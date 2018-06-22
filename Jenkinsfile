@@ -21,134 +21,162 @@ pipeline {
 				}
             }
         }
+		stage("build 1/6") {
+			parallel {
+				stage("build es2i") {
+					environment  {
+						repo = "es2i"
+						subFolder = "es2i"
+					}
+					steps {
+						runBuild(env.repo, env.subFolder)
+					}
+				}
+				stage("build eCustomer") {
+					environment  {
+						repo = "eCustomer"
+						subFolder = "eCustomer"
+					}
+					steps {
+						runBuild(env.repo, env.subFolder)
+					}
+				}
+				stage("build smsSender") {
+					environment  {
+						repo = "smsSender"
+						subFolder = "smsSender"
+					}
+					steps {
+						runBuild(env.repo, env.subFolder)
+					}
+				}
+				stage("build procyon") {
+					environment  {
+						repo = "eStat"
+						subFolder = "procyon"
+					}
+					steps {
+						runBuild(env.repo, env.subFolder)
+					}
+				}
+			}
+		}
+			
+		stage("build 2/6") {
+			parallel {
+				stage("build eSecurity") {
+					environment  {
+						repo = "eSecurity"
+						subFolder = "esecurity"
+					}
+					steps {
+						runBuild(env.repo, env.subFolder)
+					}
+				}
+			}
+		}
 		
-		stage("build es2i") {
-			environment  {
-				repo = "es2i"
-				subFolder = "es2i"
-			}
-			steps {
-				runBuild(env.repo, env.subFolder)
-			}
-		}
-		stage("build eCustomer") {
-			environment  {
-				repo = "eCustomer"
-				subFolder = "eCustomer"
-			}
-			steps {
-				runBuild(env.repo, env.subFolder)
-			}
-		}
-		stage("build smsSender") {
-			environment  {
-				repo = "smsSender"
-				subFolder = "smsSender"
-			}
-			steps {
-				runBuild(env.repo, env.subFolder)
-			}
-		}
-		stage("build procyon") {
-			environment  {
-				repo = "eStat"
-				subFolder = "procyon"
-			}
-			steps {
-				runBuild(env.repo, env.subFolder)
+		stage("build 3/6") {
+			parallel {
+				stage("build eSirius-shared") {
+					environment  {
+						repo = "eSirius"
+						subFolder = "eSirius-shared"
+					}
+					steps {
+						runBuild(env.repo, env.subFolder)
+					}
+				}
+				stage("build es2i-rsi-connector") {
+					environment  {
+						repo = "es2i-rsi-connector"
+						subFolder = "es2i-rsi-connector"
+					}
+					steps {
+						runBuild(env.repo, env.subFolder)
+					}
+				}
+				stage("build eStat") {
+					environment  {
+						repo = "eStat"
+						subFolder = "eSirius-estat"
+					}
+					steps {
+						runBuild(env.repo, env.subFolder)
+					}
+				}
 			}
 		}
-		stage("build eSecurity") {
-			environment  {
-				repo = "eSecurity"
-				subFolder = "esecurity"
-			}
-			steps {
-				runBuild(env.repo, env.subFolder)
-			}
-		}
-		stage("build eSirius-shared") {
-			environment  {
-				repo = "eSirius"
-				subFolder = "eSirius-shared"
-			}
-			steps {
-				runBuild(env.repo, env.subFolder)
-			}
-		}
-		stage("build es2i-rsi-connector") {
-			environment  {
-				repo = "es2i-rsi-connector"
-				subFolder = "es2i-rsi-connector"
-			}
-			steps {
-				runBuild(env.repo, env.subFolder)
-			}
-		}
-		stage("build eStat") {
-			environment  {
-				repo = "eStat"
-				subFolder = "eSirius-estat"
-			}
-			steps {
-				runBuild(env.repo, env.subFolder)
-			}
-		}
-		stage("build History") {
-			environment  {
-				repo = "History"
-				subFolder = "eSirius-history"
-			}
-			steps {
-				runBuild(env.repo, env.subFolder)
-			}
-		}
-		stage("build ePlanning") {
-			environment  {
-				repo = "ePlanning"
-				subFolder = "ePlanning"
-			}
-			steps {
-				runBuild(env.repo, env.subFolder)
-			}
-		}
-		stage("build eSirius") {
-			environment  {
-				repo = "eSirius"
-				subFolder = "eSirius"
-			}
-			steps {
-				runBuild(env.repo, env.subFolder)
-			}
-		}
-		stage("build Appointment") {
-			environment  {
-				repo = "Appointment"
-				subFolder = "appointment"
-			}
-			steps {
-				runBuild(env.repo, env.subFolder)
-			}
-		}
-		stage("build eAdmin") {
-			environment  {
-				repo = "eAdmin"
-				subFolder = "eSirius-admin"
-			}
-			steps {
-				runBuild(env.repo, env.subFolder)
-			}
-		}
-		stage("build eVision") {
-			environment  {
-				repo = "eVision"
-				subFolder = "eSirius-vision"
-			}
-			steps {
-				runBuild(env.repo, env.subFolder)
-			}
-		}		
 		
+		stage("build 4/6") {
+			parallel {
+				stage("build ePlanning") {
+					environment  {
+						repo = "ePlanning"
+						subFolder = "ePlanning"
+					}
+					steps {
+						runBuild(env.repo, env.subFolder)
+					}
+				}
+				stage("build History") {
+					environment  {
+						repo = "History"
+						subFolder = "eSirius-history"
+					}
+					steps {
+						runBuild(env.repo, env.subFolder)
+					}
+				}
+			}
+		}
+	
+		stage("build 5/6") {
+			parallel {
+				stage("build eSirius") {
+					environment  {
+						repo = "eSirius"
+						subFolder = "eSirius"
+					}
+					steps {
+						runBuild(env.repo, env.subFolder)
+					}
+				}
+				stage("build Appointment") {
+					environment  {
+						repo = "Appointment"
+						subFolder = "appointment"
+					}
+					steps {
+						runBuild(env.repo, env.subFolder)
+					}
+				}
+			}
+		}
+		
+		stage("build 6/6") {
+			parallel {
+				stage("build eAdmin") {
+					environment  {
+						repo = "eAdmin"
+						subFolder = "eSirius-admin"
+					}
+					steps {
+						runBuild(env.repo, env.subFolder)
+					}
+				}
+				stage("build eVision") {
+					environment  {
+						repo = "eVision"
+						subFolder = "eSirius-vision"
+					}
+					steps {
+						runBuild(env.repo, env.subFolder)
+					}
+				}	
+			}
+		}
+
     	stage("clean workspace") {
             steps {
                 cleanWs()
@@ -159,8 +187,13 @@ pipeline {
 
 void runBuild(String repo, String subFolder) {
 	cleanWs()
-	checkoutRevisionOnRepo(repo)
-	mvnCleanInstall(subFolder)
+	
+	sh "mkdir ${subFolder}Dir"
+
+	dir ("${subFolder}Dir") {
+		checkoutRevisionOnRepo(repo)
+		mvnCleanInstall(subFolder)
+	}
 }
 
 void checkoutRevisionOnRepo(String repo) {
