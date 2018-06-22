@@ -62,17 +62,13 @@ pipeline {
 			}
 		}
 			
-		stage("build 2/6") {
-			parallel {
-				stage("build eSecurity") {
-					environment  {
-						repo = "eSecurity"
-						subFolder = "esecurity"
-					}
-					steps {
-						runBuild(env.repo, env.subFolder)
-					}
-				}
+		stage("build eSecurity") {
+			environment  {
+				repo = "eSecurity"
+				subFolder = "esecurity"
+			}
+			steps {
+				runBuild(env.repo, env.subFolder)
 			}
 		}
 		
