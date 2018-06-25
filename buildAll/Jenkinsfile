@@ -21,6 +21,7 @@ pipeline {
 				}
             }
         }
+		
 		stage("build 1/6") {
 			parallel {
 				stage("build es2i") {
