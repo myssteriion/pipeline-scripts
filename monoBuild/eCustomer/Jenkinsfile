@@ -1,26 +1,26 @@
 pipeline {
-	agent any
+    agent any
 	parameters {
 		string(name: "revision", defaultValue: "master", description: "branche ou TAG")
 	}
 	environment  {
 		gitLabUrl = "http://192.168.25.68/eSirius/"
 	}
-	tools { 
-		maven "Maven 3.0.4" 
-		jdk "JDK 1.6.0_20" 
-	}
-	stages {
-		stage ("Initialize") {
-			steps {
+    tools { 
+        maven "Maven 3.0.4" 
+        jdk "JDK 1.6.0_20" 
+    }
+    stages {
+    	stage ("Initialize") {
+            steps {
 				sh "java -version"
 				sh "mvn -v"
 				wrap([$class: 'AnsiColorBuildWrapper']) {
 					echo "\u001B[34m gitlab url : ${env.gitLabUrl} \u001B[m"
 					echo "\u001B[34m revision : ${params.revision} \u001B[m"
 				}
-			}
-		}
+            }
+        }
 
 		stage("build eCustomer") {
 			environment  {
@@ -32,12 +32,12 @@ pipeline {
 			}
 		}
 
-		stage("clean workspace") {
-			steps {
-				cleanWs()
-			}
-		}
-	}
+    	stage("clean workspace") {
+            steps {
+                cleanWs()
+            }
+        }
+    }
 }
 
 void runBuild(String repo, String subFolder) {
