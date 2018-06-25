@@ -17,7 +17,7 @@ pipeline {
 				sh "mvn -v"
 				wrap([$class: 'AnsiColorBuildWrapper']) {
 					echo "\u001B[34m gitlab url : ${env.gitLabUrl} \u001B[m"
-					echo "\u001B[34m branch/tag : ${params.revision} \u001B[m"
+					echo "\u001B[34m revision : ${params.revision} \u001B[m"
 				}
             }
         }
