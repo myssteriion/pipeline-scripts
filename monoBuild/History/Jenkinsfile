@@ -5,16 +5,15 @@ pipeline {
 	}
 	environment  {
 		gitLabUrl = "http://192.168.25.68/eSirius/"
+		jdk6 = "JDK 1.6.0_20" 
+		jdk7 = "JDK 1.7.0_25" 
 	}
     tools { 
         maven "Maven 3.0.4" 
-        jdk "JDK 1.6.0_20" 
     }
     stages {
     	stage ("Initialize") {
             steps {
-				sh "java -version"
-				sh "mvn -v"
 				wrap([$class: 'AnsiColorBuildWrapper']) {
 					echo "\u001B[34m gitlab url : ${env.gitLabUrl} \u001B[m"
 					echo "\u001B[34m revision : ${params.revision} \u001B[m"
@@ -30,7 +29,7 @@ pipeline {
 						subFolder = "es2i"
 					}
 					steps {
-						runBuild(env.repo, env.subFolder)
+						runBuild(env.repo, env.subFolder, env.jdk6)
 					}
 				}
 				stage("build procyon") {
@@ -39,7 +38,7 @@ pipeline {
 						subFolder = "procyon"
 					}
 					steps {
-						runBuild(env.repo, env.subFolder)
+						runBuild(env.repo, env.subFolder, env.jdk6)
 					}
 				}
 			}
@@ -51,7 +50,7 @@ pipeline {
 				subFolder = "esecurity"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder)
+				runBuild(env.repo, env.subFolder, env.jdk6)
 			}
 		}
 		
@@ -61,7 +60,7 @@ pipeline {
 				subFolder = "eSirius-estat"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder)
+				runBuild(env.repo, env.subFolder, env.jdk6)
 			}
 		}
 		
@@ -71,7 +70,7 @@ pipeline {
 				subFolder = "eSirius-history"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder)
+				runBuild(env.repo, env.subFolder, env.jdk6)
 			}
 		}
 
@@ -83,14 +82,14 @@ pipeline {
     }
 }
 
-void runBuild(String repo, String subFolder) {
+void runBuild(String repo, String subFolder, String jdk) {
 	cleanWs()
 	
 	sh "mkdir ${subFolder}Dir"
 
 	dir ("${subFolder}Dir") {
 		checkoutRevisionOnRepo(repo)
-		mvnCleanInstall(subFolder)
+		mvnCleanInstall(subFolder, jdk)
 	}
 }
 
@@ -114,8 +113,8 @@ void checkoutRevisionOnRepo(String repo) {
 	}
 }
 
-void mvnCleanInstall(String subFolder) {
-	withMaven {
+void mvnCleanInstall(String subFolder, String jdk) {
+	withMaven (jdk: jdk) {
 		sh "mvn -f ./${subFolder}/pom.xml clean install"
 	}
 }
