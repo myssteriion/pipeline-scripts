@@ -1,0 +1,47 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.es2i</groupId>
+	<artifactId>pipelineScripts</artifactId>
+	<version>1.0</version>
+	<packaging>jar</packaging>
+
+	<name>pipelineScripts</name>
+	<description>Project for generate all Jenkinsfile</description>
+
+	
+	<properties>
+		<jdk.version>1.7</jdk.version>
+		<main.class>com.es2i.pipeline.PipelineScriptsApplication</main.class>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>${main.class}</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
