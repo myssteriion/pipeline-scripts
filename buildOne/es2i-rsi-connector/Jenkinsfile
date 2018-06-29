@@ -1,0 +1,78 @@
+pipeline {
+	agent any
+	parameters {
+		string(name: "revision", defaultValue: "master", description: "branche ou TAG")
+	}
+	environment {
+		gitLabUrl = "http://192.168.25.68/eSirius/"
+		remoteConnexion = "esii@192.168.25.94"
+		remoteDepotConst = "depot"
+		remoteDirectoryConst = "ESII-APPLICATION/app"
+	}
+	tools {
+		maven "Maven 3.0.4"
+	}
+	stages {
+		stage ("Initialize") {
+			steps {
+				cleanWs()
+				wrap([$class: 'AnsiColorBuildWrapper']) {
+					echo "\u001B[34m revision : ${params.revision} \u001B[m"
+				}
+			}
+		}
+		stage ("build es2i-rsi-connector") {
+			environment {
+				gitRoot = "es2i-rsi-connector"
+				jdkCompilation = "JDK 1.6.0_20"
+				projectRoot = "es2i-rsi-connector"
+			}
+			steps {
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+			}
+		}
+	}
+}
+
+void runBuild(String gitRoot, String projectRoot, String jdk) {
+	cleanWs()
+	
+	sh "mkdir ${gitRoot}Dir"
+
+	dir ("${gitRoot}Dir") {
+		checkoutRevisionOnRepo(gitRoot)
+		mvnCleanInstall(projectRoot, jdk)
+		deploy(projectRoot)
+	}
+}
+
+void checkoutRevisionOnRepo(String gitRoot) {
+	script {
+		try {
+			checkout scm: [ $class: "GitSCM", 
+							userRemoteConfigs: [ [url: env.gitLabUrl+gitRoot, credentialsId: "root"] ],
+							branches: [ [name: params.revision] ]
+						  ], poll: false
+		}
+		catch(Exception e) {
+			wrap([$class: 'AnsiColorBuildWrapper']) {
+				echo "\u001B[31mLa branche ou le tag '${params.revision}' n'existe pas sur le repository '${gitRoot}' => build de la branche 'master'\u001B[m"
+			}
+			checkout scm: [ $class: "GitSCM", 
+							userRemoteConfigs: [ [url: env.gitLabUrl+gitRoot, credentialsId: "root"] ],
+							branches: [ [name: 'master'] ]
+						  ], poll: false
+		}
+	}
+}
+
+void mvnCleanInstall(String projectRoot, String jdk) {
+	withMaven (jdk: jdk) {
+		sh "mvn -f ./${projectRoot}/pom.xml clean install"
+	}
+}
+
+void deploy(String projectRoot) {
+	sh "ssh ${env.remoteConnexion} mkdir -p ${env.remoteDepotConst}/${params.revision}/${env.remoteDirectoryConst}/${projectRoot}"
+	sh "scp -r ${projectRoot} ${env.remoteConnexion}:${env.remoteDepotConst}/${params.revision}/${env.remoteDirectoryConst}/${projectRoot}"
+}

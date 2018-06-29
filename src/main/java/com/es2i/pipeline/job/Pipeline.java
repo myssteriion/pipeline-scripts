@@ -118,6 +118,7 @@ public class Pipeline {
 		generateBuildAllLinear();
 		generateBuildAll();
 		generateRunner();
+		genetateAllBuildOne();
 	}
 	
 	private void clean() throws IOException {
@@ -260,6 +261,56 @@ public class Pipeline {
 		}
 	}
 	
+	private void genetateAllBuildOne() throws IOException, URISyntaxException {
+		
+		Path path = Paths.get(application.getProperty(ConstantTools.BUILD_ONE_DIRECTORY_KEY));
+		File direcrory = Tools.createDirectoryIfNeedIt(path).toFile();
+		
+		
+		// all build
+		int nbGroup = projects.size();
+		for (int index = 1; index <= nbGroup; index++) {
+			for ( String project : projects.get(index) ) {
+				
+				path = Paths.get(direcrory.getAbsolutePath(), project);
+				File subDirecrory = Tools.createDirectoryIfNeedIt(path).toFile();
+				
+				File jenkinsfile = Paths.get(subDirecrory.getAbsolutePath(), ConstantTools.JENKINS_FILE).toFile();
+				jenkinsfile.createNewFile();
+				
+				try (Writer writer = new PrintWriter(jenkinsfile)) {
+					
+					// pipeline
+					writer.write(ConstrcuctHelper.beginPipeline() + ConstrcuctHelper.addCRLF());
+					
+					// agent
+					writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.agent() + ConstrcuctHelper.addCRLF());
+					
+					addParamEnvTools(writer);
+					
+					// stages
+					writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginStages() + ConstrcuctHelper.addCRLF());
+					
+					addInitialize(writer);
+					
+					addStageForProject(writer, project, 0);
+					
+					// end stages
+					writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endStages() + ConstrcuctHelper.addCRLF());
+					
+					// end pipeline
+					writer.write( ConstrcuctHelper.endPipeline() + ConstrcuctHelper.addCRLF());
+					
+					writer.write( ConstrcuctHelper.addCRLF());
+					
+					// functions
+					writer.write( ConstrcuctHelper.getFunctions() );
+				}
+			}
+		}
+		
+	}
+	
 	
 	
 	private void addParamEnvTools(Writer writer) throws IOException, URISyntaxException {
@@ -293,10 +344,12 @@ public class Pipeline {
 		
 		writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.beginStage("Initialize") + ConstrcuctHelper.addCRLF());
 		
+		// clean workspace
 		writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.beginSteps() + ConstrcuctHelper.addCRLF());
 		writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.cleanWs() + ConstrcuctHelper.addCRLF());
 		writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.beginWrap() + ConstrcuctHelper.addCRLF());
 		
+		// echo all parameters
 		for ( Entry<Object, Object> entry : parameters.entrySet() ) {
 			Parameter param = PropToEntitiy.transformToParameter(entry.getKey().toString(), entry.getValue().toString());
 			String echoStr = ConstrcuctHelper.infoColor(param.getName() + " : " + ConstrcuctHelper.dollarParams(param.getName()));
