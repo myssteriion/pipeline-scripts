@@ -3,197 +3,216 @@ pipeline {
 	parameters {
 		string(name: "revision", defaultValue: "master", description: "branche ou TAG")
 	}
-	environment  {
+	environment {
 		gitLabUrl = "http://192.168.25.68/eSirius/"
-		jdk6 = "JDK 1.6.0_20" 
-		jdk7 = "JDK 1.7.0_25" 
+		remoteConnexion = "esii@192.168.25.94"
+		remoteDepotConst = "depot"
+		remoteDirectoryConst = "ESII-APPLICATION/app"
 	}
-	tools { 
-		maven "Maven 3.0.4" 
+	tools {
+		maven "Maven 3.0.4"
 	}
 	stages {
 		stage ("Initialize") {
 			steps {
+				cleanWs()
 				wrap([$class: 'AnsiColorBuildWrapper']) {
-					echo "\u001B[34m gitlab url : ${env.gitLabUrl} \u001B[m"
 					echo "\u001B[34m revision : ${params.revision} \u001B[m"
 				}
 			}
 		}
-		
-		stage("build dashboard") {
-			environment  {
-				repo = "dashboard"
-				subFolder = "dashboard"
+		stage ("build dashboard") {
+			environment {
+				gitRoot = "dashboard"
+				jdkCompilation = "JDK 1.7.0_25"
+				projectRoot = "dashboard"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder, env.jdk7)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
 			}
 		}
-		
-		stage("build es2i") {
-			environment  {
-				repo = "es2i"
-				subFolder = "es2i"
+		stage ("build es2i") {
+			environment {
+				gitRoot = "es2i"
+				jdkCompilation = "JDK 1.6.0_20"
+				projectRoot = "es2i"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder, env.jdk6)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
 			}
 		}
-		stage("build eCustomer") {
-			environment  {
-				repo = "eCustomer"
-				subFolder = "eCustomer"
+		stage ("build eCustomer") {
+			environment {
+				gitRoot = "eCustomer"
+				jdkCompilation = "JDK 1.6.0_20"
+				projectRoot = "eCustomer"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder, env.jdk6)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
 			}
 		}
-		stage("build smsSender") {
-			environment  {
-				repo = "smsSender"
-				subFolder = "smsSender"
+		stage ("build smsSender") {
+			environment {
+				gitRoot = "smsSender"
+				jdkCompilation = "JDK 1.6.0_20"
+				projectRoot = "smsSender"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder, env.jdk6)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
 			}
 		}
-		stage("build procyon") {
-			environment  {
-				repo = "eStat"
-				subFolder = "procyon"
+		stage ("build procyon") {
+			environment {
+				gitRoot = "eStat"
+				jdkCompilation = "JDK 1.6.0_20"
+				projectRoot = "procyon"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder, env.jdk6)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
 			}
 		}
-		stage("build eSecurity") {
-			environment  {
-				repo = "eSecurity"
-				subFolder = "esecurity"
+		stage ("build eSecurity") {
+			environment {
+				gitRoot = "eSecurity"
+				jdkCompilation = "JDK 1.6.0_20"
+				projectRoot = "esecurity"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder, env.jdk6)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
 			}
 		}
-		stage("build eSirius-shared") {
-			environment  {
-				repo = "eSirius"
-				subFolder = "eSirius-shared"
+		stage ("build eSirius-shared") {
+			environment {
+				gitRoot = "eSirius"
+				jdkCompilation = "JDK 1.6.0_20"
+				projectRoot = "eSirius-shared"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder, env.jdk6)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
 			}
 		}
-		stage("build es2i-rsi-connector") {
-			environment  {
-				repo = "es2i-rsi-connector"
-				subFolder = "es2i-rsi-connector"
+		stage ("build es2i-rsi-connector") {
+			environment {
+				gitRoot = "es2i-rsi-connector"
+				jdkCompilation = "JDK 1.6.0_20"
+				projectRoot = "es2i-rsi-connector"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder, env.jdk6)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
 			}
 		}
-		stage("build eStat") {
-			environment  {
-				repo = "eStat"
-				subFolder = "eSirius-estat"
+		stage ("build eStat") {
+			environment {
+				gitRoot = "eStat"
+				jdkCompilation = "JDK 1.6.0_20"
+				projectRoot = "eSirius-estat"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder, env.jdk6)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
 			}
 		}
-		stage("build History") {
-			environment  {
-				repo = "History"
-				subFolder = "eSirius-history"
+		stage ("build History") {
+			environment {
+				gitRoot = "History"
+				jdkCompilation = "JDK 1.6.0_20"
+				projectRoot = "eSirius-history"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder, env.jdk6)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
 			}
 		}
-		stage("build ePlanning") {
-			environment  {
-				repo = "ePlanning"
-				subFolder = "ePlanning"
+		stage ("build ePlanning") {
+			environment {
+				gitRoot = "ePlanning"
+				jdkCompilation = "JDK 1.6.0_20"
+				projectRoot = "ePlanning"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder, env.jdk6)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
 			}
 		}
-		stage("build eSirius") {
-			environment  {
-				repo = "eSirius"
-				subFolder = "eSirius"
+		stage ("build eSirius") {
+			environment {
+				gitRoot = "eSirius"
+				jdkCompilation = "JDK 1.6.0_20"
+				projectRoot = "eSirius"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder, env.jdk6)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
 			}
 		}
-		stage("build Appointment") {
-			environment  {
-				repo = "Appointment"
-				subFolder = "appointment"
+		stage ("build Appointment") {
+			environment {
+				gitRoot = "Appointment"
+				jdkCompilation = "JDK 1.6.0_20"
+				projectRoot = "appointment"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder, env.jdk6)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
 			}
 		}
-		stage("build eAdmin") {
-			environment  {
-				repo = "eAdmin"
-				subFolder = "eSirius-admin"
+		stage ("build eAdmin") {
+			environment {
+				gitRoot = "eAdmin"
+				jdkCompilation = "JDK 1.6.0_20"
+				projectRoot = "eSirius-admin"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder, env.jdk6)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
 			}
 		}
-		stage("build eVision") {
-			environment  {
-				repo = "eVision"
-				subFolder = "eSirius-vision"
+		stage ("build eVision") {
+			environment {
+				gitRoot = "eVision"
+				jdkCompilation = "JDK 1.6.0_20"
+				projectRoot = "eSirius-vision"
 			}
 			steps {
-				runBuild(env.repo, env.subFolder, env.jdk6)
-			}
-		}		
-		
-		stage("clean workspace") {
-			steps {
-				cleanWs()
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
 			}
 		}
 	}
 }
 
-void runBuild(String repo, String subFolder, String jdk) {
+void runBuild(String gitRoot, String projectRoot, String jdk) {
 	cleanWs()
-	checkoutRevisionOnRepo(repo)
-	mvnCleanInstall(subFolder, jdk)
+	
+	sh "mkdir ${gitRoot}Dir"
+
+	dir ("${gitRoot}Dir") {
+		checkoutRevisionOnRepo(gitRoot)
+		mvnCleanInstall(projectRoot, jdk)
+		deploy(projectRoot)
+	}
 }
 
-void checkoutRevisionOnRepo(String repo) {
+void checkoutRevisionOnRepo(String gitRoot) {
 	script {
 		try {
 			checkout scm: [ $class: "GitSCM", 
-							userRemoteConfigs: [ [url: env.gitLabUrl+repo, credentialsId: "root"] ],
+							userRemoteConfigs: [ [url: env.gitLabUrl+gitRoot, credentialsId: "root"] ],
 							branches: [ [name: params.revision] ]
 						  ], poll: false
 		}
 		catch(Exception e) {
 			wrap([$class: 'AnsiColorBuildWrapper']) {
-				echo "\u001B[31mLa branche ou le tag '${params.revision}' n'existe pas sur le repository '${repo}' => build de la branche 'master'\u001B[m"
+				echo "\u001B[31mLa branche ou le tag '${params.revision}' n'existe pas sur le repository '${gitRoot}' => build de la branche 'master'\u001B[m"
 			}
 			checkout scm: [ $class: "GitSCM", 
-							userRemoteConfigs: [ [url: env.gitLabUrl+repo, credentialsId: "root"] ],
+							userRemoteConfigs: [ [url: env.gitLabUrl+gitRoot, credentialsId: "root"] ],
 							branches: [ [name: 'master'] ]
 						  ], poll: false
 		}
 	}
 }
 
-void mvnCleanInstall(String subFolder, String jdk) {
+void mvnCleanInstall(String projectRoot, String jdk) {
 	withMaven (jdk: jdk) {
-		sh "mvn -f ./${subFolder}/pom.xml clean install"
+		sh "mvn -f ./${projectRoot}/pom.xml clean install"
 	}
+}
+
+void deploy(String projectRoot) {
+	sh "ssh ${env.remoteConnexion} mkdir -p ${env.remoteDepotConst}/${params.revision}/${env.remoteDirectoryConst}/${projectRoot}"
+	sh "scp -r ${projectRoot} ${env.remoteConnexion}:${env.remoteDepotConst}/${params.revision}/${env.remoteDirectoryConst}/${projectRoot}"
 }

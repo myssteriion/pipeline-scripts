@@ -11,9 +11,9 @@
 	<name>pipelineScripts</name>
 	<description>Project for generate all Jenkinsfile</description>
 
-	
+
 	<properties>
-		<jdk.version>1.7</jdk.version>
+		<jdk.version>1.8</jdk.version>
 		<main.class>com.es2i.pipeline.PipelineScriptsApplication</main.class>
 	</properties>
 
@@ -24,6 +24,13 @@
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
+		</dependency>
+
 	</dependencies>
 
 
