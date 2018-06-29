@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,9 +26,9 @@ import com.es2i.pipeline.tools.ConstantTools;
 import com.es2i.pipeline.tools.Tools;
 
 public class Pipeline {
-
+	
 	private Properties application;
-
+	
 	private Map<Integer, List<String>> projects;
 	
 	private Properties parameters;
@@ -35,13 +36,13 @@ public class Pipeline {
 	private Properties environment;
 
 	private Properties tools;
-
+	
 	
 	
 	public Pipeline() throws IOException {
 		init();
 	}
-
+	
 	
 	
 	private void init() throws IOException {
@@ -99,7 +100,7 @@ public class Pipeline {
 		expectedKeys.add(ConstantTools.MAVEN_KEY);
 		verifyKeys(expectedKeys, tools.stringPropertyNames(), ConstantTools.TOOLS_PROP_FILE);
 	}
-
+	
 	private void verifyKeys(Set<String> expectedKeys, Set<String> actualKeys, String fileName) {
 		
 		if ( !actualKeys.containsAll(expectedKeys) ) {
@@ -116,17 +117,19 @@ public class Pipeline {
 		clean();
 		generateBuildAllLinear();
 		generateBuildAll();
+		generateRunner();
 	}
-
+	
 	private void clean() throws IOException {
 
 		Tools.deleteIfExists( Paths.get( application.getProperty(ConstantTools.BUILD_ALL_DIRECTORY_KEY)) );
 		Tools.deleteIfExists( Paths.get( application.getProperty(ConstantTools.BUILD_ONE_DIRECTORY_KEY)) );
 	}
-
+	
 	private void generateBuildAllLinear() throws IOException, URISyntaxException {
 		
-		File direcrory = Tools.createDirectoryIfNeedIt( Paths.get( application.getProperty(ConstantTools.BUILD_ALL_DIRECTORY_KEY)) ).toFile();
+		Path path = Paths.get(application.getProperty(ConstantTools.BUILD_ALL_DIRECTORY_KEY));
+		File direcrory = Tools.createDirectoryIfNeedIt(path).toFile();
 		File jenkinsfile = Paths.get(direcrory.getAbsolutePath(), ConstantTools.JENKINS_LINEAR_FILE).toFile();
 		jenkinsfile.createNewFile();
 		
@@ -164,10 +167,11 @@ public class Pipeline {
 			writer.write( ConstrcuctHelper.getFunctions() );
 		}
 	}
-
+	
 	private void generateBuildAll() throws IOException, URISyntaxException {
 		
-		File direcrory = Tools.createDirectoryIfNeedIt( Paths.get( application.getProperty(ConstantTools.BUILD_ALL_DIRECTORY_KEY)) ).toFile();
+		Path path = Paths.get(application.getProperty(ConstantTools.BUILD_ALL_DIRECTORY_KEY));
+		File direcrory = Tools.createDirectoryIfNeedIt(path).toFile();
 		File jenkinsfile = Paths.get(direcrory.getAbsolutePath(), ConstantTools.JENKINS_FILE).toFile();
 		jenkinsfile.createNewFile();
 		
@@ -209,8 +213,54 @@ public class Pipeline {
 			writer.write( ConstrcuctHelper.getFunctions() );
 		}
 	}
-
-
+	
+	private void generateRunner() throws IOException, URISyntaxException {
+		
+		Path path = Paths.get(application.getProperty(ConstantTools.BUILD_ALL_DIRECTORY_KEY), ConstantTools.RUNNER_DIRECTORY);
+		File direcrory = Tools.createDirectoryIfNeedIt(path).toFile();
+		File jenkinsfile = Paths.get(direcrory.getAbsolutePath(), ConstantTools.JENKINS_FILE).toFile();
+		jenkinsfile.createNewFile();
+		
+		try (Writer writer = new PrintWriter(jenkinsfile)) {
+			
+			// pipeline
+			writer.write(ConstrcuctHelper.beginPipeline() + ConstrcuctHelper.addCRLF());
+			
+			// agent
+			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.agent() + ConstrcuctHelper.addCRLF());
+			
+			// global runner env
+			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginEnv() + ConstrcuctHelper.addCRLF());
+			for ( String key : Tools.getKeysFilterByPrefix(environment, ConstantTools.RUNNER_KEY + ConstantTools.DOT) ) {
+				Environment env = PropToEntitiy.transformToEnvironment(key, environment.getProperty(key));
+				writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.contentEnv(env) + ConstrcuctHelper.addCRLF());
+			}
+			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endEnv() + ConstrcuctHelper.addCRLF());
+			
+			// stages
+			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginStages() + ConstrcuctHelper.addCRLF());
+			
+			writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.beginStage("run") + ConstrcuctHelper.addCRLF());
+			writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.beginSteps() + ConstrcuctHelper.addCRLF());
+			
+			String shCommand = "wget \\\"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=master\\\"";
+			writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.sh(shCommand) + ConstrcuctHelper.addCRLF());
+			
+			shCommand = "wget \\\"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=develop\\\"";
+			writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.sh(shCommand) + ConstrcuctHelper.addCRLF());
+			
+			writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.endSteps() + ConstrcuctHelper.addCRLF());
+			writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.endStage() + ConstrcuctHelper.addCRLF());
+			
+			// end stages
+			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endStages() + ConstrcuctHelper.addCRLF());
+			
+			// end pipeline
+			writer.write( ConstrcuctHelper.endPipeline());
+		}
+	}
+	
+	
 	
 	private void addParamEnvTools(Writer writer) throws IOException, URISyntaxException {
 		

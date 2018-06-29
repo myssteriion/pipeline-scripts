@@ -145,6 +145,10 @@ public class ConstrcuctHelper {
 		return "echo \"" + str + "\"";
 	}
 	
+	public static String sh(String str) {
+		return "sh \"" + str + "\"";
+	}
+	
 	public static String cleanWs() {
 		return "cleanWs()";
 	}
