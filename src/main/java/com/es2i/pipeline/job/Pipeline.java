@@ -115,6 +115,7 @@ public class Pipeline {
 
 		clean();
 		generateBuildAllLinear();
+		generateBuildAll();
 	}
 
 	private void clean() throws IOException {
@@ -125,7 +126,7 @@ public class Pipeline {
 
 	private void generateBuildAllLinear() throws IOException, URISyntaxException {
 		
-		File direcrory = Tools.createDirectory( Paths.get( application.getProperty(ConstantTools.BUILD_ALL_DIRECTORY_KEY)), true ).toFile();
+		File direcrory = Tools.createDirectoryIfNeedIt( Paths.get( application.getProperty(ConstantTools.BUILD_ALL_DIRECTORY_KEY)) ).toFile();
 		File jenkinsfile = Paths.get(direcrory.getAbsolutePath(), ConstantTools.JENKINS_LINEAR_FILE).toFile();
 		jenkinsfile.createNewFile();
 		
@@ -148,9 +149,8 @@ public class Pipeline {
 			int nbGroup = projects.size();
 			for (int index = 1; index <= nbGroup; index++) {
 				for ( String project : projects.get(index) )
-					addStageForProject(writer, project);
+					addStageForProject(writer, project, 0);
 			}
-			
 			
 			// end stages
 			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endStages() + ConstrcuctHelper.addCRLF());
@@ -165,7 +165,52 @@ public class Pipeline {
 		}
 	}
 
-	
+	private void generateBuildAll() throws IOException, URISyntaxException {
+		
+		File direcrory = Tools.createDirectoryIfNeedIt( Paths.get( application.getProperty(ConstantTools.BUILD_ALL_DIRECTORY_KEY)) ).toFile();
+		File jenkinsfile = Paths.get(direcrory.getAbsolutePath(), ConstantTools.JENKINS_FILE).toFile();
+		jenkinsfile.createNewFile();
+		
+		try (Writer writer = new PrintWriter(jenkinsfile)) {
+			
+			// pipeline
+			writer.write(ConstrcuctHelper.beginPipeline() + ConstrcuctHelper.addCRLF());
+			
+			// agent
+			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.agent() + ConstrcuctHelper.addCRLF());
+			
+			addParamEnvTools(writer);
+						
+			// stages
+			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginStages() + ConstrcuctHelper.addCRLF());
+			
+			addInitialize(writer);
+			
+			// all build
+			int nbGroup = projects.size();
+			for (int index = 1; index <= nbGroup; index++) {
+				
+				List<String> groupe = projects.get(index);
+				if (groupe.size() == 1)
+					addStageForProject(writer, groupe.get(0), 0);
+				else
+					addParallelStageForProject(writer, index, groupe);
+			}
+			
+			// end stages
+			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endStages() + ConstrcuctHelper.addCRLF());
+			
+			// end pipeline
+			writer.write( ConstrcuctHelper.endPipeline() + ConstrcuctHelper.addCRLF());
+			
+			writer.write( ConstrcuctHelper.addCRLF());
+			
+			// functions
+			writer.write( ConstrcuctHelper.getFunctions() );
+		}
+	}
+
+
 	
 	private void addParamEnvTools(Writer writer) throws IOException, URISyntaxException {
 		
@@ -214,22 +259,37 @@ public class Pipeline {
 		writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.endStage() + ConstrcuctHelper.addCRLF());
 	}
 	
-	private void addStageForProject(Writer writer, String project) throws IOException, URISyntaxException {
+	private void addStageForProject(Writer writer, String project, int identToAdd) throws IOException, URISyntaxException {
 		
-		writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.beginStage("build " + project) + ConstrcuctHelper.addCRLF());
+		writer.write(ConstrcuctHelper.addTab(2 + identToAdd) + ConstrcuctHelper.beginStage("build " + project) + ConstrcuctHelper.addCRLF());
 		
 		// env
-		writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.beginEnv() + ConstrcuctHelper.addCRLF());
+		writer.write(ConstrcuctHelper.addTab(3 + identToAdd) + ConstrcuctHelper.beginEnv() + ConstrcuctHelper.addCRLF());
 		for ( String key : Tools.getKeysFilterByPrefix(environment, project + ConstantTools.DOT) ) {
 			Environment env = PropToEntitiy.transformToEnvironment(key, environment.getProperty(key));
-			writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.contentEnv(env) + ConstrcuctHelper.addCRLF());
+			writer.write(ConstrcuctHelper.addTab(4 + identToAdd) + ConstrcuctHelper.contentEnv(env) + ConstrcuctHelper.addCRLF());
 		}
-		writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.endEnv() + ConstrcuctHelper.addCRLF());
+		writer.write(ConstrcuctHelper.addTab(3 + identToAdd) + ConstrcuctHelper.endEnv() + ConstrcuctHelper.addCRLF());
 		
 		// step
-		writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.beginSteps() + ConstrcuctHelper.addCRLF());
-		writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.runBuild() + ConstrcuctHelper.addCRLF());
-		writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.endEnv() + ConstrcuctHelper.addCRLF());
+		writer.write(ConstrcuctHelper.addTab(3 + identToAdd) + ConstrcuctHelper.beginSteps() + ConstrcuctHelper.addCRLF());
+		writer.write(ConstrcuctHelper.addTab(4 + identToAdd) + ConstrcuctHelper.runBuild() + ConstrcuctHelper.addCRLF());
+		writer.write(ConstrcuctHelper.addTab(3 + identToAdd) + ConstrcuctHelper.endEnv() + ConstrcuctHelper.addCRLF());
+		
+		writer.write(ConstrcuctHelper.addTab(2 + identToAdd) + ConstrcuctHelper.endStage() + ConstrcuctHelper.addCRLF());
+	}
+	
+	private void addParallelStageForProject(Writer writer, int index, List<String> groupe) throws IOException, URISyntaxException {
+		
+		writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.beginStage("build groupe " + index) + ConstrcuctHelper.addCRLF());
+		
+		// parallel
+		writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.beginParallel() + ConstrcuctHelper.addCRLF());
+		
+		for (String project : groupe)
+			addStageForProject(writer, project, 2);
+		
+		writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.endParallel() + ConstrcuctHelper.addCRLF());
 		
 		writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.endStage() + ConstrcuctHelper.addCRLF());
 	}

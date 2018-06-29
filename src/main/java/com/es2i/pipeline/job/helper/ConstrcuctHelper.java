@@ -109,6 +109,14 @@ public class ConstrcuctHelper {
 	}
 	
 	
+	public static String beginParallel() {
+		return "parallel {";
+	}
+	
+	public static String endParallel() {
+		return "}";
+	}
+	
 	
 	public static String getFunctions() throws IOException, URISyntaxException {
 		

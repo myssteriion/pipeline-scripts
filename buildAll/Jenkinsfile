@@ -1,0 +1,238 @@
+pipeline {
+	agent any
+	parameters {
+		string(name: "revision", defaultValue: "master", description: "branche ou TAG")
+	}
+	environment {
+		gitLabUrl = "http://192.168.25.68/eSirius/"
+		remoteConnexion = "esii@192.168.25.94"
+		remoteDepotConst = "depot"
+		remoteDirectoryConst = "ESII-APPLICATION/app"
+	}
+	tools {
+		maven "Maven 3.0.4"
+	}
+	stages {
+		stage ("Initialize") {
+			steps {
+				cleanWs()
+				wrap([$class: 'AnsiColorBuildWrapper']) {
+					echo "\u001B[34m revision : ${params.revision} \u001B[m"
+				}
+			}
+		}
+		stage ("build groupe 1") {
+			parallel {
+				stage ("build dashboard") {
+					environment {
+						gitRoot = "dashboard"
+						jdkCompilation = "JDK 1.7.0_25"
+						projectRoot = "dashboard"
+					}
+					steps {
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+					}
+				}
+				stage ("build es2i") {
+					environment {
+						gitRoot = "es2i"
+						jdkCompilation = "JDK 1.6.0_20"
+						projectRoot = "es2i"
+					}
+					steps {
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+					}
+				}
+				stage ("build eCustomer") {
+					environment {
+						gitRoot = "eCustomer"
+						jdkCompilation = "JDK 1.6.0_20"
+						projectRoot = "eCustomer"
+					}
+					steps {
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+					}
+				}
+				stage ("build smsSender") {
+					environment {
+						gitRoot = "smsSender"
+						jdkCompilation = "JDK 1.6.0_20"
+						projectRoot = "smsSender"
+					}
+					steps {
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+					}
+				}
+				stage ("build procyon") {
+					environment {
+						gitRoot = "eStat"
+						jdkCompilation = "JDK 1.6.0_20"
+						projectRoot = "procyon"
+					}
+					steps {
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+					}
+				}
+			}
+		}
+		stage ("build eSecurity") {
+			environment {
+				gitRoot = "eSecurity"
+				jdkCompilation = "JDK 1.6.0_20"
+				projectRoot = "esecurity"
+			}
+			steps {
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+			}
+		}
+		stage ("build groupe 3") {
+			parallel {
+				stage ("build eSirius-shared") {
+					environment {
+						gitRoot = "eSirius"
+						jdkCompilation = "JDK 1.6.0_20"
+						projectRoot = "eSirius-shared"
+					}
+					steps {
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+					}
+				}
+				stage ("build es2i-rsi-connector") {
+					environment {
+						gitRoot = "es2i-rsi-connector"
+						jdkCompilation = "JDK 1.6.0_20"
+						projectRoot = "es2i-rsi-connector"
+					}
+					steps {
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+					}
+				}
+				stage ("build eStat") {
+					environment {
+						gitRoot = "eStat"
+						jdkCompilation = "JDK 1.6.0_20"
+						projectRoot = "eSirius-estat"
+					}
+					steps {
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+					}
+				}
+			}
+		}
+		stage ("build groupe 4") {
+			parallel {
+				stage ("build History") {
+					environment {
+						gitRoot = "History"
+						jdkCompilation = "JDK 1.6.0_20"
+						projectRoot = "eSirius-history"
+					}
+					steps {
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+					}
+				}
+				stage ("build ePlanning") {
+					environment {
+						gitRoot = "ePlanning"
+						jdkCompilation = "JDK 1.6.0_20"
+						projectRoot = "ePlanning"
+					}
+					steps {
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+					}
+				}
+			}
+		}
+		stage ("build groupe 5") {
+			parallel {
+				stage ("build eSirius") {
+					environment {
+						gitRoot = "eSirius"
+						jdkCompilation = "JDK 1.6.0_20"
+						projectRoot = "eSirius"
+					}
+					steps {
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+					}
+				}
+				stage ("build Appointment") {
+					environment {
+						gitRoot = "Appointment"
+						jdkCompilation = "JDK 1.6.0_20"
+						projectRoot = "appointment"
+					}
+					steps {
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+					}
+				}
+			}
+		}
+		stage ("build groupe 6") {
+			parallel {
+				stage ("build eAdmin") {
+					environment {
+						gitRoot = "eAdmin"
+						jdkCompilation = "JDK 1.6.0_20"
+						projectRoot = "eSirius-admin"
+					}
+					steps {
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+					}
+				}
+				stage ("build eVision") {
+					environment {
+						gitRoot = "eVision"
+						jdkCompilation = "JDK 1.6.0_20"
+						projectRoot = "eSirius-vision"
+					}
+					steps {
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+					}
+				}
+			}
+		}
+	}
+}
+
+void runBuild(String gitRoot, String projectRoot, String jdk) {
+	cleanWs()
+	
+	sh "mkdir ${gitRoot}Dir"
+
+	dir ("${gitRoot}Dir") {
+		checkoutRevisionOnRepo(gitRoot)
+		mvnCleanInstall(projectRoot, jdk)
+		deploy(projectRoot)
+	}
+}
+
+void checkoutRevisionOnRepo(String gitRoot) {
+	script {
+		try {
+			checkout scm: [ $class: "GitSCM", 
+							userRemoteConfigs: [ [url: env.gitLabUrl+gitRoot, credentialsId: "root"] ],
+							branches: [ [name: params.revision] ]
+						  ], poll: false
+		}
+		catch(Exception e) {
+			wrap([$class: 'AnsiColorBuildWrapper']) {
+				echo "\u001B[31mLa branche ou le tag '${params.revision}' n'existe pas sur le repository '${gitRoot}' => build de la branche 'master'\u001B[m"
+			}
+			checkout scm: [ $class: "GitSCM", 
+							userRemoteConfigs: [ [url: env.gitLabUrl+gitRoot, credentialsId: "root"] ],
+							branches: [ [name: 'master'] ]
+						  ], poll: false
+		}
+	}
+}
+
+void mvnCleanInstall(String projectRoot, String jdk) {
+	withMaven (jdk: jdk) {
+		sh "mvn -f ./${projectRoot}/pom.xml clean install"
+	}
+}
+
+void deploy(String projectRoot) {
+	sh "ssh ${env.remoteConnexion} mkdir -p ${env.remoteDepotConst}/${params.revision}/${env.remoteDirectoryConst}/${projectRoot}"
+	sh "scp -r ${projectRoot} ${env.remoteConnexion}:${env.remoteDepotConst}/${params.revision}/${env.remoteDirectoryConst}/${projectRoot}"
+}

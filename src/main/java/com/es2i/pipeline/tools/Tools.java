@@ -16,12 +16,12 @@ public class Tools {
 		FileUtils.deleteDirectory( path.toFile() );
 	}
 	
-	public static Path createDirectory(Path path, boolean deleteBefore) throws IOException {
+	public static Path createDirectoryIfNeedIt(Path path) throws IOException {
 		
-		if (deleteBefore && Files.exists(path) && Files.isDirectory(path) )
-			deleteIfExists(path);
-		
-		return Files.createDirectory(path);
+		if ( path.toFile().exists() )
+			return path;
+		else
+			return Files.createDirectory(path);
 	}
 	
 	public static String concatenateItem(Collection<String> items) {
