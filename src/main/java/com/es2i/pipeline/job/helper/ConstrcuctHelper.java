@@ -1,9 +1,10 @@
 package com.es2i.pipeline.job.helper;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
+
+import org.apache.commons.io.IOUtils;
 
 import com.es2i.pipeline.job.Pipeline;
 import com.es2i.pipeline.job.entities.Environment;
@@ -121,8 +122,9 @@ public class ConstrcuctHelper {
 	
 	public static String getFunctions() throws IOException, URISyntaxException {
 		
-		byte[] encoded = Files.readAllBytes( new File(Pipeline.class.getResource(ConstantTools.FUNCTIONS_FILE).toURI()).toPath() );
-		return new String(encoded);
+		InputStream is = Pipeline.class.getResourceAsStream(ConstantTools.FUNCTIONS_FILE);
+		byte[] bytes = IOUtils.toByteArray(is);
+		return new String(bytes);
 	}
 
 	public static String runBuild() {

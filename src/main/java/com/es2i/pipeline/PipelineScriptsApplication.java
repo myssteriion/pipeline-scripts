@@ -1,14 +1,27 @@
 package com.es2i.pipeline;
 
+import org.apache.log4j.Logger;
+
 import com.es2i.pipeline.job.Pipeline;
 
 public class PipelineScriptsApplication {
 
-	public static void main(String[] args) throws Exception {
+	private static final Logger LOGGER = Logger.getLogger(PipelineScriptsApplication.class);
+	 
+	
+	
+	public static void main(String[] args) {
 		
-		System.out.println("Debut");
-		Pipeline job = new Pipeline();
-		job.run();
-		System.out.println("Fin");
+		try {
+			
+			LOGGER.info("Start process");
+			Pipeline job = new Pipeline();
+			job.run();
+			LOGGER.info("End process");
+		}
+		catch(Exception e) {
+			LOGGER.error("End process with error", e);
+		}
 	}
+	
 }
