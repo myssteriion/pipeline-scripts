@@ -1,6 +1,4 @@
 void runBuild(String gitRoot, String projectRoot, String jdk) {
-	cleanWs()
-	
 	sh "mkdir ${gitRoot}Dir"
 
 	dir ("${gitRoot}Dir") {
