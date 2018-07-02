@@ -195,7 +195,7 @@ pipeline {
 }
 
 void runBuild(String gitRoot, String projectRoot, String jdk) {
-	sh "mkdir ${gitRoot}Dir"
+	sh "mkdir -p ${gitRoot}Dir"
 
 	dir ("${gitRoot}Dir") {
 		checkoutRevisionOnRepo(gitRoot)
