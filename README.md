@@ -6,6 +6,7 @@ maven 3.5.4
 
 [Paramétrages]
 Sauf modification majeur, tout se passe dans les fichiers propeties.
+Modifier les fichiers qui sont dans conf ne nessécite pas un mvn clean install.
 
 [Exécution]
 Si nécessaire, faire un clean install de l'application.

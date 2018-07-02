@@ -71,6 +71,7 @@ void mvnCleanInstall(String projectRoot, String jdk) {
 }
 
 void deploy(String projectRoot) {
+	sh "ssh ${env.remoteConnexion} rm -rf ${env.remoteDepotConst}/${params.revision}/${env.remoteDirectoryConst}/${projectRoot}"
 	sh "ssh ${env.remoteConnexion} mkdir -p ${env.remoteDepotConst}/${params.revision}/${env.remoteDirectoryConst}/${projectRoot}"
 	sh "scp -r ${projectRoot} ${env.remoteConnexion}:${env.remoteDepotConst}/${params.revision}/${env.remoteDirectoryConst}/${projectRoot}"
 }

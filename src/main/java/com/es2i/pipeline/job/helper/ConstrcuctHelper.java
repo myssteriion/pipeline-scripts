@@ -6,7 +6,6 @@ import java.net.URISyntaxException;
 
 import org.apache.commons.io.IOUtils;
 
-import com.es2i.pipeline.job.Pipeline;
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
 import com.es2i.pipeline.job.entities.Tool;
@@ -122,7 +121,7 @@ public class ConstrcuctHelper {
 	
 	public static String getFunctions() throws IOException, URISyntaxException {
 		
-		InputStream is = Pipeline.class.getResourceAsStream(ConstantTools.FUNCTIONS_FILE);
+		InputStream is = ConstrcuctHelper.class.getClassLoader().getResourceAsStream(ConstantTools.FUNCTIONS_FILE);
 		byte[] bytes = IOUtils.toByteArray(is);
 		return new String(bytes);
 	}

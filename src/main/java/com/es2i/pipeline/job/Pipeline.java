@@ -48,7 +48,7 @@ public class Pipeline {
 	private void init() throws IOException {
 
 		application = new Properties();
-		try (InputStream is = Pipeline.class.getResourceAsStream(ConstantTools.APPLICATION_PROP_FILE)) {
+		try (InputStream is = getClass().getClassLoader().getResourceAsStream(ConstantTools.APPLICATION_PROP_FILE)) {
 			application.load(is);
 		}
 		Set<String> expectedKeys = new HashSet<String>();
@@ -70,7 +70,7 @@ public class Pipeline {
 		/* */
 		
 		parameters = new Properties();
-		try (InputStream is = Pipeline.class.getResourceAsStream(ConstantTools.PARAM_PROP_FILE)) {
+		try (InputStream is = getClass().getClassLoader().getResourceAsStream(ConstantTools.PARAM_PROP_FILE)) {
 			parameters.load(is);
 		}
 		expectedKeys = new HashSet<String>();
@@ -80,7 +80,7 @@ public class Pipeline {
 		/* */
 		
 		environment = new Properties();
-		try (InputStream is = Pipeline.class.getResourceAsStream(ConstantTools.ENV_PROP_FILE)) {
+		try (InputStream is = getClass().getClassLoader().getResourceAsStream(ConstantTools.ENV_PROP_FILE)) {
 			environment.load(is);
 		}
 		expectedKeys = new HashSet<String>();
@@ -93,7 +93,7 @@ public class Pipeline {
 		/* */
 		
 		tools = new Properties();
-		try (InputStream is = Pipeline.class.getResourceAsStream(ConstantTools.TOOLS_PROP_FILE)) {
+		try (InputStream is = getClass().getClassLoader().getResourceAsStream(ConstantTools.TOOLS_PROP_FILE)) {
 			tools.load(is);
 		}
 		expectedKeys = new HashSet<String>();
