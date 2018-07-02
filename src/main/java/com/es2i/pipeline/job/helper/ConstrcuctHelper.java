@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 
+import com.es2i.pipeline.job.Pipeline;
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
 import com.es2i.pipeline.job.entities.Tool;
@@ -120,7 +121,7 @@ public class ConstrcuctHelper {
 	
 	public static String getFunctions() throws IOException, URISyntaxException {
 		
-		byte[] encoded = Files.readAllBytes( new File(ConstrcuctHelper.class.getResource("/" + ConstantTools.FUNCTIONS_FILE).toURI()).toPath() );
+		byte[] encoded = Files.readAllBytes( new File(Pipeline.class.getResource(ConstantTools.FUNCTIONS_FILE).toURI()).toPath() );
 		return new String(encoded);
 	}
 
