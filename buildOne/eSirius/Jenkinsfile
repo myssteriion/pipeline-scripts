@@ -10,7 +10,7 @@ pipeline {
 		remoteDirectoryConst = "ESII-APPLICATION/app"
 	}
 	tools {
-		maven "Maven 3.0.4"
+		maven "Maven 3.2.1"
 	}
 	stages {
 		stage ("Initialize") {
