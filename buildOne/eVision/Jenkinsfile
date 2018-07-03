@@ -9,9 +9,6 @@ pipeline {
 		remoteDepotConst = "depot"
 		remoteDirectoryConst = "ESII-APPLICATION/app"
 	}
-	tools {
-		maven "Maven 3.2.1"
-	}
 	stages {
 		stage ("Initialize") {
 			steps {
@@ -25,21 +22,22 @@ pipeline {
 			environment {
 				gitRoot = "eVision"
 				jdkCompilation = "JDK 1.6.0_20"
+				mvnVersion = "Maven 3.2.1"
 				projectRoot = "eSirius-vision"
 			}
 			steps {
-				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
 			}
 		}
 	}
 }
 
-void runBuild(String gitRoot, String projectRoot, String jdk) {
+void runBuild(String gitRoot, String projectRoot, String jdk, String mvn) {
 	sh "mkdir -p ${gitRoot}Dir"
 
 	dir ("${gitRoot}Dir") {
 		checkoutRevisionOnRepo(gitRoot)
-		mvnCleanInstall(projectRoot, jdk)
+		mvnCleanInstall(projectRoot, jdk, mvn)
 		deploy(projectRoot)
 	}
 }
@@ -64,8 +62,8 @@ void checkoutRevisionOnRepo(String gitRoot) {
 	}
 }
 
-void mvnCleanInstall(String projectRoot, String jdk) {
-	withMaven (jdk: jdk) {
+void mvnCleanInstall(String projectRoot, String jdk, String mvn) {
+	withMaven (jdk: jdk, maven: mvn) {
 		sh "mvn -f ./${projectRoot}/pom.xml clean install"
 	}
 }

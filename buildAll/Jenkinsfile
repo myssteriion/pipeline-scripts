@@ -9,9 +9,6 @@ pipeline {
 		remoteDepotConst = "depot"
 		remoteDirectoryConst = "ESII-APPLICATION/app"
 	}
-	tools {
-		maven "Maven 3.2.1"
-	}
 	stages {
 		stage ("Initialize") {
 			steps {
@@ -27,50 +24,55 @@ pipeline {
 					environment {
 						gitRoot = "dashboard"
 						jdkCompilation = "JDK 1.7.0_25"
+						mvnVersion = "Maven 3.2.1"
 						projectRoot = "dashboard"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
 					}
 				}
 				stage ("build es2i") {
 					environment {
 						gitRoot = "es2i"
 						jdkCompilation = "JDK 1.6.0_20"
+						mvnVersion = "Maven 3.2.1"
 						projectRoot = "es2i"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
 					}
 				}
 				stage ("build eCustomer") {
 					environment {
 						gitRoot = "eCustomer"
 						jdkCompilation = "JDK 1.6.0_20"
+						mvnVersion = "Maven 3.2.1"
 						projectRoot = "eCustomer"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
 					}
 				}
 				stage ("build smsSender") {
 					environment {
 						gitRoot = "smsSender"
 						jdkCompilation = "JDK 1.6.0_20"
+						mvnVersion = "Maven 3.2.1"
 						projectRoot = "smsSender"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
 					}
 				}
 				stage ("build procyon") {
 					environment {
 						gitRoot = "eStat"
 						jdkCompilation = "JDK 1.6.0_20"
+						mvnVersion = "Maven 3.2.1"
 						projectRoot = "procyon"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
 					}
 				}
 			}
@@ -79,10 +81,11 @@ pipeline {
 			environment {
 				gitRoot = "eSecurity"
 				jdkCompilation = "JDK 1.6.0_20"
+				mvnVersion = "Maven 3.2.1"
 				projectRoot = "esecurity"
 			}
 			steps {
-				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
 			}
 		}
 		stage ("build groupe 3") {
@@ -91,30 +94,33 @@ pipeline {
 					environment {
 						gitRoot = "eSirius"
 						jdkCompilation = "JDK 1.6.0_20"
+						mvnVersion = "Maven 3.2.1"
 						projectRoot = "eSirius-shared"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
 					}
 				}
 				stage ("build es2i-rsi-connector") {
 					environment {
 						gitRoot = "es2i-rsi-connector"
 						jdkCompilation = "JDK 1.6.0_20"
+						mvnVersion = "Maven 3.2.1"
 						projectRoot = "es2i-rsi-connector"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
 					}
 				}
 				stage ("build eStat") {
 					environment {
 						gitRoot = "eStat"
 						jdkCompilation = "JDK 1.6.0_20"
+						mvnVersion = "Maven 3.2.1"
 						projectRoot = "eSirius-estat"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
 					}
 				}
 			}
@@ -125,20 +131,22 @@ pipeline {
 					environment {
 						gitRoot = "History"
 						jdkCompilation = "JDK 1.6.0_20"
+						mvnVersion = "Maven 3.2.1"
 						projectRoot = "eSirius-history"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
 					}
 				}
 				stage ("build ePlanning") {
 					environment {
 						gitRoot = "ePlanning"
 						jdkCompilation = "JDK 1.6.0_20"
+						mvnVersion = "Maven 3.2.1"
 						projectRoot = "ePlanning"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
 					}
 				}
 			}
@@ -149,20 +157,22 @@ pipeline {
 					environment {
 						gitRoot = "eSirius"
 						jdkCompilation = "JDK 1.6.0_20"
+						mvnVersion = "Maven 3.2.1"
 						projectRoot = "eSirius"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
 					}
 				}
 				stage ("build Appointment") {
 					environment {
 						gitRoot = "Appointment"
 						jdkCompilation = "JDK 1.6.0_20"
+						mvnVersion = "Maven 3.2.1"
 						projectRoot = "appointment"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
 					}
 				}
 			}
@@ -173,20 +183,22 @@ pipeline {
 					environment {
 						gitRoot = "eAdmin"
 						jdkCompilation = "JDK 1.6.0_20"
+						mvnVersion = "Maven 3.2.1"
 						projectRoot = "eSirius-admin"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
 					}
 				}
 				stage ("build eVision") {
 					environment {
 						gitRoot = "eVision"
 						jdkCompilation = "JDK 1.6.0_20"
+						mvnVersion = "Maven 3.2.1"
 						projectRoot = "eSirius-vision"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
 					}
 				}
 			}
@@ -194,12 +206,12 @@ pipeline {
 	}
 }
 
-void runBuild(String gitRoot, String projectRoot, String jdk) {
+void runBuild(String gitRoot, String projectRoot, String jdk, String mvn) {
 	sh "mkdir -p ${gitRoot}Dir"
 
 	dir ("${gitRoot}Dir") {
 		checkoutRevisionOnRepo(gitRoot)
-		mvnCleanInstall(projectRoot, jdk)
+		mvnCleanInstall(projectRoot, jdk, mvn)
 		deploy(projectRoot)
 	}
 }
@@ -224,8 +236,8 @@ void checkoutRevisionOnRepo(String gitRoot) {
 	}
 }
 
-void mvnCleanInstall(String projectRoot, String jdk) {
-	withMaven (jdk: jdk) {
+void mvnCleanInstall(String projectRoot, String jdk, String mvn) {
+	withMaven (jdk: jdk, maven: mvn) {
 		sh "mvn -f ./${projectRoot}/pom.xml clean install"
 	}
 }

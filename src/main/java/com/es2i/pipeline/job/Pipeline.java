@@ -97,7 +97,6 @@ public class Pipeline {
 			tools.load(is);
 		}
 		expectedKeys = new HashSet<String>();
-		expectedKeys.add(ConstantTools.MAVEN_KEY);
 		verifyKeys(expectedKeys, tools.stringPropertyNames(), ConstantTools.TOOLS_PROP_FILE);
 	}
 	
@@ -332,12 +331,13 @@ public class Pipeline {
 		writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endEnv() + ConstrcuctHelper.addCRLF());
 		
 		// tools
-		writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginTools() + ConstrcuctHelper.addCRLF());
-		for ( String key : Tools.getKeysFilterByPrefix(tools, "") ) {
-			Tool tool = PropToEntitiy.transformToTool(key, tools.getProperty(key));
-			writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.contentTools(tool) + ConstrcuctHelper.addCRLF());
-		}
-		writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endTools() + ConstrcuctHelper.addCRLF());
+		// laisser décommenter tant qu'il n'y a pas de clé valeur dans le bloc tools
+//		writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginTools() + ConstrcuctHelper.addCRLF());
+//		for ( String key : Tools.getKeysFilterByPrefix(tools, "") ) {
+//			Tool tool = PropToEntitiy.transformToTool(key, tools.getProperty(key));
+//			writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.contentTools(tool) + ConstrcuctHelper.addCRLF());
+//		}
+//		writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endTools() + ConstrcuctHelper.addCRLF());
 	}
 	
 	private void addInitialize(Writer writer) throws IOException, URISyntaxException {

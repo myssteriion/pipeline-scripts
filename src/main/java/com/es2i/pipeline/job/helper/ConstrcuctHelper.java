@@ -127,7 +127,7 @@ public class ConstrcuctHelper {
 	}
 
 	public static String runBuild() {
-		return "runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation)";
+		return "runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)";
 	}
 	
 	public static String addTab(int nb) {

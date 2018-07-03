@@ -31,7 +31,6 @@ public class ConstantTools {
 	public static final String REMOTE_DIRECTORY_KEY 		= GLOBAL_KEY + DOT + "remoteDirectoryConst";
 	
 	public static final String TOOLS_PROP_FILE 				= "tools.properties";
-	public static final String MAVEN_KEY 					= "maven";
 	
 	public static final String FUNCTIONS_FILE 				= "functions.txt";
 	
