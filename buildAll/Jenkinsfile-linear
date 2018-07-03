@@ -187,9 +187,9 @@ pipeline {
 }
 
 void runBuild(String gitRoot, String projectRoot, String jdk, String mvn) {
-	sh "mkdir -p ${gitRoot}Dir"
+	sh "mkdir -p ${gitRoot}"
 
-	dir ("${gitRoot}Dir") {
+	dir ("${gitRoot}") {
 		checkoutRevisionOnRepo(gitRoot)
 		mvnCleanInstall(projectRoot, jdk, mvn)
 		deploy(projectRoot)
@@ -217,8 +217,10 @@ void checkoutRevisionOnRepo(String gitRoot) {
 }
 
 void mvnCleanInstall(String projectRoot, String jdk, String mvn) {
-	withMaven (jdk: jdk, maven: mvn) {
-		sh "mvn -f ./${projectRoot}/pom.xml clean install"
+	dir ("${projectRoot}") {
+		withMaven (jdk: jdk, maven: mvn) {
+			sh "mvn clean install"
+		}
 	}
 }
 
