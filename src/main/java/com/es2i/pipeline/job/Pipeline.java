@@ -8,6 +8,7 @@ import java.io.Writer;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,7 +29,9 @@ public class Pipeline {
 	
 	private Properties application;
 	
-	private Map<Integer, List<String>> projects;
+	private Map<Integer, String> projectsBuilOne;
+	
+	private Map<Integer, List<String>> projectsBuildAll;
 	
 	private Properties parameters;
 	
@@ -53,18 +56,11 @@ public class Pipeline {
 		Set<String> expectedKeys = new HashSet<String>();
 		expectedKeys.add(ConstantTools.BUILD_ALL_DIRECTORY_KEY);
 		expectedKeys.add(ConstantTools.BUILD_ONE_DIRECTORY_KEY);
+		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ONE_KEY);
 		expectedKeys.add(ConstantTools.PROJECTS_GROUPE1_KEY);
 		verifyKeys(expectedKeys, application.stringPropertyNames(), ConstantTools.APPLICATION_PROP_FILE);
 		
-		projects = new HashMap<Integer, List<String>>();
-		int index = 1;
-		String key = ConstantTools.PROJECTS_KEY + ConstantTools.DOT + ConstantTools.GROUP_KEY + index;
-		while ( application.containsKey(key) ) {
-			String[] projectsTab = application.getProperty(key).split(ConstantTools.COMA);
-			projects.put(index, Arrays.asList(projectsTab));
-			index++;
-			key = ConstantTools.PROJECTS_KEY + ConstantTools.DOT + ConstantTools.GROUP_KEY + index;
-		}
+		fillProjectsList();
 	
 		/* */
 		
@@ -99,6 +95,26 @@ public class Pipeline {
 		verifyKeys(expectedKeys, tools.stringPropertyNames(), ConstantTools.TOOLS_PROP_FILE);
 	}
 	
+	private void fillProjectsList() {
+		
+		// les buildOne
+		projectsBuilOne = new HashMap<Integer, String>();
+		String[] projectsList = application.getProperty(ConstantTools.PROJECTS_BUILD_ONE_KEY).split(ConstantTools.COMA);
+		for (int index = 0; index < projectsList.length; index++)
+			projectsBuilOne.put(index+1, projectsList[index]);
+		
+		// les buildAll
+		projectsBuildAll = new HashMap<Integer, List<String>>();
+		int index = 1;
+		String key = ConstantTools.PROJECTS_BUILD_ALL_KEY + ConstantTools.DOT + ConstantTools.GROUP_KEY + index;
+		while ( application.containsKey(key) ) {
+			String[] projectsTab = application.getProperty(key).split(ConstantTools.COMA);
+			projectsBuildAll.put(index, Arrays.asList(projectsTab));
+			index++;
+			key = ConstantTools.PROJECTS_BUILD_ALL_KEY + ConstantTools.DOT + ConstantTools.GROUP_KEY + index;
+		}
+	}
+
 	private void verifyKeys(Set<String> expectedKeys, Set<String> actualKeys, String fileName) {
 		
 		if ( !actualKeys.containsAll(expectedKeys) ) {
@@ -148,9 +164,9 @@ public class Pipeline {
 			addInitialize(writer, true);
 			
 			// all build
-			int nbGroup = projects.size();
+			int nbGroup = projectsBuildAll.size();
 			for (int index = 1; index <= nbGroup; index++) {
-				for ( String project : projects.get(index) )
+				for ( String project : projectsBuildAll.get(index) )
 					addStageForProject(writer, project, 0);
 			}
 			
@@ -190,10 +206,10 @@ public class Pipeline {
 			addInitialize(writer, true);
 			
 			// all build
-			int nbGroup = projects.size();
+			int nbGroup = projectsBuildAll.size();
 			for (int index = 1; index <= nbGroup; index++) {
 				
-				List<String> groupe = projects.get(index);
+				List<String> groupe = projectsBuildAll.get(index);
 				if (groupe.size() == 1)
 					addStageForProject(writer, groupe.get(0), 0);
 				else
@@ -265,45 +281,44 @@ public class Pipeline {
 		File direcrory = Tools.createDirectoryIfNeedIt(path).toFile();
 		
 		
-		// all build
-		int nbGroup = projects.size();
-		for (int index = 1; index <= nbGroup; index++) {
-			for ( String project : projects.get(index) ) {
+		// all buildOne	
+		for (int index = 1; index <= projectsBuilOne.size(); index++) {
 				
-				path = Paths.get(direcrory.getAbsolutePath(), project);
-				File subDirecrory = Tools.createDirectoryIfNeedIt(path).toFile();
+			String project = projectsBuilOne.get(index);
+			
+			path = Paths.get(direcrory.getAbsolutePath(), project);
+			File subDirecrory = Tools.createDirectoryIfNeedIt(path).toFile();
+			
+			File jenkinsfile = Paths.get(subDirecrory.getAbsolutePath(), ConstantTools.JENKINS_FILE).toFile();
+			jenkinsfile.createNewFile();
+			
+			try (Writer writer = new PrintWriter(jenkinsfile)) {
 				
-				File jenkinsfile = Paths.get(subDirecrory.getAbsolutePath(), ConstantTools.JENKINS_FILE).toFile();
-				jenkinsfile.createNewFile();
+				// pipeline
+				writer.write(ConstrcuctHelper.beginPipeline() + ConstrcuctHelper.addCRLF());
 				
-				try (Writer writer = new PrintWriter(jenkinsfile)) {
-					
-					// pipeline
-					writer.write(ConstrcuctHelper.beginPipeline() + ConstrcuctHelper.addCRLF());
-					
-					// agent
-					writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.agent() + ConstrcuctHelper.addCRLF());
-					
-					addParamEnvTools(writer);
-					
-					// stages
-					writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginStages() + ConstrcuctHelper.addCRLF());
-					
-					addInitialize(writer, false);
-					
-					addStageForProject(writer, project, 0);
-					
-					// end stages
-					writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endStages() + ConstrcuctHelper.addCRLF());
-					
-					// end pipeline
-					writer.write( ConstrcuctHelper.endPipeline() + ConstrcuctHelper.addCRLF());
-					
-					writer.write( ConstrcuctHelper.addCRLF());
-					
-					// functions
-					writer.write( ConstrcuctHelper.getFunctions() );
-				}
+				// agent
+				writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.agent() + ConstrcuctHelper.addCRLF());
+				
+				addParamEnvTools(writer);
+				
+				// stages
+				writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginStages() + ConstrcuctHelper.addCRLF());
+				
+				addInitialize(writer, false);
+				
+				addStageForProject(writer, project, 0);
+				
+				// end stages
+				writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endStages() + ConstrcuctHelper.addCRLF());
+				
+				// end pipeline
+				writer.write( ConstrcuctHelper.endPipeline() + ConstrcuctHelper.addCRLF());
+				
+				writer.write( ConstrcuctHelper.addCRLF());
+				
+				// functions
+				writer.write( ConstrcuctHelper.getFunctions() );
 			}
 		}
 		

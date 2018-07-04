@@ -21,17 +21,6 @@ pipeline {
 		}
 		stage ("build groupe 1") {
 			parallel {
-				stage ("build dashboard") {
-					environment {
-						gitRoot = "dashboard"
-						jdkCompilation = "JDK 1.7.0_25"
-						mvnVersion = "Maven 3.2.1"
-						projectRoot = "dashboard"
-					}
-					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
-					}
-				}
 				stage ("build es2i") {
 					environment {
 						gitRoot = "es2i"
