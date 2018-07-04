@@ -12,10 +12,10 @@ pipeline {
 	stages {
 		stage ("Initialize") {
 			steps {
-				cleanWs()
 				wrap([$class: 'AnsiColorBuildWrapper']) {
 					echo "\u001B[34m revision : ${params.revision} \u001B[m"
 				}
+				cleanWs()
 			}
 		}
 		stage ("build eStat") {

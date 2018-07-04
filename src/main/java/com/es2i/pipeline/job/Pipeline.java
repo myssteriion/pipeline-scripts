@@ -19,7 +19,6 @@ import java.util.Set;
 
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
-import com.es2i.pipeline.job.entities.Tool;
 import com.es2i.pipeline.job.helper.ConstrcuctHelper;
 import com.es2i.pipeline.job.helper.PropToEntitiy;
 import com.es2i.pipeline.tools.ConstantTools;
@@ -146,7 +145,7 @@ public class Pipeline {
 			// stages
 			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginStages() + ConstrcuctHelper.addCRLF());
 			
-			addInitialize(writer);
+			addInitialize(writer, true);
 			
 			// all build
 			int nbGroup = projects.size();
@@ -188,7 +187,7 @@ public class Pipeline {
 			// stages
 			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginStages() + ConstrcuctHelper.addCRLF());
 			
-			addInitialize(writer);
+			addInitialize(writer, true);
 			
 			// all build
 			int nbGroup = projects.size();
@@ -290,7 +289,7 @@ public class Pipeline {
 					// stages
 					writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginStages() + ConstrcuctHelper.addCRLF());
 					
-					addInitialize(writer);
+					addInitialize(writer, false);
 					
 					addStageForProject(writer, project, 0);
 					
@@ -340,25 +339,30 @@ public class Pipeline {
 //		writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endTools() + ConstrcuctHelper.addCRLF());
 	}
 	
-	private void addInitialize(Writer writer) throws IOException, URISyntaxException {
+	private void addInitialize(Writer writer, boolean cleanTargetRemoteDirectory) throws IOException, URISyntaxException {
 		
 		writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.beginStage("Initialize") + ConstrcuctHelper.addCRLF());
-		
-		// clean workspace
 		writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.beginSteps() + ConstrcuctHelper.addCRLF());
-		writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.cleanWs() + ConstrcuctHelper.addCRLF());
-		writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.beginWrap() + ConstrcuctHelper.addCRLF());
-		
+
 		// echo all parameters
+		writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.beginWrap() + ConstrcuctHelper.addCRLF());
 		for ( Entry<Object, Object> entry : parameters.entrySet() ) {
 			Parameter param = PropToEntitiy.transformToParameter(entry.getKey().toString(), entry.getValue().toString());
 			String echoStr = ConstrcuctHelper.infoColor(param.getName() + " : " + ConstrcuctHelper.dollarParams(param.getName()));
 			writer.write(ConstrcuctHelper.addTab(5) + ConstrcuctHelper.echo(echoStr) + ConstrcuctHelper.addCRLF());
 		}
-		
 		writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.endWrap() + ConstrcuctHelper.addCRLF());	
-		writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.endSteps() + ConstrcuctHelper.addCRLF());	
 		
+		// clean jenkins workspace
+		writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.cleanWs() + ConstrcuctHelper.addCRLF());
+		
+		// clean remote
+		if (cleanTargetRemoteDirectory) {
+			String shCommand = "ssh ${env.remoteConnexion} rm -rf ${env.remoteDepotConst}/${params.revision}";
+			writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.sh(shCommand) + ConstrcuctHelper.addCRLF());
+		}
+		
+		writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.endSteps() + ConstrcuctHelper.addCRLF());	
 		writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.endStage() + ConstrcuctHelper.addCRLF());
 	}
 	
