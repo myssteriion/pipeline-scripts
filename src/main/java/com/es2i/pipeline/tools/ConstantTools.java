@@ -28,8 +28,9 @@ public class ConstantTools {
 	public static final String RUNNER_KEY 					= "runner";
 	public static final String GITLAB_URL_KEY 				= GLOBAL_KEY + DOT + "gitLabUrl";
 	public static final String REMOTE_CONNEXION_KEY 		= GLOBAL_KEY + DOT + "remoteConnexion";
-	public static final String REMOTE_DEPOT_KEY 			= GLOBAL_KEY + DOT + "remoteDepotConst";
-	public static final String REMOTE_DIRECTORY_KEY 		= GLOBAL_KEY + DOT + "remoteDirectoryConst";
+	public static final String REMOTE_DEPOT_FOLDER_KEY 		= GLOBAL_KEY + DOT + "depotFolder";
+	public static final String REMOTE_ESII_APP_FOLDER_KEY 	= GLOBAL_KEY + DOT + "esiiAppFolder";
+	public static final String REMOTE_ESII_CONF_FOLDER_KEY 	= GLOBAL_KEY + DOT + "esiiConfFolder";
 	
 	public static final String TOOLS_PROP_FILE 				= "tools.properties";
 	

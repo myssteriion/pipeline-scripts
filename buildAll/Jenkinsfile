@@ -4,10 +4,11 @@ pipeline {
 		string(name: "revision", defaultValue: "master", description: "branche ou TAG")
 	}
 	environment {
+		depotFolder = "depot"
+		esiiAppFolder = "ESII-APPLICATION/app"
+		esiiConfFolder = "ESII-APPLICATION/conf"
 		gitLabUrl = "http://192.168.25.68/eSirius/"
 		remoteConnexion = "esii@192.168.25.94"
-		remoteDepotConst = "depot"
-		remoteDirectoryConst = "ESII-APPLICATION/app"
 	}
 	stages {
 		stage ("Initialize") {
@@ -16,7 +17,7 @@ pipeline {
 					echo "\u001B[34m revision : ${params.revision} \u001B[m"
 				}
 				cleanWs()
-				sh "ssh ${env.remoteConnexion} rm -rf ${env.remoteDepotConst}/${params.revision}"
+				sh "ssh ${env.remoteConnexion} rm -rf ${env.depotFolder}/${params.revision}"
 			}
 		}
 		stage ("build groupe 1") {
@@ -27,9 +28,12 @@ pipeline {
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
 						projectRoot = "es2i"
+						sourceAppDirectory = ""
+						sourceConfDirectory = ""
+						targetDirectory = ""
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
 					}
 				}
 				stage ("build eCustomer") {
@@ -38,9 +42,12 @@ pipeline {
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
 						projectRoot = "eCustomer"
+						sourceAppDirectory = "eCustomer-app/target"
+						sourceConfDirectory = "eCustomer-conf/target/eCustomer-conf"
+						targetDirectory = "customer"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
 					}
 				}
 				stage ("build smsSender") {
@@ -49,9 +56,12 @@ pipeline {
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
 						projectRoot = "smsSender"
+						sourceAppDirectory = "smsSender-app/target"
+						sourceConfDirectory = "smsSender-conf/target/smsSender-conf"
+						targetDirectory = "smssender"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
 					}
 				}
 				stage ("build procyon") {
@@ -60,9 +70,12 @@ pipeline {
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
 						projectRoot = "procyon"
+						sourceAppDirectory = ""
+						sourceConfDirectory = ""
+						targetDirectory = ""
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
 					}
 				}
 			}
@@ -73,9 +86,12 @@ pipeline {
 				jdkCompilation = "JDK 1.6.0_20"
 				mvnVersion = "Maven 3.2.1"
 				projectRoot = "esecurity"
+				sourceAppDirectory = "esecurity-gxt-app/target"
+				sourceConfDirectory = "esecurity-conf/target/esecurity-conf"
+				targetDirectory = "esecurity"
 			}
 			steps {
-				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
 			}
 		}
 		stage ("build groupe 3") {
@@ -86,9 +102,12 @@ pipeline {
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
 						projectRoot = "eSirius-shared"
+						sourceAppDirectory = ""
+						sourceConfDirectory = ""
+						targetDirectory = ""
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
 					}
 				}
 				stage ("build es2i-rsi-connector") {
@@ -97,9 +116,12 @@ pipeline {
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
 						projectRoot = "es2i-rsi-connector"
+						sourceAppDirectory = ""
+						sourceConfDirectory = ""
+						targetDirectory = ""
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
 					}
 				}
 				stage ("build eStat") {
@@ -108,9 +130,12 @@ pipeline {
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
 						projectRoot = "eSirius-estat"
+						sourceAppDirectory = "eSirius-estat-app/target"
+						sourceConfDirectory = "eStatConf/target/eStat-conf"
+						targetDirectory = "estat"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
 					}
 				}
 			}
@@ -123,9 +148,12 @@ pipeline {
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
 						projectRoot = "eSirius-history"
+						sourceAppDirectory = "eSirius-history-event-app/target"
+						sourceConfDirectory = "eSirius-history-event-conf/target/eSirius-history-event-conf"
+						targetDirectory = "esirius-history-event"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
 					}
 				}
 				stage ("build ePlanning") {
@@ -134,9 +162,12 @@ pipeline {
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
 						projectRoot = "ePlanning"
+						sourceAppDirectory = "ePlanning-app/target"
+						sourceConfDirectory = "ePlanningConf/target/ePlanningConf"
+						targetDirectory = "ePlanning"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
 					}
 				}
 			}
@@ -149,9 +180,12 @@ pipeline {
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
 						projectRoot = "eSirius"
+						sourceAppDirectory = "eSirius-app/target"
+						sourceConfDirectory = "eSiriusConf/target/eSirius-Conf"
+						targetDirectory = "eSirius"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
 					}
 				}
 				stage ("build Appointment") {
@@ -160,9 +194,12 @@ pipeline {
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
 						projectRoot = "appointment"
+						sourceAppDirectory = "appointment-app/target"
+						sourceConfDirectory = "appointment-conf/target/appointment-conf"
+						targetDirectory = "appointment"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
 					}
 				}
 			}
@@ -175,9 +212,12 @@ pipeline {
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
 						projectRoot = "eSirius-admin"
+						sourceAppDirectory = "eSirius-admin-app/target"
+						sourceConfDirectory = "eSirius-admin-conf/target/eSirius-admin-conf"
+						targetDirectory = "eadmin"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
 					}
 				}
 				stage ("build eVision") {
@@ -186,9 +226,12 @@ pipeline {
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
 						projectRoot = "eSirius-vision"
+						sourceAppDirectory = "eSirius-vision-app/target"
+						sourceConfDirectory = "eSirius-vision-conf/target/eSirius-vision-conf"
+						targetDirectory = "evision"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
 					}
 				}
 			}
@@ -196,13 +239,14 @@ pipeline {
 	}
 }
 
-void runBuild(String gitRoot, String projectRoot, String jdk, String mvn) {
+void runBuild(String gitRoot, String projectRoot, String jdk, String mvn, String targetDirectory, String sourceAppDirectory, String sourceConfDirectory) {
+	
 	sh "mkdir -p ${gitRoot}"
 
 	dir ("${gitRoot}") {
 		checkoutRevisionOnRepo(gitRoot)
 		mvnCleanInstall(projectRoot, jdk, mvn)
-		deploy(projectRoot)
+		deploy(projectRoot, targetDirectory, sourceAppDirectory, sourceConfDirectory)
 	}
 }
 
@@ -234,8 +278,24 @@ void mvnCleanInstall(String projectRoot, String jdk, String mvn) {
 	}
 }
 
-void deploy(String projectRoot) {
-	sh "ssh ${env.remoteConnexion} rm -rf ${env.remoteDepotConst}/${params.revision}/${env.remoteDirectoryConst}/${projectRoot}"
-	sh "ssh ${env.remoteConnexion} mkdir -p ${env.remoteDepotConst}/${params.revision}/${env.remoteDirectoryConst}/${projectRoot}"
-	sh "scp -r ${projectRoot} ${env.remoteConnexion}:${env.remoteDepotConst}/${params.revision}/${env.remoteDirectoryConst}/${projectRoot}"
+void deploy(String projectRoot, String targetDirectory, String sourceAppDirectory, String sourceConfDirectory) {
+
+	script {
+		
+		if (targetDirectory && targetDirectory != "") {
+			sh "ssh ${env.remoteConnexion} rm -rf ${env.depotFolder}/${params.revision}/${env.esiiAppFolder}/${targetDirectory}"
+			sh "ssh ${env.remoteConnexion} rm -rf ${env.depotFolder}/${params.revision}/${env.esiiConfFolder}/${targetDirectory}"
+		
+			if (sourceAppDirectory && sourceAppDirectory != "") {
+				sh "ssh ${env.remoteConnexion} mkdir -p ${env.depotFolder}/${params.revision}/${env.esiiAppFolder}/${targetDirectory}"
+				sh "scp ${projectRoot}/${sourceAppDirectory}/*.war ${env.remoteConnexion}:${env.depotFolder}/${params.revision}/${env.esiiAppFolder}/${targetDirectory}"
+				sh "ssh ${env.remoteConnexion} unzip ${env.depotFolder}/${params.revision}/${env.esiiAppFolder}/${targetDirectory}/*.war -d ${env.depotFolder}/${params.revision}/${env.esiiAppFolder}/${targetDirectory}/"
+				sh "ssh ${env.remoteConnexion} rm -f ${env.depotFolder}/${params.revision}/${env.esiiAppFolder}/${targetDirectory}/*.war"
+			}
+			if (sourceConfDirectory && sourceConfDirectory != "") {
+				sh "ssh ${env.remoteConnexion} mkdir -p ${env.depotFolder}/${params.revision}/${env.esiiConfFolder}/${targetDirectory}"
+				sh "scp -r ${projectRoot}/${sourceConfDirectory}/* ${env.remoteConnexion}:${env.depotFolder}/${params.revision}/${env.esiiConfFolder}/${targetDirectory}"
+			}
+		}
+	}
 }

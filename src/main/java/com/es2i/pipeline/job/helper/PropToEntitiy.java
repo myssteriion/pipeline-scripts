@@ -22,9 +22,6 @@ public class PropToEntitiy {
 	
 	public static Environment transformToEnvironment(String propName, String propValue) {
 		
-		if ( Tools.isNullOrEmpty(propValue) )
-			throw new IllegalArgumentException("Le propriété " + propName + " est vide");
-		
 		String[] tab = propName.split("\\" + ConstantTools.DOT);
 		if (tab == null || tab.length != 2)
 			throw new IllegalArgumentException("Le propriété " + propName + " n'est pas correct (" + propValue + ")");

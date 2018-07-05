@@ -81,8 +81,8 @@ public class Pipeline {
 		expectedKeys = new HashSet<String>();
 		expectedKeys.add(ConstantTools.GITLAB_URL_KEY);
 		expectedKeys.add(ConstantTools.REMOTE_CONNEXION_KEY);
-		expectedKeys.add(ConstantTools.REMOTE_DEPOT_KEY);
-		expectedKeys.add(ConstantTools.REMOTE_DIRECTORY_KEY);
+		expectedKeys.add(ConstantTools.REMOTE_DEPOT_FOLDER_KEY);
+		expectedKeys.add(ConstantTools.REMOTE_ESII_APP_FOLDER_KEY);
 		verifyKeys(expectedKeys, environment.stringPropertyNames(), ConstantTools.ENV_PROP_FILE);
 		
 		/* */
@@ -373,7 +373,7 @@ public class Pipeline {
 		
 		// clean remote
 		if (cleanTargetRemoteDirectory) {
-			String shCommand = "ssh ${env.remoteConnexion} rm -rf ${env.remoteDepotConst}/${params.revision}";
+			String shCommand = "ssh ${env.remoteConnexion} rm -rf ${env.depotFolder}/${params.revision}";
 			writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.sh(shCommand) + ConstrcuctHelper.addCRLF());
 		}
 		
