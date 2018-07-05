@@ -8,7 +8,6 @@ import java.io.Writer;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,6 +26,8 @@ import com.es2i.pipeline.tools.Tools;
 
 public class Pipeline {
 	
+	private ConstrcuctHelper constrcuctHelper;
+	
 	private Properties application;
 	
 	private Map<Integer, String> projectsBuilOne;
@@ -42,7 +43,9 @@ public class Pipeline {
 	
 	
 	public Pipeline() throws IOException {
+		
 		init();
+		constrcuctHelper = ConstrcuctHelper.getInstance();
 	}
 	
 	
@@ -57,8 +60,8 @@ public class Pipeline {
 		expectedKeys.add(ConstantTools.BUILD_ALL_DIRECTORY_KEY);
 		expectedKeys.add(ConstantTools.BUILD_ONE_DIRECTORY_KEY);
 		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ONE_KEY);
-		expectedKeys.add(ConstantTools.PROJECTS_GROUPE1_KEY);
-		verifyKeys(expectedKeys, application.stringPropertyNames(), ConstantTools.APPLICATION_PROP_FILE);
+		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ALL_GROUPE1_KEY);
+		Tools.verifyKeys(expectedKeys, application.stringPropertyNames(), ConstantTools.APPLICATION_PROP_FILE);
 		
 		fillProjectsList();
 	
@@ -70,7 +73,7 @@ public class Pipeline {
 		}
 		expectedKeys = new HashSet<String>();
 		expectedKeys.add(ConstantTools.REVISION_KEY);
-		verifyKeys(expectedKeys, parameters.stringPropertyNames(), ConstantTools.TOOLS_PROP_FILE);
+		Tools.verifyKeys(expectedKeys, parameters.stringPropertyNames(), ConstantTools.TOOLS_PROP_FILE);
 		
 		/* */
 		
@@ -83,7 +86,7 @@ public class Pipeline {
 		expectedKeys.add(ConstantTools.REMOTE_CONNEXION_KEY);
 		expectedKeys.add(ConstantTools.REMOTE_DEPOT_FOLDER_KEY);
 		expectedKeys.add(ConstantTools.REMOTE_ESII_APP_FOLDER_KEY);
-		verifyKeys(expectedKeys, environment.stringPropertyNames(), ConstantTools.ENV_PROP_FILE);
+		Tools.verifyKeys(expectedKeys, environment.stringPropertyNames(), ConstantTools.ENV_PROP_FILE);
 		
 		/* */
 		
@@ -92,7 +95,7 @@ public class Pipeline {
 			tools.load(is);
 		}
 		expectedKeys = new HashSet<String>();
-		verifyKeys(expectedKeys, tools.stringPropertyNames(), ConstantTools.TOOLS_PROP_FILE);
+		Tools.verifyKeys(expectedKeys, tools.stringPropertyNames(), ConstantTools.TOOLS_PROP_FILE);
 	}
 	
 	private void fillProjectsList() {
@@ -106,21 +109,12 @@ public class Pipeline {
 		// les buildAll
 		projectsBuildAll = new HashMap<Integer, List<String>>();
 		int index = 1;
-		String key = ConstantTools.PROJECTS_BUILD_ALL_KEY + ConstantTools.DOT + ConstantTools.GROUP_KEY + index;
+		String key = ConstantTools.PROJECTS_BUILD_ALL_GROUPE_KEY + index;
 		while ( application.containsKey(key) ) {
 			String[] projectsTab = application.getProperty(key).split(ConstantTools.COMA);
 			projectsBuildAll.put(index, Arrays.asList(projectsTab));
 			index++;
-			key = ConstantTools.PROJECTS_BUILD_ALL_KEY + ConstantTools.DOT + ConstantTools.GROUP_KEY + index;
-		}
-	}
-
-	private void verifyKeys(Set<String> expectedKeys, Set<String> actualKeys, String fileName) {
-		
-		if ( !actualKeys.containsAll(expectedKeys) ) {
-			String message = "Au moins une clé est manquante dans " + fileName;
-			message += " (" + Tools.concatenateItem(expectedKeys) + ")";
-			throw new IllegalArgumentException(message);
+			key = ConstantTools.PROJECTS_BUILD_ALL_GROUPE_KEY + index;
 		}
 	}
 	
@@ -151,15 +145,15 @@ public class Pipeline {
 		try (Writer writer = new PrintWriter(jenkinsfile)) {
 			
 			// pipeline
-			writer.write(ConstrcuctHelper.beginPipeline() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
 			
 			// agent
-			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.agent() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
 			
 			addParamEnvTools(writer);
 						
 			// stages
-			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginStages() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
 			
 			addInitialize(writer, true);
 			
@@ -171,15 +165,15 @@ public class Pipeline {
 			}
 			
 			// end stages
-			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endStages() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
 			
 			// end pipeline
-			writer.write( ConstrcuctHelper.endPipeline() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.endPipeline() + constrcuctHelper.addCRLF());
 			
-			writer.write( ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addCRLF());
 			
 			// functions
-			writer.write( ConstrcuctHelper.getFunctions() );
+			writer.write(constrcuctHelper.getFunctions() );
 		}
 	}
 	
@@ -193,15 +187,15 @@ public class Pipeline {
 		try (Writer writer = new PrintWriter(jenkinsfile)) {
 			
 			// pipeline
-			writer.write(ConstrcuctHelper.beginPipeline() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
 			
 			// agent
-			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.agent() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
 			
 			addParamEnvTools(writer);
 						
 			// stages
-			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginStages() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
 			
 			addInitialize(writer, true);
 			
@@ -217,15 +211,15 @@ public class Pipeline {
 			}
 			
 			// end stages
-			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endStages() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
 			
 			// end pipeline
-			writer.write( ConstrcuctHelper.endPipeline() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.endPipeline() + constrcuctHelper.addCRLF());
 			
-			writer.write( ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addCRLF());
 			
 			// functions
-			writer.write( ConstrcuctHelper.getFunctions() );
+			writer.write(constrcuctHelper.getFunctions() );
 		}
 	}
 	
@@ -239,39 +233,39 @@ public class Pipeline {
 		try (Writer writer = new PrintWriter(jenkinsfile)) {
 			
 			// pipeline
-			writer.write(ConstrcuctHelper.beginPipeline() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
 			
 			// agent
-			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.agent() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
 			
 			// global runner env
-			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginEnv() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
 			for ( String key : Tools.getKeysFilterByPrefix(environment, ConstantTools.RUNNER_KEY + ConstantTools.DOT) ) {
 				Environment env = PropToEntitiy.transformToEnvironment(key, environment.getProperty(key));
-				writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.contentEnv(env) + ConstrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.contentEnv(env) + constrcuctHelper.addCRLF());
 			}
-			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endEnv() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 			
 			// stages
-			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginStages() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
 			
-			writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.beginStage("run") + ConstrcuctHelper.addCRLF());
-			writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.beginSteps() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("run") + constrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
 			
 			String shCommand = "wget \\\"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=master\\\"";
-			writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.sh(shCommand) + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.sh(shCommand) + constrcuctHelper.addCRLF());
 			
 			shCommand = "wget \\\"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=develop\\\"";
-			writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.sh(shCommand) + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.sh(shCommand) + constrcuctHelper.addCRLF());
 			
-			writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.endSteps() + ConstrcuctHelper.addCRLF());
-			writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.endStage() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 			
 			// end stages
-			writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endStages() + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
 			
 			// end pipeline
-			writer.write( ConstrcuctHelper.endPipeline());
+			writer.write(constrcuctHelper.endPipeline());
 		}
 	}
 	
@@ -295,30 +289,30 @@ public class Pipeline {
 			try (Writer writer = new PrintWriter(jenkinsfile)) {
 				
 				// pipeline
-				writer.write(ConstrcuctHelper.beginPipeline() + ConstrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
 				
 				// agent
-				writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.agent() + ConstrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
 				
 				addParamEnvTools(writer);
 				
 				// stages
-				writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginStages() + ConstrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
 				
 				addInitialize(writer, false);
 				
 				addStageForProject(writer, project, 0);
 				
 				// end stages
-				writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endStages() + ConstrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
 				
 				// end pipeline
-				writer.write( ConstrcuctHelper.endPipeline() + ConstrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.endPipeline() + constrcuctHelper.addCRLF());
 				
-				writer.write( ConstrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.addCRLF());
 				
 				// functions
-				writer.write( ConstrcuctHelper.getFunctions() );
+				writer.write(constrcuctHelper.getFunctions());
 			}
 		}
 		
@@ -329,91 +323,91 @@ public class Pipeline {
 	private void addParamEnvTools(Writer writer) throws IOException, URISyntaxException {
 		
 		// parameters
-		writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginParameters() + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginParameters() + constrcuctHelper.addCRLF());
 		for ( String key : Tools.getKeysFilterByPrefix(parameters, "") ) {
 			Parameter param = PropToEntitiy.transformToParameter(key, parameters.getProperty(key));
-			writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.contentParameters(param) + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.contentParameters(param) + constrcuctHelper.addCRLF());
 		}
-		writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endParameters() + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endParameters() + constrcuctHelper.addCRLF());
 		
 		// global env
-		writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginEnv() + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
 		for ( String key : Tools.getKeysFilterByPrefix(environment, ConstantTools.GLOBAL_KEY + ConstantTools.DOT) ) {
 			Environment env = PropToEntitiy.transformToEnvironment(key, environment.getProperty(key));
-			writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.contentEnv(env) + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.contentEnv(env) + constrcuctHelper.addCRLF());
 		}
-		writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endEnv() + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 		
 		// tools
 		// laisser décommenter tant qu'il n'y a pas de clé valeur dans le bloc tools
-//		writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.beginTools() + ConstrcuctHelper.addCRLF());
+//		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginTools() + constrcuctHelper.addCRLF());
 //		for ( String key : Tools.getKeysFilterByPrefix(tools, "") ) {
 //			Tool tool = PropToEntitiy.transformToTool(key, tools.getProperty(key));
-//			writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.contentTools(tool) + ConstrcuctHelper.addCRLF());
+//			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.contentTools(tool) + constrcuctHelper.addCRLF());
 //		}
-//		writer.write(ConstrcuctHelper.addTab(1) + ConstrcuctHelper.endTools() + ConstrcuctHelper.addCRLF());
+//		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endTools() + constrcuctHelper.addCRLF());
 	}
 	
 	private void addInitialize(Writer writer, boolean cleanTargetRemoteDirectory) throws IOException, URISyntaxException {
 		
-		writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.beginStage("Initialize") + ConstrcuctHelper.addCRLF());
-		writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.beginSteps() + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("Initialize") + constrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
 
 		// echo all parameters
-		writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.beginWrap() + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.beginWrap() + constrcuctHelper.addCRLF());
 		for ( Entry<Object, Object> entry : parameters.entrySet() ) {
 			Parameter param = PropToEntitiy.transformToParameter(entry.getKey().toString(), entry.getValue().toString());
-			String echoStr = ConstrcuctHelper.infoColor(param.getName() + " : " + ConstrcuctHelper.dollarParams(param.getName()));
-			writer.write(ConstrcuctHelper.addTab(5) + ConstrcuctHelper.echo(echoStr) + ConstrcuctHelper.addCRLF());
+			String echoStr = constrcuctHelper.infoColor(param.getName() + " : " + constrcuctHelper.dollarParams(param.getName()));
+			writer.write(constrcuctHelper.addTab(5) + constrcuctHelper.echo(echoStr) + constrcuctHelper.addCRLF());
 		}
-		writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.endWrap() + ConstrcuctHelper.addCRLF());	
+		writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.endWrap() + constrcuctHelper.addCRLF());	
 		
 		// clean jenkins workspace
-		writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.cleanWs() + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.cleanWs() + constrcuctHelper.addCRLF());
 		
 		// clean remote
 		if (cleanTargetRemoteDirectory) {
 			String shCommand = "ssh ${env.remoteConnexion} rm -rf ${env.depotFolder}/${params.revision}";
-			writer.write(ConstrcuctHelper.addTab(4) + ConstrcuctHelper.sh(shCommand) + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.sh(shCommand) + constrcuctHelper.addCRLF());
 		}
 		
-		writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.endSteps() + ConstrcuctHelper.addCRLF());	
-		writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.endStage() + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());	
+		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 	
 	private void addStageForProject(Writer writer, String project, int identToAdd) throws IOException, URISyntaxException {
 		
-		writer.write(ConstrcuctHelper.addTab(2 + identToAdd) + ConstrcuctHelper.beginStage("build " + project) + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(2 + identToAdd) + constrcuctHelper.beginStage("build " + project) + constrcuctHelper.addCRLF());
 		
 		// env
-		writer.write(ConstrcuctHelper.addTab(3 + identToAdd) + ConstrcuctHelper.beginEnv() + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
 		for ( String key : Tools.getKeysFilterByPrefix(environment, project + ConstantTools.DOT) ) {
 			Environment env = PropToEntitiy.transformToEnvironment(key, environment.getProperty(key));
-			writer.write(ConstrcuctHelper.addTab(4 + identToAdd) + ConstrcuctHelper.contentEnv(env) + ConstrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.contentEnv(env) + constrcuctHelper.addCRLF());
 		}
-		writer.write(ConstrcuctHelper.addTab(3 + identToAdd) + ConstrcuctHelper.endEnv() + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 		
 		// step
-		writer.write(ConstrcuctHelper.addTab(3 + identToAdd) + ConstrcuctHelper.beginSteps() + ConstrcuctHelper.addCRLF());
-		writer.write(ConstrcuctHelper.addTab(4 + identToAdd) + ConstrcuctHelper.runBuild() + ConstrcuctHelper.addCRLF());
-		writer.write(ConstrcuctHelper.addTab(3 + identToAdd) + ConstrcuctHelper.endEnv() + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.runBuild() + constrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 		
-		writer.write(ConstrcuctHelper.addTab(2 + identToAdd) + ConstrcuctHelper.endStage() + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(2 + identToAdd) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 	
 	private void addParallelStageForProject(Writer writer, int index, List<String> groupe) throws IOException, URISyntaxException {
 		
-		writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.beginStage("build groupe " + index) + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("build groupe " + index) + constrcuctHelper.addCRLF());
 		
 		// parallel
-		writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.beginParallel() + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginParallel() + constrcuctHelper.addCRLF());
 		
 		for (String project : groupe)
 			addStageForProject(writer, project, 2);
 		
-		writer.write(ConstrcuctHelper.addTab(3) + ConstrcuctHelper.endParallel() + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endParallel() + constrcuctHelper.addCRLF());
 		
-		writer.write(ConstrcuctHelper.addTab(2) + ConstrcuctHelper.endStage() + ConstrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 	
 }

@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -48,4 +49,13 @@ public class Tools {
 								.collect( Collectors.toList() );
 	}
 
+	public static void verifyKeys(Set<String> expectedKeys, Set<String> actualKeys, String fileName) {
+		
+		if ( !actualKeys.containsAll(expectedKeys) ) {
+			String message = "Au moins une clé est manquante dans " + fileName;
+			message += " (" + Tools.concatenateItem(expectedKeys) + ")";
+			throw new IllegalArgumentException(message);
+		}
+	}
+	
 }

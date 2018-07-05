@@ -3,6 +3,9 @@ package com.es2i.pipeline.job.helper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 
@@ -10,28 +13,66 @@ import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
 import com.es2i.pipeline.job.entities.Tool;
 import com.es2i.pipeline.tools.ConstantTools;
+import com.es2i.pipeline.tools.Tools;
 
+/*
+ * Singleton
+ */
 public class ConstrcuctHelper {
 
-	public static String beginPipeline() {
+	private static ConstrcuctHelper instance;
+	
+	private Properties callFunctions;
+	
+	
+	
+	private ConstrcuctHelper() throws IOException {
+		init();
+	}
+	
+	private void init() throws IOException {
+		
+		callFunctions = new Properties();
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(ConstantTools.CALL_FUNCTIONS_PROP_FILE)) {
+			callFunctions.load(is);
+		}
+		
+		Set<String> expectedKeys = new HashSet<String>();
+		expectedKeys.add(ConstantTools.CALL_RUN_BUILD_KEY);
+		Tools.verifyKeys(expectedKeys, callFunctions.stringPropertyNames(), ConstantTools.CALL_FUNCTIONS_PROP_FILE);
+	}
+
+	
+	
+	public static ConstrcuctHelper getInstance() throws IOException {
+		
+		if (instance == null)
+			instance = new ConstrcuctHelper();
+		
+		return instance;
+	}
+	
+	
+	
+	public String beginPipeline() {
 		return "pipeline {";
 	}
 	
-	public static String endPipeline() {
+	public String endPipeline() {
 		return "}";
 	}
 	
 	
-	public static String agent() {
+	public String agent() {
 		return "agent any";
 	}
 	
 	
-	public static String beginParameters() {
+	public String beginParameters() {
 		return "parameters {";
 	}
 	
-	public static String contentParameters(Parameter param) {
+	public String contentParameters(Parameter param) {
 		
 		if (param.getType().equalsIgnoreCase("String")) {
 			return "string(name: \"" + param.getName() + "\", defaultValue: \"" + param.getDefaultValue() + "\", description: \"" + param.getDesc() + "\")";
@@ -41,96 +82,96 @@ public class ConstrcuctHelper {
 		}
 	}
 	
-	public static String endParameters() {
+	public String endParameters() {
 		return "}";
 	}
 	
 	
-	public static String beginEnv() {
+	public String beginEnv() {
 		return "environment {";
 	}
 	
-	public static String contentEnv(Environment env) {
+	public String contentEnv(Environment env) {
 		
 		return env.getName() + " = \"" + env.getValue() + "\"";
 	}
 	
-	public static String endEnv() {
+	public String endEnv() {
 		return "}";
 	}
 
 	
-	public static String beginTools() {
+	public String beginTools() {
 		return "tools {";
 	}
 	
-	public static String contentTools(Tool tool) {
+	public String contentTools(Tool tool) {
 		
 		return tool.getName() + " \"" + tool.getValue() + "\"";
 	}
 	
-	public static String endTools() {
+	public String endTools() {
 		return "}";
 	}
 
 	
-	public static String beginStages() {
+	public String beginStages() {
 		return "stages {";
 	}
 	
-	public static String endStages() {
+	public String endStages() {
 		return "}";
 	}
 	
 	
-	public static String beginStage(String name) {
+	public String beginStage(String name) {
 		return "stage (\"" + name + "\") {";
 	}
 	
-	public static String endStage() {
+	public String endStage() {
 		return "}";
 	}
 	
 	
-	public static String beginSteps() {
+	public String beginSteps() {
 		return "steps {";
 	}
 	
-	public static String endSteps() {
+	public String endSteps() {
 		return "}";
 	}
 	
 	
-	public static String beginWrap() {
+	public String beginWrap() {
 		return "wrap([$class: 'AnsiColorBuildWrapper']) {";
 	}
 	
-	public static String endWrap() {
+	public String endWrap() {
 		return "}";
 	}
 	
 	
-	public static String beginParallel() {
+	public String beginParallel() {
 		return "parallel {";
 	}
 	
-	public static String endParallel() {
+	public String endParallel() {
 		return "}";
 	}
 	
 	
-	public static String getFunctions() throws IOException, URISyntaxException {
+	public String getFunctions() throws IOException, URISyntaxException {
 		
 		InputStream is = ConstrcuctHelper.class.getClassLoader().getResourceAsStream(ConstantTools.FUNCTIONS_FILE);
 		byte[] bytes = IOUtils.toByteArray(is);
 		return new String(bytes);
 	}
 
-	public static String runBuild() {
-		return "runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)";
+	public String runBuild() {
+		return callFunctions.getProperty(ConstantTools.CALL_RUN_BUILD_KEY);
 	}
 	
-	public static String addTab(int nb) {
+	public String addTab(int nb) {
 		
 		String str = "";
 		for (int i = 0; i < nb; i++)
@@ -139,35 +180,47 @@ public class ConstrcuctHelper {
 		return str;
 	}
 	
-	public static String addCRLF() {
+	public String addCRLF() {
 		return ConstantTools.CRLF;
 	}
 	
-	public static String echo(String str) {
+	public String echo(String str) {
 		return "echo \"" + str + "\"";
 	}
 	
-	public static String sh(String str) {
+	public String sh(String str) {
 		return "sh \"" + str + "\"";
 	}
 	
-	public static String cleanWs() {
+	public String cleanWs() {
 		return "cleanWs()";
 	}
 	
-	public static String infoColor(String str) {
+	/**
+	 * Doit être utilisé à l'intérieur d'un bloc 'wrap'
+	 * 
+	 * @see #beginWrap()
+	 * @see #endWrap()
+	 */
+	public String infoColor(String str) {
 		return "\\u001B[34m " + str + " \\u001B[m";
 	}
 	
-	public static String errorColor(String str) {
+	/**
+	 * Doit être utilisé à l'intérieur d'un bloc 'wrap'
+	 * 
+	 * @see #beginWrap()
+	 * @see #endWrap()
+	 */
+	public String errorColor(String str) {
 		return "\\u001B[31m " + str + " \\u001B[m";
 	}
 	
-	public static String dollarParams(String prop) {
+	public String dollarParams(String prop) {
 		return "${params." + prop + "}";
 	}
 	
-	public static String dollarEnv(String prop) {
+	public String dollarEnv(String prop) {
 		return "${env." + prop + "}";
 	}
 
