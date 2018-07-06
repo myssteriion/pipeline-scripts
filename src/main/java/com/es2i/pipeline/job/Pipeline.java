@@ -86,6 +86,10 @@ public class Pipeline {
 		expectedKeys.add(ConstantTools.REMOTE_CONNEXION_KEY);
 		expectedKeys.add(ConstantTools.REMOTE_DEPOT_FOLDER_KEY);
 		expectedKeys.add(ConstantTools.REMOTE_ESII_APP_FOLDER_KEY);
+		expectedKeys.add(ConstantTools.JENKINS_URL_KEY);
+		expectedKeys.add(ConstantTools.JOB_NAME_KEY);
+		expectedKeys.add(ConstantTools.JOB_TOKEN_KEY);
+		expectedKeys.add(ConstantTools.ENVENT_STORAGE_KEY);
 		Tools.verifyKeys(expectedKeys, environment.stringPropertyNames(), ConstantTools.ENV_PROP_FILE);
 		
 		/* */
@@ -164,6 +168,8 @@ public class Pipeline {
 					addStageForProject(writer, project, 0);
 			}
 			
+			addRemoteDataFolder(writer);
+			
 			// end stages
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
 			
@@ -209,6 +215,8 @@ public class Pipeline {
 				else
 					addParallelStageForProject(writer, index, groupe);
 			}
+			
+			addRemoteDataFolder(writer);
 			
 			// end stages
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
@@ -348,7 +356,7 @@ public class Pipeline {
 //		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endTools() + constrcuctHelper.addCRLF());
 	}
 	
-	private void addInitialize(Writer writer, boolean cleanTargetRemoteDirectory) throws IOException, URISyntaxException {
+	private void addInitialize(Writer writer, boolean isBuildAll) throws IOException, URISyntaxException {
 		
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("Initialize") + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
@@ -366,12 +374,34 @@ public class Pipeline {
 		writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.cleanWs() + constrcuctHelper.addCRLF());
 		
 		// clean remote
-		if (cleanTargetRemoteDirectory) {
+		if (isBuildAll) {
 			String shCommand = "ssh ${env.remoteConnexion} rm -rf ${env.depotFolder}/${params.revision}";
 			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.sh(shCommand) + constrcuctHelper.addCRLF());
 		}
 		
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());	
+		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
+	}
+	
+	private void addRemoteDataFolder(Writer writer) throws IOException, URISyntaxException {
+		
+		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("Create data folder") + constrcuctHelper.addCRLF());
+		
+		// env
+		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
+		for ( String key : Tools.getKeysFilterByPrefix(environment, ConstantTools.INITIALIZE_KEY + ConstantTools.DOT) ) {
+			Environment env = PropToEntitiy.transformToEnvironment(key, environment.getProperty(key));
+			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.contentEnv(env) + constrcuctHelper.addCRLF());
+		}
+		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
+		
+		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
+
+		String shCommand = "ssh ${env.remoteConnexion} mkdir -p ${env.depotFolder}/${params.revision}/${env.esiiDataFolder}/${enventStorage}";
+		writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.sh(shCommand) + constrcuctHelper.addCRLF());
+		
+		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());	
+		
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 	

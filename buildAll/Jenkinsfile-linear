@@ -7,6 +7,7 @@ pipeline {
 		depotFolder = "depot"
 		esiiAppFolder = "ESII-APPLICATION/app"
 		esiiConfFolder = "ESII-APPLICATION/conf"
+		esiiDataFolder = "ESII-APPLICATION/data"
 		gitLabUrl = "http://192.168.25.68/eSirius/"
 		remoteConnexion = "esii@192.168.25.94"
 	}
@@ -214,6 +215,14 @@ pipeline {
 			}
 			steps {
 				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
+			}
+		}
+		stage ("Create data folder") {
+			environment {
+				enventStorage = "event-storage"
+			}
+			steps {
+				sh "ssh ${env.remoteConnexion} mkdir -p ${env.depotFolder}/${params.revision}/${env.esiiDataFolder}/${enventStorage}"
 			}
 		}
 	}

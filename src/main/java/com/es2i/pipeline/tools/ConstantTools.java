@@ -24,12 +24,17 @@ public class ConstantTools {
 	
 	public static final String ENV_PROP_FILE 					= "environment.properties";
 	public static final String GLOBAL_KEY 						= "global";
-	public static final String RUNNER_KEY 						= "runner";
 	public static final String GITLAB_URL_KEY 					= GLOBAL_KEY + DOT + "gitLabUrl";
 	public static final String REMOTE_CONNEXION_KEY 			= GLOBAL_KEY + DOT + "remoteConnexion";
 	public static final String REMOTE_DEPOT_FOLDER_KEY 			= GLOBAL_KEY + DOT + "depotFolder";
 	public static final String REMOTE_ESII_APP_FOLDER_KEY 		= GLOBAL_KEY + DOT + "esiiAppFolder";
 	public static final String REMOTE_ESII_CONF_FOLDER_KEY 		= GLOBAL_KEY + DOT + "esiiConfFolder";
+	public static final String RUNNER_KEY 						= "runner";
+	public static final String JENKINS_URL_KEY 					= RUNNER_KEY + DOT + "jenkinsUrl";
+	public static final String JOB_NAME_KEY 					= RUNNER_KEY + DOT + "jobName";
+	public static final String JOB_TOKEN_KEY 					= RUNNER_KEY + DOT + "pipelineToken";
+	public static final String INITIALIZE_KEY 					= "initialize";
+	public static final String ENVENT_STORAGE_KEY 				= INITIALIZE_KEY + DOT + "enventStorage";
 	
 	public static final String TOOLS_PROP_FILE 					= "tools.properties";
 	

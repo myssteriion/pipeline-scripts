@@ -7,6 +7,7 @@ pipeline {
 		depotFolder = "depot"
 		esiiAppFolder = "ESII-APPLICATION/app"
 		esiiConfFolder = "ESII-APPLICATION/conf"
+		esiiDataFolder = "ESII-APPLICATION/data"
 		gitLabUrl = "http://192.168.25.68/eSirius/"
 		remoteConnexion = "esii@192.168.25.94"
 	}
