@@ -240,23 +240,10 @@ void runBuild(String gitRoot, String projectRoot, String jdk, String mvn, String
 }
 
 void checkoutRevisionOnRepo(String gitRoot) {
-	script {
-		try {
-			checkout scm: [ $class: "GitSCM", 
-							userRemoteConfigs: [ [url: env.gitLabUrl+gitRoot, credentialsId: "root"] ],
-							branches: [ [name: params.revision] ]
-						  ], poll: false
-		}
-		catch(Exception e) {
-			wrap([$class: 'AnsiColorBuildWrapper']) {
-				echo "\u001B[31mLa branche ou le tag '${params.revision}' n'existe pas sur le repository '${gitRoot}' => build de la branche 'master'\u001B[m"
-			}
-			checkout scm: [ $class: "GitSCM", 
-							userRemoteConfigs: [ [url: env.gitLabUrl+gitRoot, credentialsId: "root"] ],
-							branches: [ [name: 'master'] ]
-						  ], poll: false
-		}
-	}
+	checkout scm: [ $class: "GitSCM", 
+					userRemoteConfigs: [ [url: env.gitLabUrl+gitRoot, credentialsId: "root"] ],
+					branches: [ [name: params.revision] ]
+				  ], poll: false
 }
 
 void mvnCleanInstall(String projectRoot, String jdk, String mvn) {
