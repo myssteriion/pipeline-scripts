@@ -15,6 +15,7 @@ public class ConstantTools {
 	public static final String APPLICATION_PROP_FILE			= "application.properties";
 	public static final String BUILD_ALL_DIRECTORY_KEY 			= "dest.directory.build.all";
 	public static final String BUILD_ONE_DIRECTORY_KEY 			= "dest.directory.build.one";
+	public static final String RUNNER_BRANCHES_KEY 				= "runner.branches";
 	public static final String PROJECTS_BUILD_ONE_KEY 			= "projects.build.one";
 	public static final String PROJECTS_BUILD_ALL_GROUPE_KEY 	= "projects.build.all.groupe";
 	public static final String PROJECTS_BUILD_ALL_GROUPE1_KEY 	= PROJECTS_BUILD_ALL_GROUPE_KEY + "1";

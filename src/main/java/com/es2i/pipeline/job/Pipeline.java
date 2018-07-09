@@ -59,6 +59,7 @@ public class Pipeline {
 		Set<String> expectedKeys = new HashSet<String>();
 		expectedKeys.add(ConstantTools.BUILD_ALL_DIRECTORY_KEY);
 		expectedKeys.add(ConstantTools.BUILD_ONE_DIRECTORY_KEY);
+		expectedKeys.add(ConstantTools.RUNNER_BRANCHES_KEY);
 		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ONE_KEY);
 		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ALL_GROUPE1_KEY);
 		Tools.verifyKeys(expectedKeys, application.stringPropertyNames(), ConstantTools.APPLICATION_PROP_FILE);
@@ -260,11 +261,18 @@ public class Pipeline {
 			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("run") + constrcuctHelper.addCRLF());
 			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
 			
-			String shCommand = "wget \\\"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=master\\\"";
-			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.sh(shCommand) + constrcuctHelper.addCRLF());
-			
-			shCommand = "wget \\\"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=develop\\\"";
-			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.sh(shCommand) + constrcuctHelper.addCRLF());
+			String[] branches = application.getProperty(ConstantTools.RUNNER_BRANCHES_KEY).split(ConstantTools.COMA);
+			// master par défaut
+			if ( branches == null || branches.length == 0 || (branches.length == 1 && branches[0].equals("")) ) {
+				String shCommand = "wget \\\"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=master\\\"";
+				writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.sh(shCommand) + constrcuctHelper.addCRLF());
+			}
+			else {
+				for (String branche : branches) {
+					String shCommand = "wget \\\"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=" + branche + "\\\"";
+					writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.sh(shCommand) + constrcuctHelper.addCRLF());
+				}
+			}
 			
 			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());
 			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
