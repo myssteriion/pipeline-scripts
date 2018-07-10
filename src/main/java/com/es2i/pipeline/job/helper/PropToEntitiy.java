@@ -14,10 +14,10 @@ public class PropToEntitiy {
 			throw new IllegalArgumentException("Le propriété " + propName + " est vide");
 		
 		String[] tab = propValue.split(ConstantTools.UNDERSCORE);
-		if (tab == null || tab.length != 4)
+		if (tab == null || (tab.length != 4 && tab.length != 5))
 			throw new IllegalArgumentException("Le propriété " + propName + " n'est pas correct (" + propValue + ")");
 		
-		return new Parameter(tab[0], tab[1], tab[2], tab[3]);
+		return new Parameter(tab[0].trim(), tab[1].trim(), tab[2].trim(), tab[3].trim(), (tab.length == 5 ? tab[4].trim() : null));
 	}
 	
 	public static Environment transformToEnvironment(String propName, String propValue) {

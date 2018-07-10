@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,10 +13,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
@@ -76,6 +74,7 @@ public class Pipeline {
 		}
 		expectedKeys = new HashSet<String>();
 		expectedKeys.add(ConstantTools.REVISION_KEY);
+		expectedKeys.add(ConstantTools.SECONDARY_DEPLOY_KEY);
 		Tools.verifyKeys(expectedKeys, parameters.stringPropertyNames(), ConstantTools.TOOLS_PROP_FILE);
 		
 		/* */
@@ -163,7 +162,7 @@ public class Pipeline {
 			// pipeline - agent - param - env - tools - stages
 			writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
-			addParamEnvTools(writer);
+			addParamEnvTools(writer, true);
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
 			
 			addInitializeStage(writer, true);
@@ -258,7 +257,7 @@ public class Pipeline {
 				// pipeline - agent - param - env - tools - stages
 				writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
 				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
-				addParamEnvTools(writer);
+				addParamEnvTools(writer, false);
 				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
 				
 				addInitializeStage(writer, false);
@@ -281,13 +280,15 @@ public class Pipeline {
 	
 	
 	
-	private void addParamEnvTools(Writer writer) throws IOException, URISyntaxException {
+	private void addParamEnvTools(Writer writer, boolean isBuildAll) throws IOException, URISyntaxException {
 		
 		// parameters
 		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginParameters() + constrcuctHelper.addCRLF());
 		for ( String key : Tools.getKeysFilterByPrefix(parameters, "") ) {
+			
 			Parameter param = PropToEntitiy.transformToParameter(key, parameters.getProperty(key));
-			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.contentParameters(param) + constrcuctHelper.addCRLF());
+			if ( (isBuildAll && param.isAllScope()) || (!isBuildAll && param.isMonoScope()) )
+				writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.contentParameters(param) + constrcuctHelper.addCRLF());
 		}
 		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endParameters() + constrcuctHelper.addCRLF());
 		
@@ -318,8 +319,10 @@ public class Pipeline {
 		writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.beginWrap() + constrcuctHelper.addCRLF());
 		for ( Entry<Object, Object> entry : parameters.entrySet() ) {
 			Parameter param = PropToEntitiy.transformToParameter(entry.getKey().toString(), entry.getValue().toString());
-			String echoStr = constrcuctHelper.infoColor(param.getName() + " : " + constrcuctHelper.dollarParams(param.getName()));
-			writer.write(constrcuctHelper.addTab(5) + constrcuctHelper.echo(echoStr) + constrcuctHelper.addCRLF());
+			if ( (isBuildAll && param.isAllScope()) || (!isBuildAll && param.isMonoScope()) ) {
+				String echoStr = constrcuctHelper.infoColor(param.getName() + " : " + constrcuctHelper.dollarParams(param.getName()));
+				writer.write(constrcuctHelper.addTab(5) + constrcuctHelper.echo(echoStr) + constrcuctHelper.addCRLF());
+			}
 		}
 		writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.endWrap() + constrcuctHelper.addCRLF());	
 		
@@ -353,28 +356,32 @@ public class Pipeline {
 		// au moins un remote secondaire
 		if ( remoteDescriptor.containsKey(ConstantTools.SECONDARY_REMOTE1_KEY) ) {
 			
-			// stage - steps
+			// stage - steps - script - if()
 			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("secondary deploy") + constrcuctHelper.addCRLF());
 			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.beginScript() + constrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(5) + constrcuctHelper.beginIfSecondaryDeploy() + constrcuctHelper.addCRLF());
 			
 			// creation tar
-			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.createTarOnPrimaryRemote() + constrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.createTarOnPrimaryRemote() + constrcuctHelper.addCRLF());
 			
 			int index = 1;
 			String key = ConstantTools.SECONDARY_REMOTE_KEY + index;
 			while ( remoteDescriptor.containsKey(key) ) {
 				
 				String remote = remoteDescriptor.getProperty(key);
-				writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.runDeployToSecondaryRemote(remote) + constrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.runDeployToSecondaryRemote(remote) + constrcuctHelper.addCRLF());
 				
 				index++;
 				key = ConstantTools.SECONDARY_REMOTE_KEY + index;
 			}
 			
 			// supression tar
-			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.removeTarOnPrimaryRemote() + constrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.removeTarOnPrimaryRemote() + constrcuctHelper.addCRLF());
 			
-			// steps - stage
+			// if() - script - steps - stage
+			writer.write(constrcuctHelper.addTab(5) + constrcuctHelper.endIfSecondaryDeploy() + constrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.endScript() + constrcuctHelper.addCRLF());
 			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());
 			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 		}

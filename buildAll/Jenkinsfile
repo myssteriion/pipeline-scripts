@@ -2,6 +2,7 @@ pipeline {
 	agent any
 	parameters {
 		string(name: "revision", defaultValue: "master", description: "branche ou TAG")
+		booleanParam(name: "secondaryDeploy", defaultValue: false, description: "déployer sur les serveurs secondaires")
 	}
 	environment {
 		depotFolder = "depotTest"
@@ -12,6 +13,7 @@ pipeline {
 		stage ("Initialize") {
 			steps {
 				wrap([$class: 'AnsiColorBuildWrapper']) {
+					echo "\u001B[34m secondaryDeploy : ${params.secondaryDeploy} \u001B[m"
 					echo "\u001B[34m revision : ${params.revision} \u001B[m"
 				}
 				cleanWs()
@@ -241,9 +243,13 @@ pipeline {
 		}
 		stage ("secondary deploy") {
 			steps {
-				sh "ssh ${env.primaryRemote} \"cd ${env.depotFolder}/${params.revision} && tar -cf ESII-Applications.gz ESII-Applications\""
-				deployToSecondaryRemote("esii@192.168.25.22")
-				sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/ESII-Applications.gz"
+				script {
+					if (params.secondaryDeploy) {
+						sh "ssh ${env.primaryRemote} \"cd ${env.depotFolder}/${params.revision} && tar -cf ESII-Applications.gz ESII-Applications\""
+						deployToSecondaryRemote("esii@192.168.25.22")
+						sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/ESII-Applications.gz"
+					}
+				}
 			}
 		}
 	}

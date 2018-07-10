@@ -52,6 +52,7 @@ public class ConstantTools {
 	 */
 	public static final String PARAM_PROP_FILE 							= "parameters.properties";
 	public static final String REVISION_KEY 							= "revision";
+	public static final String SECONDARY_DEPLOY_KEY 					= "secondaryDeploy";
 	
 	/*
 	 * environment.properties

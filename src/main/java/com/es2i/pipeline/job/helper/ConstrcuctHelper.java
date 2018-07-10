@@ -59,6 +59,9 @@ public class ConstrcuctHelper {
 		if (param.getType().equalsIgnoreCase("String")) {
 			return "string(name: \"" + param.getName() + "\", defaultValue: \"" + param.getDefaultValue() + "\", description: \"" + param.getDesc() + "\")";
 		}
+		else if (param.getType().equalsIgnoreCase("boolean")) {
+			return "booleanParam(name: \"" + param.getName() + "\", defaultValue: " + param.getDefaultValue() + ", description: \"" + param.getDesc() + "\")";
+		}
 		else {
 			return "";
 		}
@@ -142,6 +145,15 @@ public class ConstrcuctHelper {
 	}
 	
 	
+	public String beginScript() {
+		return "script {";
+	}
+	
+	public String endScript() {
+		return "}";
+	}
+	
+	
 	public String getFunctions() throws IOException, URISyntaxException {
 		
 		InputStream is = ConstrcuctHelper.class.getClassLoader().getResourceAsStream(ConstantTools.FUNCTIONS_FILE);
@@ -153,6 +165,15 @@ public class ConstrcuctHelper {
 		str = str.replace(ConstantTools.CONF_PARAM, ConstantTools.CONF);
 		
 		return str;
+	}
+
+	
+	public String beginIfSecondaryDeploy() {
+		return "if (params.secondaryDeploy) {";
+	}
+	
+	public String endIfSecondaryDeploy() {
+		return "}";
 	}
 
 	
