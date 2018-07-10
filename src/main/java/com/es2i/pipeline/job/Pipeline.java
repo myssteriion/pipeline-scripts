@@ -141,7 +141,6 @@ public class Pipeline {
 	public void run() throws IOException, URISyntaxException {
 
 		clean();
-		generateBuildAllLinear();
 		generateBuildAll();
 		generateRunner();
 		genetateAllBuildOne();
@@ -151,45 +150,6 @@ public class Pipeline {
 
 		Tools.deleteIfExists( Paths.get(ConstantTools.BUILD_ALL_DIRECTORY) );
 		Tools.deleteIfExists( Paths.get(ConstantTools.BUILD_ONE_DIRECTORY) );
-	}
-	
-	private void generateBuildAllLinear() throws IOException, URISyntaxException {
-		
-		File buildAllDirectory = Tools.createDirectoryIfNeedIt( Paths.get(ConstantTools.BUILD_ALL_DIRECTORY) ).toFile();
-		File jenkinsfile = Paths.get(buildAllDirectory.getAbsolutePath(), ConstantTools.JENKINS_LINEAR_FILE).toFile();
-		jenkinsfile.createNewFile();
-		
-		try (Writer writer = new PrintWriter(jenkinsfile)) {
-			
-			// pipeline - agent - param - env - tools - stages
-			writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
-			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
-			addParamEnvTools(writer);
-			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
-			
-			addInitializeStage(writer, true);
-			
-			addCreateDataFolderStage(writer);
-			
-			// all build
-			int nbGroup = projectsBuildAll.size();
-			for (int index = 1; index <= nbGroup; index++) {
-				for ( String project : projectsBuildAll.get(index) )
-					addStageForProject(writer, project, 0);
-			}
-			
-			addDeployToSecondaryRemoteStage(writer);
-			
-			// stages - pipeline
-			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
-			writer.write(constrcuctHelper.endPipeline() + constrcuctHelper.addCRLF());
-			
-			// saut de ligne
-			writer.write(constrcuctHelper.addCRLF());
-			
-			// functions.txt
-			writer.write(constrcuctHelper.getFunctions() );
-		}
 	}
 	
 	private void generateBuildAll() throws IOException, URISyntaxException {

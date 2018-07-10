@@ -16,7 +16,6 @@ public class ConstantTools {
 	 * noms des fichiers et dossiers
 	 */
 	public static final String JENKINS_FILE 							= "Jenkinsfile";
-	public static final String JENKINS_LINEAR_FILE 						= "Jenkinsfile-linear";
 	public static final String RUNNER_DIRECTORY 						= "runner";
 	public static final String BUILD_ALL_DIRECTORY						= "buildAll";
 	public static final String BUILD_ONE_DIRECTORY						= "buildOne";
