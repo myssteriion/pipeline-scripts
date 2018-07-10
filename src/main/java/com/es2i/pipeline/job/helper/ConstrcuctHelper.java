@@ -3,9 +3,6 @@ package com.es2i.pipeline.job.helper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 
@@ -13,7 +10,6 @@ import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
 import com.es2i.pipeline.job.entities.Tool;
 import com.es2i.pipeline.tools.ConstantTools;
-import com.es2i.pipeline.tools.Tools;
 
 /*
  * Singleton
@@ -22,30 +18,15 @@ public class ConstrcuctHelper {
 
 	private static ConstrcuctHelper instance;
 	
-	private Properties callFunctions;
 	
 	
-	
-	private ConstrcuctHelper() throws IOException {
-		init();
-	}
-	
-	private void init() throws IOException {
+	private ConstrcuctHelper() {
 		
-		callFunctions = new Properties();
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(ConstantTools.CALL_FUNCTIONS_PROP_FILE)) {
-			callFunctions.load(is);
-		}
-		
-		Set<String> expectedKeys = new HashSet<String>();
-		expectedKeys.add(ConstantTools.CALL_RUN_BUILD_KEY);
-		expectedKeys.add(ConstantTools.CALL_DEPLOY_TO_SECONDARY_REMOTE_KEY);
-		Tools.verifyKeys(expectedKeys, callFunctions.stringPropertyNames(), ConstantTools.CALL_FUNCTIONS_PROP_FILE);
 	}
 
 	
 	
-	public static ConstrcuctHelper getInstance() throws IOException {
+	public static ConstrcuctHelper getInstance() {
 		
 		if (instance == null)
 			instance = new ConstrcuctHelper();
@@ -165,7 +146,13 @@ public class ConstrcuctHelper {
 		
 		InputStream is = ConstrcuctHelper.class.getClassLoader().getResourceAsStream(ConstantTools.FUNCTIONS_FILE);
 		byte[] bytes = IOUtils.toByteArray(is);
-		return new String(bytes);
+		String str = new String(bytes);
+		
+		str = str.replace(ConstantTools.ESII_APPLICATION_PARAM, ConstantTools.ESII_APPLICATION);
+		str = str.replace(ConstantTools.APP_PARAM, ConstantTools.APP);
+		str = str.replace(ConstantTools.CONF_PARAM, ConstantTools.CONF);
+		
+		return str;
 	}
 
 	
@@ -174,15 +161,23 @@ public class ConstrcuctHelper {
 	}
 	
 	public String createDataFolderOnPrimaryRemote() {
-		return sh("ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${env.esiiFolder}/${env.dataFolder}/${enventStorage}");
+		
+		String str = "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/";
+		str += ConstantTools.ESII_APPLICATION + "/" + ConstantTools.DATA + "/" + ConstantTools.EVENT_STORAGE + "/";
+		
+		return sh(str);
 	}
 	
 	public String createTarOnPrimaryRemote() {
-		return sh("ssh ${env.primaryRemote} \\\"cd ${env.depotFolder}/${params.revision} && tar -cf ${env.esiiFolder}.gz ${env.esiiFolder}\\\"");
+		
+		String str = "ssh ${env.primaryRemote} \\\"cd ${env.depotFolder}/${params.revision} && tar -cf ";
+		str += ConstantTools.ESII_APPLICATION + ".gz " + ConstantTools.ESII_APPLICATION + "\\\"";
+		
+		return sh(str);
 	}
 	
 	public String removeTarOnPrimaryRemote() {
-		return sh("ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${env.esiiFolder}.gz");
+		return sh("ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/" + ConstantTools.ESII_APPLICATION + ".gz");
 	}
 	
 	public String callBuildAll(String revision) {
@@ -190,13 +185,11 @@ public class ConstrcuctHelper {
 	}
 	
 	public String runBuild() {
-		return callFunctions.getProperty(ConstantTools.CALL_RUN_BUILD_KEY);
+		return "runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)";
 	}
 	
 	public String runDeployToSecondaryRemote(String remote) {
-		String call = callFunctions.getProperty(ConstantTools.CALL_DEPLOY_TO_SECONDARY_REMOTE_KEY);
-		call = call.replace(ConstantTools.SECONDARY_REMOTE_PARAM, remote);
-		return call;
+		return "deployToSecondaryRemote(\"" + remote + "\")";
 	}
 	
 	

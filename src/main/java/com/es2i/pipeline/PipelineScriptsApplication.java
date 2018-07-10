@@ -9,7 +9,6 @@ public class PipelineScriptsApplication {
 	private static final Logger LOGGER = Logger.getLogger(PipelineScriptsApplication.class);
 	 
 	
-	
 	public static void main(String[] args) {
 		
 		try {

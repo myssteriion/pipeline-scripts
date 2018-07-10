@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.Properties;
 import java.util.Set;
 
@@ -59,8 +61,6 @@ public class Pipeline {
 			application.load(is);
 		}
 		Set<String> expectedKeys = new HashSet<String>();
-		expectedKeys.add(ConstantTools.BUILD_ALL_DIRECTORY_KEY);
-		expectedKeys.add(ConstantTools.BUILD_ONE_DIRECTORY_KEY);
 		expectedKeys.add(ConstantTools.RUNNER_BRANCHES_KEY);
 		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ONE_KEY);
 		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ALL_GROUPE1_KEY);
@@ -88,14 +88,9 @@ public class Pipeline {
 		expectedKeys.add(ConstantTools.GITLAB_URL_KEY);
 		expectedKeys.add(ConstantTools.PRIMARY_REMOTE_KEY);
 		expectedKeys.add(ConstantTools.REMOTE_DEPOT_FOLDER_KEY);
-		expectedKeys.add(ConstantTools.REMOTE_ESII_FOLDER_KEY);
-		expectedKeys.add(ConstantTools.REMOTE_APP_FOLDER_KEY);
-		expectedKeys.add(ConstantTools.REMOTE_CONF_FOLDER_KEY);
-		expectedKeys.add(ConstantTools.REMOTE_DATA_FOLDER_KEY);
 		expectedKeys.add(ConstantTools.JENKINS_URL_KEY);
 		expectedKeys.add(ConstantTools.JOB_NAME_KEY);
 		expectedKeys.add(ConstantTools.JOB_TOKEN_KEY);
-		expectedKeys.add(ConstantTools.ENVENT_STORAGE_KEY);
 		Tools.verifyKeys(expectedKeys, environment.stringPropertyNames(), ConstantTools.ENV_PROP_FILE);
 		
 		/* */
@@ -122,8 +117,10 @@ public class Pipeline {
 		// les buildOne
 		projectsBuilOne = new HashMap<Integer, String>();
 		String[] projectsList = application.getProperty(ConstantTools.PROJECTS_BUILD_ONE_KEY).split(ConstantTools.COMA);
-		for (int index = 0; index < projectsList.length; index++)
-			projectsBuilOne.put(index+1, projectsList[index]);
+		if (projectsList != null) {
+			for (int index = 0; index < projectsList.length; index++)
+				projectsBuilOne.put(index+1, projectsList[index].trim());
+		}
 		
 		// les buildAll
 		projectsBuildAll = new HashMap<Integer, List<String>>();
@@ -131,7 +128,9 @@ public class Pipeline {
 		String key = ConstantTools.PROJECTS_BUILD_ALL_GROUPE_KEY + index;
 		while ( application.containsKey(key) ) {
 			String[] projectsTab = application.getProperty(key).split(ConstantTools.COMA);
-			projectsBuildAll.put(index, Arrays.asList(projectsTab));
+			if (projectsList != null) {
+				projectsBuildAll.put( index, Arrays.asList(projectsTab).stream().map(String::trim).collect(Collectors.toList()) );
+			}
 			index++;
 			key = ConstantTools.PROJECTS_BUILD_ALL_GROUPE_KEY + index;
 		}
@@ -150,33 +149,27 @@ public class Pipeline {
 	
 	private void clean() throws IOException {
 
-		Tools.deleteIfExists( Paths.get( application.getProperty(ConstantTools.BUILD_ALL_DIRECTORY_KEY)) );
-		Tools.deleteIfExists( Paths.get( application.getProperty(ConstantTools.BUILD_ONE_DIRECTORY_KEY)) );
+		Tools.deleteIfExists( Paths.get(ConstantTools.BUILD_ALL_DIRECTORY) );
+		Tools.deleteIfExists( Paths.get(ConstantTools.BUILD_ONE_DIRECTORY) );
 	}
 	
 	private void generateBuildAllLinear() throws IOException, URISyntaxException {
 		
-		Path path = Paths.get(application.getProperty(ConstantTools.BUILD_ALL_DIRECTORY_KEY));
-		File direcrory = Tools.createDirectoryIfNeedIt(path).toFile();
-		File jenkinsfile = Paths.get(direcrory.getAbsolutePath(), ConstantTools.JENKINS_LINEAR_FILE).toFile();
+		File buildAllDirectory = Tools.createDirectoryIfNeedIt( Paths.get(ConstantTools.BUILD_ALL_DIRECTORY) ).toFile();
+		File jenkinsfile = Paths.get(buildAllDirectory.getAbsolutePath(), ConstantTools.JENKINS_LINEAR_FILE).toFile();
 		jenkinsfile.createNewFile();
 		
 		try (Writer writer = new PrintWriter(jenkinsfile)) {
 			
-			// pipeline
+			// pipeline - agent - param - env - tools - stages
 			writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
-			
-			// agent
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
-			
 			addParamEnvTools(writer);
-						
-			// stages
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
 			
-			addInitialize(writer, true);
+			addInitializeStage(writer, true);
 			
-			addCreateDataFolder(writer);
+			addCreateDataFolderStage(writer);
 			
 			// all build
 			int nbGroup = projectsBuildAll.size();
@@ -185,44 +178,37 @@ public class Pipeline {
 					addStageForProject(writer, project, 0);
 			}
 			
-			addStageForSecondaryDeploy(writer);
+			addDeployToSecondaryRemoteStage(writer);
 			
-			// end stages
+			// stages - pipeline
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
-			
-			// end pipeline
 			writer.write(constrcuctHelper.endPipeline() + constrcuctHelper.addCRLF());
 			
+			// saut de ligne
 			writer.write(constrcuctHelper.addCRLF());
 			
-			// functions
+			// functions.txt
 			writer.write(constrcuctHelper.getFunctions() );
 		}
 	}
 	
 	private void generateBuildAll() throws IOException, URISyntaxException {
 		
-		Path path = Paths.get(application.getProperty(ConstantTools.BUILD_ALL_DIRECTORY_KEY));
-		File direcrory = Tools.createDirectoryIfNeedIt(path).toFile();
-		File jenkinsfile = Paths.get(direcrory.getAbsolutePath(), ConstantTools.JENKINS_FILE).toFile();
+		File buildAllDirectory = Tools.createDirectoryIfNeedIt( Paths.get(ConstantTools.BUILD_ALL_DIRECTORY) ).toFile();
+		File jenkinsfile = Paths.get(buildAllDirectory.getAbsolutePath(), ConstantTools.JENKINS_FILE).toFile();
 		jenkinsfile.createNewFile();
 		
 		try (Writer writer = new PrintWriter(jenkinsfile)) {
 			
-			// pipeline
+			// pipeline - agent - param - env - tools - stages
 			writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
-			
-			// agent
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
-			
 			addParamEnvTools(writer);
-						
-			// stages
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
 			
-			addInitialize(writer, true);
+			addInitializeStage(writer, true);
 			
-			addCreateDataFolder(writer);
+			addCreateDataFolderStage(writer);
 			
 			// all build
 			int nbGroup = projectsBuildAll.size();
@@ -235,34 +221,30 @@ public class Pipeline {
 					addParallelStageForProject(writer, index, groupe);
 			}
 			
-			addStageForSecondaryDeploy(writer);
+			addDeployToSecondaryRemoteStage(writer);
 			
-			// end stages
+			// stages - pipeline
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
-			
-			// end pipeline
 			writer.write(constrcuctHelper.endPipeline() + constrcuctHelper.addCRLF());
 			
+			// saut de ligne
 			writer.write(constrcuctHelper.addCRLF());
 			
-			// functions
+			// functions.txt
 			writer.write(constrcuctHelper.getFunctions() );
 		}
 	}
 	
 	private void generateRunner() throws IOException, URISyntaxException {
 		
-		Path path = Paths.get(application.getProperty(ConstantTools.BUILD_ALL_DIRECTORY_KEY), ConstantTools.RUNNER_DIRECTORY);
-		File direcrory = Tools.createDirectoryIfNeedIt(path).toFile();
-		File jenkinsfile = Paths.get(direcrory.getAbsolutePath(), ConstantTools.JENKINS_FILE).toFile();
+		File runnerDirecrory = Tools.createDirectoryIfNeedIt( Paths.get(ConstantTools.BUILD_ALL_DIRECTORY, ConstantTools.RUNNER_DIRECTORY) ).toFile();
+		File jenkinsfile = Paths.get(runnerDirecrory.getAbsolutePath(), ConstantTools.JENKINS_FILE).toFile();
 		jenkinsfile.createNewFile();
 		
 		try (Writer writer = new PrintWriter(jenkinsfile)) {
 			
-			// pipeline
+			// pipeline - agent
 			writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
-			
-			// agent
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
 			
 			// global runner env
@@ -273,9 +255,8 @@ public class Pipeline {
 			}
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 			
-			// stages
+			// stages - stage - steps
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
-			
 			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("run") + constrcuctHelper.addCRLF());
 			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
 			
@@ -286,63 +267,52 @@ public class Pipeline {
 			}
 			else {
 				for (String branche : branches)
-					writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.callBuildAll(branche) + constrcuctHelper.addCRLF());
+					writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.callBuildAll(branche.trim()) + constrcuctHelper.addCRLF());
 			}
 			
+			// steps - stage - stages
 			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());
 			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
-			
-			// end stages
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
 			
-			// end pipeline
+			// pipeline
 			writer.write(constrcuctHelper.endPipeline());
 		}
 	}
 	
 	private void genetateAllBuildOne() throws IOException, URISyntaxException {
 		
-		Path path = Paths.get(application.getProperty(ConstantTools.BUILD_ONE_DIRECTORY_KEY));
-		File direcrory = Tools.createDirectoryIfNeedIt(path).toFile();
-		
+		File monoBuildDirecrory = Tools.createDirectoryIfNeedIt( Paths.get(ConstantTools.BUILD_ONE_DIRECTORY) ).toFile();
 		
 		// all buildOne	
 		for (int index = 1; index <= projectsBuilOne.size(); index++) {
 				
 			String project = projectsBuilOne.get(index);
 			
-			path = Paths.get(direcrory.getAbsolutePath(), project);
-			File subDirecrory = Tools.createDirectoryIfNeedIt(path).toFile();
-			
-			File jenkinsfile = Paths.get(subDirecrory.getAbsolutePath(), ConstantTools.JENKINS_FILE).toFile();
+			File projectDirecrory = Tools.createDirectoryIfNeedIt( Paths.get(monoBuildDirecrory.getAbsolutePath(), project) ).toFile();
+			File jenkinsfile = Paths.get(projectDirecrory.getAbsolutePath(), ConstantTools.JENKINS_FILE).toFile();
 			jenkinsfile.createNewFile();
 			
 			try (Writer writer = new PrintWriter(jenkinsfile)) {
 				
-				// pipeline
+				// pipeline - agent - param - env - tools - stages
 				writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
-				
-				// agent
 				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
-				
 				addParamEnvTools(writer);
-				
-				// stages
 				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
 				
-				addInitialize(writer, false);
+				addInitializeStage(writer, false);
 				
 				addStageForProject(writer, project, 0);
 				
-				// end stages
+				// stages - pipeline
 				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
-				
-				// end pipeline
 				writer.write(constrcuctHelper.endPipeline() + constrcuctHelper.addCRLF());
 				
+				// saut de ligne
 				writer.write(constrcuctHelper.addCRLF());
 				
-				// functions
+				// functions.txt
 				writer.write(constrcuctHelper.getFunctions());
 			}
 		}
@@ -370,7 +340,6 @@ public class Pipeline {
 		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 		
 		// tools
-		// laisser décommenter tant qu'il n'y a pas de clé valeur dans le bloc tools
 //		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginTools() + constrcuctHelper.addCRLF());
 //		for ( String key : Tools.getKeysFilterByPrefix(tools, "") ) {
 //			Tool tool = PropToEntitiy.transformToTool(key, tools.getProperty(key));
@@ -379,8 +348,9 @@ public class Pipeline {
 //		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endTools() + constrcuctHelper.addCRLF());
 	}
 	
-	private void addInitialize(Writer writer, boolean isBuildAll) throws IOException, URISyntaxException {
+	private void addInitializeStage(Writer writer, boolean isBuildAll) throws IOException, URISyntaxException {
 		
+		// stage - steps
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("Initialize") + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
 
@@ -400,37 +370,31 @@ public class Pipeline {
 		if (isBuildAll)
 			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.cleanPrimaryRemote() + constrcuctHelper.addCRLF());
 		
+		// steps - stage
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());	
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 	
-	private void addCreateDataFolder(Writer writer) throws IOException, URISyntaxException {
+	private void addCreateDataFolderStage(Writer writer) throws IOException, URISyntaxException {
 		
+		// stage - stpes
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("Create data folder") + constrcuctHelper.addCRLF());
-		
-		// env
-		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
-		for ( String key : Tools.getKeysFilterByPrefix(environment, ConstantTools.INITIALIZE_KEY + ConstantTools.DOT) ) {
-			Environment env = PropToEntitiy.transformToEnvironment(key, environment.getProperty(key));
-			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.contentEnv(env) + constrcuctHelper.addCRLF());
-		}
-		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
-		
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
-		writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.createDataFolderOnPrimaryRemote() + constrcuctHelper.addCRLF());
-		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());	
 		
+		writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.createDataFolderOnPrimaryRemote() + constrcuctHelper.addCRLF());
+		
+		// steps - stage
+		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());	
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 	
-	private void addStageForSecondaryDeploy(Writer writer) throws IOException, URISyntaxException {
+	private void addDeployToSecondaryRemoteStage(Writer writer) throws IOException, URISyntaxException {
 		
-		// au moins un remote secondaire (les stage ou steps vides sont des syntaxes incorrects)
+		// au moins un remote secondaire
 		if ( remoteDescriptor.containsKey(ConstantTools.SECONDARY_REMOTE1_KEY) ) {
 			
+			// stage - steps
 			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("secondary deploy") + constrcuctHelper.addCRLF());
-			
-			// steps
 			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
 			
 			// creation tar
@@ -447,21 +411,21 @@ public class Pipeline {
 				key = ConstantTools.SECONDARY_REMOTE_KEY + index;
 			}
 			
-			// creation tar
+			// supression tar
 			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.removeTarOnPrimaryRemote() + constrcuctHelper.addCRLF());
 			
-			// end steps
+			// steps - stage
 			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());
-			
 			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 		}
 	}
 	
 	private void addStageForProject(Writer writer, String project, int identToAdd) throws IOException, URISyntaxException {
 		
+		// stage
 		writer.write(constrcuctHelper.addTab(2 + identToAdd) + constrcuctHelper.beginStage("build " + project) + constrcuctHelper.addCRLF());
 		
-		// env
+		// local env
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
 		for ( String key : Tools.getKeysFilterByPrefix(environment, project + ConstantTools.DOT) ) {
 			Environment env = PropToEntitiy.transformToEnvironment(key, environment.getProperty(key));
@@ -474,21 +438,21 @@ public class Pipeline {
 		writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.runBuild() + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());
 		
+		// stage
 		writer.write(constrcuctHelper.addTab(2 + identToAdd) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 	
 	private void addParallelStageForProject(Writer writer, int index, List<String> groupe) throws IOException, URISyntaxException {
 		
+		// stage - parallel
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("build groupe " + index) + constrcuctHelper.addCRLF());
-		
-		// parallel
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginParallel() + constrcuctHelper.addCRLF());
 		
 		for (String project : groupe)
 			addStageForProject(writer, project, 2);
 		
+		// parallel - stage
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endParallel() + constrcuctHelper.addCRLF());
-		
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 	

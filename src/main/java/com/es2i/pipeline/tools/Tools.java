@@ -53,9 +53,9 @@ public class Tools {
 		
 		if ( !actualKeys.containsAll(expectedKeys) ) {
 			String message = "Au moins une clé est manquante dans " + fileName;
-			message += " (" + Tools.concatenateItem(expectedKeys) + ")";
+			message += " (" + concatenateItem(expectedKeys) + ")";
 			throw new IllegalArgumentException(message);
 		}
 	}
-	
+
 }

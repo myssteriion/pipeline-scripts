@@ -1,15 +1,15 @@
-Permet de générer automatiquement tous les scripts pipelines.
+Permet de générer automatiquement tous les scripts pipelines d'eSirius.
 
 [Info techiques]
 JDK 1.8
 maven 3.5.4
 
 [Paramétrages]
-Sauf modification majeur, tout se passe dans les fichiers propeties.
+Sauf modification majeur, tout se passe dans les fichiers du dossier conf.
 Modifier les fichiers qui sont dans conf ne nessécite pas un mvn clean install.
+Si le code java change, faire un clean install de l'application.
 
 [Exécution]
-Si nécessaire, faire un clean install de l'application.
 En ligne de commande, se placer à la racine du projet et lancer la commande 'java -jar target/pipelineScripts-1.0.jar'.
 Les fichiers générés sont à commiter sur le repo Git.
 
@@ -18,4 +18,6 @@ Le répertoire à partir duquel lancer la commande java -jar doit être la racin
 Le jar généré ne doit pas être déplacé car il utilise en chemin relatif le dossier 'conf' ainsi que le dossier 'target/libs'.
 
 [Attention]
-attention certain nom de propriété (fichier propoerties) sont en dur dans le code (uniquement dans ConstructHelper) et les fichiers "functions.txt" et "callFunctions.txt".
+La syntaxe "${xxx}" sera écrit tel quel dans le pipeline généré car c'est une variable d'env (d'un point de vue pipeline).
+La syntaxe "$xxx" est remplacé directent par le code java lors de l'exécution du jar => ce sont donc des valeurs en dur dans le pipeline.
+Les blocs vides (d'un point de vue pipeline) sont des erreurs de syntaxe (attention au bloc parameter, tools et env vide => commenter les blocs si nécessaire)
