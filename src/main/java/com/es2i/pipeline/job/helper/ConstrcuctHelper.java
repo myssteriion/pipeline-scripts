@@ -39,6 +39,7 @@ public class ConstrcuctHelper {
 		
 		Set<String> expectedKeys = new HashSet<String>();
 		expectedKeys.add(ConstantTools.CALL_RUN_BUILD_KEY);
+		expectedKeys.add(ConstantTools.CALL_DEPLOY_TO_SECONDARY_REMOTE_KEY);
 		Tools.verifyKeys(expectedKeys, callFunctions.stringPropertyNames(), ConstantTools.CALL_FUNCTIONS_PROP_FILE);
 	}
 
@@ -167,9 +168,37 @@ public class ConstrcuctHelper {
 		return new String(bytes);
 	}
 
+	
+	public String cleanPrimaryRemote() {
+		return sh("ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}");
+	}
+	
+	public String createDataFolderOnPrimaryRemote() {
+		return sh("ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${env.esiiFolder}/${env.dataFolder}/${enventStorage}");
+	}
+	
+	public String createTarOnPrimaryRemote() {
+		return sh("ssh ${env.primaryRemote} \\\"cd ${env.depotFolder}/${params.revision} && tar -cf ${env.esiiFolder}.gz ${env.esiiFolder}\\\"");
+	}
+	
+	public String removeTarOnPrimaryRemote() {
+		return sh("ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${env.esiiFolder}.gz");
+	}
+	
+	public String callBuildAll(String revision) {
+		return sh("wget \\\"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=" + revision + "\\\"");
+	}
+	
 	public String runBuild() {
 		return callFunctions.getProperty(ConstantTools.CALL_RUN_BUILD_KEY);
 	}
+	
+	public String runDeployToSecondaryRemote(String remote) {
+		String call = callFunctions.getProperty(ConstantTools.CALL_DEPLOY_TO_SECONDARY_REMOTE_KEY);
+		call = call.replace(ConstantTools.SECONDARY_REMOTE_PARAM, remote);
+		return call;
+	}
+	
 	
 	public String addTab(int nb) {
 		

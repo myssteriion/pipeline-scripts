@@ -16,3 +16,6 @@ Les fichiers générés sont à commiter sur le repo Git.
 [Info pratiques]
 Le répertoire à partir duquel lancer la commande java -jar doit être la racine du projet.
 Le jar généré ne doit pas être déplacé car il utilise en chemin relatif le dossier 'conf' ainsi que le dossier 'target/libs'.
+
+[Attention]
+attention certain nom de propriété (fichier propoerties) sont en dur dans le code (uniquement dans ConstructHelper) et les fichiers "functions.txt" et "callFunctions.txt".

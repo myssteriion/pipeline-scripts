@@ -40,6 +40,8 @@ public class Pipeline {
 
 	private Properties tools;
 	
+	private Properties remoteDescriptor;
+	
 	
 	
 	public Pipeline() throws IOException {
@@ -84,9 +86,12 @@ public class Pipeline {
 		}
 		expectedKeys = new HashSet<String>();
 		expectedKeys.add(ConstantTools.GITLAB_URL_KEY);
-		expectedKeys.add(ConstantTools.REMOTE_CONNEXION_KEY);
+		expectedKeys.add(ConstantTools.PRIMARY_REMOTE_KEY);
 		expectedKeys.add(ConstantTools.REMOTE_DEPOT_FOLDER_KEY);
-		expectedKeys.add(ConstantTools.REMOTE_ESII_APP_FOLDER_KEY);
+		expectedKeys.add(ConstantTools.REMOTE_ESII_FOLDER_KEY);
+		expectedKeys.add(ConstantTools.REMOTE_APP_FOLDER_KEY);
+		expectedKeys.add(ConstantTools.REMOTE_CONF_FOLDER_KEY);
+		expectedKeys.add(ConstantTools.REMOTE_DATA_FOLDER_KEY);
 		expectedKeys.add(ConstantTools.JENKINS_URL_KEY);
 		expectedKeys.add(ConstantTools.JOB_NAME_KEY);
 		expectedKeys.add(ConstantTools.JOB_TOKEN_KEY);
@@ -101,6 +106,15 @@ public class Pipeline {
 		}
 		expectedKeys = new HashSet<String>();
 		Tools.verifyKeys(expectedKeys, tools.stringPropertyNames(), ConstantTools.TOOLS_PROP_FILE);
+		
+		/* */
+		
+		remoteDescriptor = new Properties();
+		try (InputStream is = getClass().getClassLoader().getResourceAsStream(ConstantTools.REMOTE_DESCRIPTOR_FILE)) {
+			remoteDescriptor.load(is);
+		}
+		expectedKeys = new HashSet<String>();
+		Tools.verifyKeys(expectedKeys, remoteDescriptor.stringPropertyNames(), ConstantTools.REMOTE_DESCRIPTOR_FILE);
 	}
 	
 	private void fillProjectsList() {
@@ -162,6 +176,8 @@ public class Pipeline {
 			
 			addInitialize(writer, true);
 			
+			addCreateDataFolder(writer);
+			
 			// all build
 			int nbGroup = projectsBuildAll.size();
 			for (int index = 1; index <= nbGroup; index++) {
@@ -169,7 +185,7 @@ public class Pipeline {
 					addStageForProject(writer, project, 0);
 			}
 			
-			addRemoteDataFolder(writer);
+			addStageForSecondaryDeploy(writer);
 			
 			// end stages
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
@@ -206,6 +222,8 @@ public class Pipeline {
 			
 			addInitialize(writer, true);
 			
+			addCreateDataFolder(writer);
+			
 			// all build
 			int nbGroup = projectsBuildAll.size();
 			for (int index = 1; index <= nbGroup; index++) {
@@ -217,7 +235,7 @@ public class Pipeline {
 					addParallelStageForProject(writer, index, groupe);
 			}
 			
-			addRemoteDataFolder(writer);
+			addStageForSecondaryDeploy(writer);
 			
 			// end stages
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
@@ -264,14 +282,11 @@ public class Pipeline {
 			String[] branches = application.getProperty(ConstantTools.RUNNER_BRANCHES_KEY).split(ConstantTools.COMA);
 			// master par défaut
 			if ( branches == null || branches.length == 0 || (branches.length == 1 && branches[0].equals("")) ) {
-				String shCommand = "wget \\\"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=master\\\"";
-				writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.sh(shCommand) + constrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.callBuildAll("master") + constrcuctHelper.addCRLF());
 			}
 			else {
-				for (String branche : branches) {
-					String shCommand = "wget \\\"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=" + branche + "\\\"";
-					writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.sh(shCommand) + constrcuctHelper.addCRLF());
-				}
+				for (String branche : branches)
+					writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.callBuildAll(branche) + constrcuctHelper.addCRLF());
 			}
 			
 			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());
@@ -382,16 +397,14 @@ public class Pipeline {
 		writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.cleanWs() + constrcuctHelper.addCRLF());
 		
 		// clean remote
-		if (isBuildAll) {
-			String shCommand = "ssh ${env.remoteConnexion} rm -rf ${env.depotFolder}/${params.revision}";
-			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.sh(shCommand) + constrcuctHelper.addCRLF());
-		}
+		if (isBuildAll)
+			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.cleanPrimaryRemote() + constrcuctHelper.addCRLF());
 		
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());	
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 	
-	private void addRemoteDataFolder(Writer writer) throws IOException, URISyntaxException {
+	private void addCreateDataFolder(Writer writer) throws IOException, URISyntaxException {
 		
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("Create data folder") + constrcuctHelper.addCRLF());
 		
@@ -404,13 +417,44 @@ public class Pipeline {
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 		
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
-
-		String shCommand = "ssh ${env.remoteConnexion} mkdir -p ${env.depotFolder}/${params.revision}/${env.esiiDataFolder}/${enventStorage}";
-		writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.sh(shCommand) + constrcuctHelper.addCRLF());
-		
+		writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.createDataFolderOnPrimaryRemote() + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());	
 		
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
+	}
+	
+	private void addStageForSecondaryDeploy(Writer writer) throws IOException, URISyntaxException {
+		
+		// au moins un remote secondaire (les stage ou steps vides sont des syntaxes incorrects)
+		if ( remoteDescriptor.containsKey(ConstantTools.SECONDARY_REMOTE1_KEY) ) {
+			
+			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("secondary deploy") + constrcuctHelper.addCRLF());
+			
+			// steps
+			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
+			
+			// creation tar
+			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.createTarOnPrimaryRemote() + constrcuctHelper.addCRLF());
+			
+			int index = 1;
+			String key = ConstantTools.SECONDARY_REMOTE_KEY + index;
+			while ( remoteDescriptor.containsKey(key) ) {
+				
+				String remote = remoteDescriptor.getProperty(key);
+				writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.runDeployToSecondaryRemote(remote) + constrcuctHelper.addCRLF());
+				
+				index++;
+				key = ConstantTools.SECONDARY_REMOTE_KEY + index;
+			}
+			
+			// creation tar
+			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.removeTarOnPrimaryRemote() + constrcuctHelper.addCRLF());
+			
+			// end steps
+			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());
+			
+			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
+		}
 	}
 	
 	private void addStageForProject(Writer writer, String project, int identToAdd) throws IOException, URISyntaxException {
@@ -425,10 +469,10 @@ public class Pipeline {
 		}
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 		
-		// step
+		// steps
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.runBuild() + constrcuctHelper.addCRLF());
-		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());
 		
 		writer.write(constrcuctHelper.addTab(2 + identToAdd) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}

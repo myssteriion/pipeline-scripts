@@ -4,12 +4,13 @@ pipeline {
 		string(name: "revision", defaultValue: "master", description: "branche ou TAG")
 	}
 	environment {
-		depotFolder = "depot"
-		esiiAppFolder = "ESII-APPLICATION/app"
-		esiiConfFolder = "ESII-APPLICATION/conf"
-		esiiDataFolder = "ESII-APPLICATION/data"
+		appFolder = "app"
+		confFolder = "conf"
+		dataFolder = "data"
+		depotFolder = "depotTest"
+		esiiFolder = "ESII-Applications"
 		gitLabUrl = "http://192.168.25.68/eSirius/"
-		remoteConnexion = "esii@192.168.25.94"
+		primaryRemote = "esii@192.168.25.94"
 	}
 	stages {
 		stage ("Initialize") {
@@ -18,7 +19,15 @@ pipeline {
 					echo "\u001B[34m revision : ${params.revision} \u001B[m"
 				}
 				cleanWs()
-				sh "ssh ${env.remoteConnexion} rm -rf ${env.depotFolder}/${params.revision}"
+				sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}"
+			}
+		}
+		stage ("Create data folder") {
+			environment {
+				enventStorage = "event-storage"
+			}
+			steps {
+				sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${env.esiiFolder}/${env.dataFolder}/${enventStorage}"
 			}
 		}
 		stage ("build es2i") {
@@ -217,12 +226,11 @@ pipeline {
 				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
 			}
 		}
-		stage ("Create data folder") {
-			environment {
-				enventStorage = "event-storage"
-			}
+		stage ("secondary deploy") {
 			steps {
-				sh "ssh ${env.remoteConnexion} mkdir -p ${env.depotFolder}/${params.revision}/${env.esiiDataFolder}/${enventStorage}"
+				sh "ssh ${env.primaryRemote} \"cd ${env.depotFolder}/${params.revision} && tar -cf ${env.esiiFolder}.gz ${env.esiiFolder}\""
+				deployToSecondaryRemote("esii@192.168.25.22")
+				sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${env.esiiFolder}.gz"
 			}
 		}
 	}
@@ -259,19 +267,28 @@ void deploy(String projectRoot, String targetDirectory, String sourceAppDirector
 	script {
 		
 		if (targetDirectory && targetDirectory != "") {
-			sh "ssh ${env.remoteConnexion} rm -rf ${env.depotFolder}/${params.revision}/${env.esiiAppFolder}/${targetDirectory}"
-			sh "ssh ${env.remoteConnexion} rm -rf ${env.depotFolder}/${params.revision}/${env.esiiConfFolder}/${targetDirectory}"
+			sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${env.esiiFolder}/${env.appFolder}/${targetDirectory}"
+			sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${env.esiiFolder}/${env.confFolder}/${targetDirectory}"
 		
 			if (sourceAppDirectory && sourceAppDirectory != "") {
-				sh "ssh ${env.remoteConnexion} mkdir -p ${env.depotFolder}/${params.revision}/${env.esiiAppFolder}/${targetDirectory}"
-				sh "scp ${projectRoot}/${sourceAppDirectory}/*.war ${env.remoteConnexion}:${env.depotFolder}/${params.revision}/${env.esiiAppFolder}/${targetDirectory}"
-				sh "ssh ${env.remoteConnexion} unzip ${env.depotFolder}/${params.revision}/${env.esiiAppFolder}/${targetDirectory}/*.war -d ${env.depotFolder}/${params.revision}/${env.esiiAppFolder}/${targetDirectory}/"
-				sh "ssh ${env.remoteConnexion} rm -f ${env.depotFolder}/${params.revision}/${env.esiiAppFolder}/${targetDirectory}/*.war"
+				sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${env.esiiFolder}/${env.appFolder}/${targetDirectory}"
+				sh "scp ${projectRoot}/${sourceAppDirectory}/*.war ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${env.esiiFolder}/${env.appFolder}/${targetDirectory}"
+				sh "ssh ${env.primaryRemote} unzip ${env.depotFolder}/${params.revision}/${env.esiiFolder}/${env.appFolder}/${targetDirectory}/*.war -d ${env.depotFolder}/${params.revision}/${env.esiiFolder}/${env.appFolder}/${targetDirectory}/"
+				sh "ssh ${env.primaryRemote} rm -f ${env.depotFolder}/${params.revision}/${env.esiiFolder}/${env.appFolder}/${targetDirectory}/*.war"
 			}
 			if (sourceConfDirectory && sourceConfDirectory != "") {
-				sh "ssh ${env.remoteConnexion} mkdir -p ${env.depotFolder}/${params.revision}/${env.esiiConfFolder}/${targetDirectory}"
-				sh "scp -r ${projectRoot}/${sourceConfDirectory}/* ${env.remoteConnexion}:${env.depotFolder}/${params.revision}/${env.esiiConfFolder}/${targetDirectory}"
+				sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${env.esiiFolder}/${env.confFolder}/${targetDirectory}"
+				sh "scp -r ${projectRoot}/${sourceConfDirectory}/* ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${env.esiiFolder}/${env.confFolder}/${targetDirectory}"
 			}
 		}
 	}
+}
+
+void deployToSecondaryRemote(String secondaryRemote) {
+	sh "ssh ${secondaryRemote} \"rm -rf ${env.esiiFolder} && mkdir -p ${env.esiiFolder}\""
+	
+	sh "scp -r ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${env.esiiFolder}.gz ${secondaryRemote}:"
+	sh "ssh ${secondaryRemote} tar -xf ${env.esiiFolder}.gz"
+	
+	sh "ssh ${secondaryRemote} rm -rf ${env.esiiFolder}.gz"
 }
