@@ -6,19 +6,28 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
+import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
 import com.es2i.pipeline.job.entities.Parameter.TypeParameter;
 import com.es2i.pipeline.job.entities.parameter_impl.BooleanParameter;
 import com.es2i.pipeline.job.entities.parameter_impl.ChoiceParameter;
 import com.es2i.pipeline.job.entities.parameter_impl.StringParameter;
 import com.es2i.pipeline.tools.ConstantTools;
+import com.es2i.pipeline.tools.Tools;
 
 /*
  * Singleton
@@ -26,18 +35,63 @@ import com.es2i.pipeline.tools.ConstantTools;
 public class ConfReader {
 
 	private static ConfReader instance;
-	
-	private List<Parameter> parameters;
 
+	private List<Parameter> parameters;
+	
+	private List<String> runnerBranches;
+	
+	private List<String> secondaryRemotes;
+	
+	private Map<String, List<Environment>> environements;
+
+	private Map<Integer, String> projectsBuilOne;
+	
+	private Map<Integer, List<String>> projectsBuildAll;
 	
 	
-	private ConfReader() {
+	
+	private ConfReader() throws IOException {
 		
+		init();
+	}
+	
+	private void init() throws IOException {
+
+		Properties application = Tools.findPropertyFile(ConstantTools.APPLICATION_PROP_FILE);
+		Set<String> expectedKeys = new HashSet<String>();
+		expectedKeys.add(ConstantTools.RUNNER_BRANCHES_KEY);
+		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ONE_KEY);
+		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ALL_GROUPE1_KEY);
+		Tools.verifyKeys(expectedKeys, application.stringPropertyNames(), ConstantTools.APPLICATION_PROP_FILE);
+		
+		/* */
+		
+		Properties environment = Tools.findPropertyFile(ConstantTools.ENV_PROP_FILE);
+		expectedKeys = new HashSet<String>();
+		expectedKeys.add(ConstantTools.GITLAB_URL_KEY);
+		expectedKeys.add(ConstantTools.PRIMARY_REMOTE_KEY);
+		expectedKeys.add(ConstantTools.REMOTE_DEPOT_FOLDER_KEY);
+		expectedKeys.add(ConstantTools.JENKINS_URL_KEY);
+		expectedKeys.add(ConstantTools.JOB_NAME_KEY);
+		expectedKeys.add(ConstantTools.JOB_TOKEN_KEY);
+		Tools.verifyKeys(expectedKeys, environment.stringPropertyNames(), ConstantTools.ENV_PROP_FILE);
+		
+		/* */
+		
+		Properties tools = Tools.findPropertyFile(ConstantTools.TOOLS_PROP_FILE);
+		expectedKeys = new HashSet<String>();
+		Tools.verifyKeys(expectedKeys, tools.stringPropertyNames(), ConstantTools.TOOLS_PROP_FILE);
+		
+		/* */
+		
+		Properties remoteDescriptor = Tools.findPropertyFile(ConstantTools.REMOTE_DESCRIPTOR_FILE);
+		expectedKeys = new HashSet<String>();
+		Tools.verifyKeys(expectedKeys, remoteDescriptor.stringPropertyNames(), ConstantTools.REMOTE_DESCRIPTOR_FILE);
 	}
 	
 	
 	
-	public static ConfReader getInstance() {
+	public static ConfReader getInstance() throws IOException {
 		
 		if (instance == null)
 			instance = new ConfReader();
@@ -47,6 +101,45 @@ public class ConfReader {
 	
 	
 	
+	public List<String> getRunnerBranches() throws IOException {
+		
+		if (runnerBranches == null) {
+			
+			runnerBranches = new ArrayList<String>();
+			
+			Properties prop = Tools.findPropertyFile(ConstantTools.APPLICATION_PROP_FILE);
+			String[] branches = prop.getProperty(ConstantTools.RUNNER_BRANCHES_KEY).split(ConstantTools.COMA);
+			if ( branches == null || branches.length == 0 || (branches.length == 1 && branches[0].equals("")) ) {
+				runnerBranches.add("master");
+			}
+			else {
+				for (String branche : branches)
+					runnerBranches.add( branche.trim() );
+			}
+		}
+		
+		return runnerBranches;
+	}
+	
+	public List<String> getSecondaryRemotes() throws IOException {
+		
+		if (secondaryRemotes == null) {
+			
+			secondaryRemotes = new ArrayList<String>();
+			
+			Properties prop = Tools.findPropertyFile(ConstantTools.REMOTE_DESCRIPTOR_FILE);
+			int index = 1;
+			String key = ConstantTools.SECONDARY_REMOTE_KEY + index;
+			while ( prop.containsKey(key) ) {
+				secondaryRemotes.add( prop.getProperty(key) );
+				index++;
+				key = ConstantTools.SECONDARY_REMOTE_KEY + index;
+			}
+		}
+		
+		return secondaryRemotes;
+	}
+
 	public List<Parameter> getParameters() throws IOException {
 		
 		if (parameters == null) {
@@ -90,4 +183,62 @@ public class ConfReader {
 		return parameters;
 	}
 	
+	public List<Environment> getEnvironmentByPrefix(String prefix) throws IOException {
+		
+		if ( environements == null)
+			environements = new HashMap<String, List<Environment>>();
+			
+		if ( !environements.containsKey(prefix) ) {
+			
+			Properties prop = Tools.findPropertyFile(ConstantTools.ENV_PROP_FILE);
+			List<Environment> list = new ArrayList<Environment>();
+			
+			for ( String key : Tools.getKeysFilterByPrefix(prop, prefix) )
+				list.add( PropToEntitiy.transformToEnvironment(key, prop.getProperty(key)) );
+			
+			environements.put(prefix, list);
+		}
+		
+		return environements.get(prefix);
+	}
+	
+	public Map<Integer, String> getProjectsBuildOne() throws IOException {
+		
+		if (projectsBuilOne == null) {
+			
+			Properties prop = Tools.findPropertyFile(ConstantTools.APPLICATION_PROP_FILE);
+			
+			projectsBuilOne = new HashMap<Integer, String>();
+			String[] projectsList = prop.getProperty(ConstantTools.PROJECTS_BUILD_ONE_KEY).split(ConstantTools.COMA);
+			if (projectsList != null) {
+				for (int index = 0; index < projectsList.length; index++)
+					projectsBuilOne.put(index+1, projectsList[index].trim());
+			}
+		}
+		
+		return projectsBuilOne;
+	}
+	
+	public Map<Integer, List<String>> getProjectsBuildAll() throws IOException {
+		
+		if (projectsBuildAll == null) {
+			
+			Properties prop = Tools.findPropertyFile(ConstantTools.APPLICATION_PROP_FILE);
+			
+			projectsBuildAll = new HashMap<Integer, List<String>>();
+			int index = 1;
+			String key = ConstantTools.PROJECTS_BUILD_ALL_GROUPE_KEY + index;
+			while ( prop.containsKey(key) ) {
+				String[] projectsTab = prop.getProperty(key).split(ConstantTools.COMA);
+				if (projectsTab != null) {
+					projectsBuildAll.put( index, Arrays.asList(projectsTab).stream().map(String::trim).collect(Collectors.toList()) );
+				}
+				index++;
+				key = ConstantTools.PROJECTS_BUILD_ALL_GROUPE_KEY + index;
+			}
+		}
+		
+		return projectsBuildAll;
+	}
+
 }

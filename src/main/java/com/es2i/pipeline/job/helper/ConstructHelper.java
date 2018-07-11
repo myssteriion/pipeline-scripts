@@ -17,22 +17,22 @@ import com.es2i.pipeline.tools.ConstantTools;
 /*
  * Singleton
  */
-public class ConstrcuctHelper {
+public class ConstructHelper {
 
-	private static ConstrcuctHelper instance;
+	private static ConstructHelper instance;
 	
 	
 	
-	private ConstrcuctHelper() {
+	private ConstructHelper() {
 		
 	}
 
 	
 	
-	public static ConstrcuctHelper getInstance() {
+	public static ConstructHelper getInstance() {
 		
 		if (instance == null)
-			instance = new ConstrcuctHelper();
+			instance = new ConstructHelper();
 		
 		return instance;
 	}
@@ -165,7 +165,7 @@ public class ConstrcuctHelper {
 	
 	public String getFunctions() throws IOException, URISyntaxException {
 		
-		InputStream is = ConstrcuctHelper.class.getClassLoader().getResourceAsStream(ConstantTools.FUNCTIONS_FILE);
+		InputStream is = ConstructHelper.class.getClassLoader().getResourceAsStream(ConstantTools.FUNCTIONS_FILE);
 		byte[] bytes = IOUtils.toByteArray(is);
 		String str = new String(bytes);
 		

@@ -1,6 +1,8 @@
 package com.es2i.pipeline.tools;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -58,4 +60,18 @@ public class Tools {
 		}
 	}
 
+	public static Properties findPropertyFile(String fileName) throws IOException {
+		
+		InputStream is = Tools.class.getClassLoader().getResourceAsStream(fileName);
+		if (is == null)
+			throw new FileNotFoundException("Le fichier '" + fileName + "' n'est pas retrouvé.");
+
+		Properties prop = new Properties();
+		prop.load(is);
+		
+		is.close();
+			
+		return prop;
+	}
+	
 }

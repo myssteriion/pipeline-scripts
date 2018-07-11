@@ -3,7 +3,6 @@ package com.es2i.pipeline.job;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -11,125 +10,30 @@ import java.io.Writer;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
 import com.es2i.pipeline.job.helper.ConfReader;
-import com.es2i.pipeline.job.helper.ConstrcuctHelper;
-import com.es2i.pipeline.job.helper.PropToEntitiy;
+import com.es2i.pipeline.job.helper.ConstructHelper;
 import com.es2i.pipeline.tools.ConstantTools;
 import com.es2i.pipeline.tools.Tools;
 
 public class Pipeline {
 	
-	private ConstrcuctHelper constrcuctHelper;
+	private ConstructHelper constrcuctHelper;
 	
 	private ConfReader confReader;
-	
-	private Properties application;
-	
-	private Map<Integer, String> projectsBuilOne;
-	
-	private Map<Integer, List<String>> projectsBuildAll;
-	
-	private Properties environment;
-
-	private Properties tools;
-	
-	private Properties remoteDescriptor;
 	
 	
 	
 	public Pipeline() throws IOException {
 		
-		constrcuctHelper = ConstrcuctHelper.getInstance();
+		constrcuctHelper = ConstructHelper.getInstance();
 		confReader = ConfReader.getInstance();
-		
-		init();
 	}
-	
-	
-	
-	private void init() throws IOException {
 
-		application = new Properties();
-		try (InputStream is = getClass().getClassLoader().getResourceAsStream(ConstantTools.APPLICATION_PROP_FILE)) {
-			application.load(is);
-		}
-		Set<String> expectedKeys = new HashSet<String>();
-		expectedKeys.add(ConstantTools.RUNNER_BRANCHES_KEY);
-		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ONE_KEY);
-		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ALL_GROUPE1_KEY);
-		Tools.verifyKeys(expectedKeys, application.stringPropertyNames(), ConstantTools.APPLICATION_PROP_FILE);
-		
-		fillProjectsList();
-	
-		/* */
-		
-		environment = new Properties();
-		try (InputStream is = getClass().getClassLoader().getResourceAsStream(ConstantTools.ENV_PROP_FILE)) {
-			environment.load(is);
-		}
-		expectedKeys = new HashSet<String>();
-		expectedKeys.add(ConstantTools.GITLAB_URL_KEY);
-		expectedKeys.add(ConstantTools.PRIMARY_REMOTE_KEY);
-		expectedKeys.add(ConstantTools.REMOTE_DEPOT_FOLDER_KEY);
-		expectedKeys.add(ConstantTools.JENKINS_URL_KEY);
-		expectedKeys.add(ConstantTools.JOB_NAME_KEY);
-		expectedKeys.add(ConstantTools.JOB_TOKEN_KEY);
-		Tools.verifyKeys(expectedKeys, environment.stringPropertyNames(), ConstantTools.ENV_PROP_FILE);
-		
-		/* */
-		
-		tools = new Properties();
-		try (InputStream is = getClass().getClassLoader().getResourceAsStream(ConstantTools.TOOLS_PROP_FILE)) {
-			tools.load(is);
-		}
-		expectedKeys = new HashSet<String>();
-		Tools.verifyKeys(expectedKeys, tools.stringPropertyNames(), ConstantTools.TOOLS_PROP_FILE);
-		
-		/* */
-		
-		remoteDescriptor = new Properties();
-		try (InputStream is = getClass().getClassLoader().getResourceAsStream(ConstantTools.REMOTE_DESCRIPTOR_FILE)) {
-			remoteDescriptor.load(is);
-		}
-		expectedKeys = new HashSet<String>();
-		Tools.verifyKeys(expectedKeys, remoteDescriptor.stringPropertyNames(), ConstantTools.REMOTE_DESCRIPTOR_FILE);
-	}
-	
-	private void fillProjectsList() {
-		
-		// les buildOne
-		projectsBuilOne = new HashMap<Integer, String>();
-		String[] projectsList = application.getProperty(ConstantTools.PROJECTS_BUILD_ONE_KEY).split(ConstantTools.COMA);
-		if (projectsList != null) {
-			for (int index = 0; index < projectsList.length; index++)
-				projectsBuilOne.put(index+1, projectsList[index].trim());
-		}
-		
-		// les buildAll
-		projectsBuildAll = new HashMap<Integer, List<String>>();
-		int index = 1;
-		String key = ConstantTools.PROJECTS_BUILD_ALL_GROUPE_KEY + index;
-		while ( application.containsKey(key) ) {
-			String[] projectsTab = application.getProperty(key).split(ConstantTools.COMA);
-			if (projectsList != null) {
-				projectsBuildAll.put( index, Arrays.asList(projectsTab).stream().map(String::trim).collect(Collectors.toList()) );
-			}
-			index++;
-			key = ConstantTools.PROJECTS_BUILD_ALL_GROUPE_KEY + index;
-		}
-	}
-	
 	
 	
 	public void run() throws IOException, URISyntaxException {
@@ -167,6 +71,7 @@ public class Pipeline {
 					addCreateDataFolderStage(writer);
 					
 					// all build
+					Map<Integer, List<String>> projectsBuildAll = confReader.getProjectsBuildAll();
 					int nbGroup = projectsBuildAll.size();
 					for (int index = 1; index <= nbGroup; index++) {
 						
@@ -207,10 +112,8 @@ public class Pipeline {
 			
 			// global runner env
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
-			for ( String key : Tools.getKeysFilterByPrefix(environment, ConstantTools.RUNNER_KEY + ConstantTools.DOT) ) {
-				Environment env = PropToEntitiy.transformToEnvironment(key, environment.getProperty(key));
+			for ( Environment env : confReader.getEnvironmentByPrefix(ConstantTools.RUNNER_KEY + ConstantTools.DOT) )
 				writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.contentEnv(env) + constrcuctHelper.addCRLF());
-			}
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 			
 			// stages - stage - steps
@@ -218,15 +121,8 @@ public class Pipeline {
 			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("run") + constrcuctHelper.addCRLF());
 			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
 			
-			String[] branches = application.getProperty(ConstantTools.RUNNER_BRANCHES_KEY).split(ConstantTools.COMA);
-			// master par défaut
-			if ( branches == null || branches.length == 0 || (branches.length == 1 && branches[0].equals("")) ) {
-				writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.callBuildAll("master") + constrcuctHelper.addCRLF());
-			}
-			else {
-				for (String branche : branches)
-					writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.callBuildAll(branche.trim()) + constrcuctHelper.addCRLF());
-			}
+			for ( String branche : confReader.getRunnerBranches() )
+				writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.callBuildAll(branche.trim()) + constrcuctHelper.addCRLF());
 			
 			// steps - stage - stages
 			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());
@@ -243,6 +139,7 @@ public class Pipeline {
 		File monoBuildDirecrory = Tools.createDirectoryIfNeedIt( Paths.get(ConstantTools.BUILD_ONE_DIRECTORY) ).toFile();
 		
 		// all buildOne	
+		 Map<Integer, String> projectsBuilOne = confReader.getProjectsBuildOne();
 		for (int index = 1; index <= projectsBuilOne.size(); index++) {
 				
 			String project = projectsBuilOne.get(index);
@@ -291,10 +188,8 @@ public class Pipeline {
 		
 		// global env
 		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
-		for ( String key : Tools.getKeysFilterByPrefix(environment, ConstantTools.GLOBAL_KEY + ConstantTools.DOT) ) {
-			Environment env = PropToEntitiy.transformToEnvironment(key, environment.getProperty(key));
+		for ( Environment env : confReader.getEnvironmentByPrefix(ConstantTools.GLOBAL_KEY + ConstantTools.DOT) )
 			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.contentEnv(env) + constrcuctHelper.addCRLF());
-		}
 		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 		
 		// tools
@@ -350,7 +245,7 @@ public class Pipeline {
 	private void addDeployToSecondaryRemoteStage(Writer writer) throws IOException, URISyntaxException {
 		
 		// au moins un remote secondaire
-		if ( remoteDescriptor.containsKey(ConstantTools.SECONDARY_REMOTE1_KEY) ) {
+		if ( !confReader.getSecondaryRemotes().isEmpty() ) {
 			
 			// stage - steps - script - if()
 			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("secondary deploy") + constrcuctHelper.addCRLF());
@@ -361,16 +256,8 @@ public class Pipeline {
 			// creation tar
 			writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.createTarOnPrimaryRemote() + constrcuctHelper.addCRLF());
 			
-			int index = 1;
-			String key = ConstantTools.SECONDARY_REMOTE_KEY + index;
-			while ( remoteDescriptor.containsKey(key) ) {
-				
-				String remote = remoteDescriptor.getProperty(key);
+			for ( String remote : confReader.getSecondaryRemotes() )
 				writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.runDeployToSecondaryRemote(remote) + constrcuctHelper.addCRLF());
-				
-				index++;
-				key = ConstantTools.SECONDARY_REMOTE_KEY + index;
-			}
 			
 			// supression tar
 			writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.removeTarOnPrimaryRemote() + constrcuctHelper.addCRLF());
@@ -390,10 +277,8 @@ public class Pipeline {
 		
 		// local env
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
-		for ( String key : Tools.getKeysFilterByPrefix(environment, project + ConstantTools.DOT) ) {
-			Environment env = PropToEntitiy.transformToEnvironment(key, environment.getProperty(key));
+		for ( Environment env : confReader.getEnvironmentByPrefix(project + ConstantTools.DOT) )
 			writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.contentEnv(env) + constrcuctHelper.addCRLF());
-		}
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 		
 		// steps
