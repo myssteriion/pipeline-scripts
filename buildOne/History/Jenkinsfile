@@ -2,7 +2,7 @@ pipeline {
 	agent any
 	parameters {
 		string(name: "revision", defaultValue: "master", description: "branche ou TAG")
-		choice(name: "mavenProfil", choices: "rod_windows\nprod_linux\ndev_windows\ndev_linux\ncd\n", description: "profile maven")
+		choice(name: "mavenProfil", choices: "prod_windows\nprod_linux\ndev_windows\ndev_linux\ncd\n", description: "profile maven")
 	}
 	environment {
 		depotFolder = "depotTest"
@@ -57,7 +57,7 @@ void checkoutRevisionOnRepo(String gitRoot) {
 void mvnCleanInstall(String projectRoot, String jdk, String mvn) {
 	dir ("${projectRoot}") {
 		withMaven (jdk: jdk, maven: mvn) {
-			sh "mvn clean install"
+			sh "mvn clean install -P ${params.mavenProfil}"
 		}
 	}
 }

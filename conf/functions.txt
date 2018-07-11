@@ -19,7 +19,7 @@ void checkoutRevisionOnRepo(String gitRoot) {
 void mvnCleanInstall(String projectRoot, String jdk, String mvn) {
 	dir ("${projectRoot}") {
 		withMaven (jdk: jdk, maven: mvn) {
-			sh "mvn clean install"
+			sh "mvn clean install -P ${params.mavenProfil}"
 		}
 	}
 }

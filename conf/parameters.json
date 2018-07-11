@@ -8,7 +8,7 @@
 	{
 		"name": "mavenProfil",
 		"type": "choice",
-		"choices" : "rod_windows, prod_linux, dev_windows, dev_linux, cd",
+		"choices" : "prod_windows, prod_linux, dev_windows, dev_linux, cd",
 		"description" : "profile maven"
 	},
 	{
