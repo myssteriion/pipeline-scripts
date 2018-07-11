@@ -112,7 +112,7 @@ public class Pipeline {
 			
 			// global runner env
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
-			for ( Environment env : confReader.getEnvironmentByPrefix(ConstantTools.RUNNER_KEY + ConstantTools.DOT) )
+			for ( Environment env : confReader.getEnvironmentByPrefix(ConstantTools.RUNNER_KEY) )
 				writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.contentEnv(env) + constrcuctHelper.addCRLF());
 			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 			
@@ -188,7 +188,7 @@ public class Pipeline {
 		
 		// global env
 		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
-		for ( Environment env : confReader.getEnvironmentByPrefix(ConstantTools.GLOBAL_KEY + ConstantTools.DOT) )
+		for ( Environment env : confReader.getEnvironmentByPrefix(ConstantTools.GLOBAL_KEY) )
 			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.contentEnv(env) + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 		
@@ -277,7 +277,7 @@ public class Pipeline {
 		
 		// local env
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
-		for ( Environment env : confReader.getEnvironmentByPrefix(project + ConstantTools.DOT) )
+		for ( Environment env : confReader.getEnvironmentByPrefix(project) )
 			writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.contentEnv(env) + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 		

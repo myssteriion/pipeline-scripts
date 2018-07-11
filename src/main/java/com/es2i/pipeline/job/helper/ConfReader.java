@@ -7,10 +7,12 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,6 +21,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.json.JsonValue;
 
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
@@ -63,18 +66,6 @@ public class ConfReader {
 		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ONE_KEY);
 		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ALL_GROUPE1_KEY);
 		Tools.verifyKeys(expectedKeys, application.stringPropertyNames(), ConstantTools.APPLICATION_PROP_FILE);
-		
-		/* */
-		
-		Properties environment = Tools.findPropertyFile(ConstantTools.ENV_PROP_FILE);
-		expectedKeys = new HashSet<String>();
-		expectedKeys.add(ConstantTools.GITLAB_URL_KEY);
-		expectedKeys.add(ConstantTools.PRIMARY_REMOTE_KEY);
-		expectedKeys.add(ConstantTools.REMOTE_DEPOT_FOLDER_KEY);
-		expectedKeys.add(ConstantTools.JENKINS_URL_KEY);
-		expectedKeys.add(ConstantTools.JOB_NAME_KEY);
-		expectedKeys.add(ConstantTools.JOB_TOKEN_KEY);
-		Tools.verifyKeys(expectedKeys, environment.stringPropertyNames(), ConstantTools.ENV_PROP_FILE);
 		
 		/* */
 		
@@ -190,13 +181,25 @@ public class ConfReader {
 			
 		if ( !environements.containsKey(prefix) ) {
 			
-			Properties prop = Tools.findPropertyFile(ConstantTools.ENV_PROP_FILE);
-			List<Environment> list = new ArrayList<Environment>();
-			
-			for ( String key : Tools.getKeysFilterByPrefix(prop, prefix) )
-				list.add( PropToEntitiy.transformToEnvironment(key, prop.getProperty(key)) );
-			
-			environements.put(prefix, list);
+			try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.ENV_PROP_FILE) ) {
+				try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
+					try ( JsonReader jsonReader = Json.createReader(is) ) {
+						
+						JsonObject racineArray = jsonReader.readObject();
+						for (Entry<String, JsonValue> firstBlockEntry : racineArray.entrySet()) {
+
+							String firstBlockKey = firstBlockEntry.getKey();
+							JsonObject firstBlockObject = firstBlockEntry.getValue().asJsonObject();
+							
+							List<Environment> list = new ArrayList<Environment>();
+							for ( String secondBlockKey : firstBlockObject.keySet() )
+								list.add( new Environment(secondBlockKey, firstBlockObject.getString(secondBlockKey)) );
+							
+							environements.put(firstBlockKey, list);
+						}
+					}
+				}
+			}
 		}
 		
 		return environements.get(prefix);

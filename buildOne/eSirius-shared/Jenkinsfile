@@ -5,9 +5,9 @@ pipeline {
 		choice(name: "mavenProfil", choices: "prod_windows\nprod_linux\ndev_windows\ndev_linux\ncd\n", description: "profile maven")
 	}
 	environment {
-		depotFolder = "depotTest"
 		gitLabUrl = "http://192.168.25.68/eSirius/"
 		primaryRemote = "esii@192.168.25.94"
+		depotFolder = "depotTest"
 	}
 	stages {
 		stage ("Initialize") {
@@ -22,12 +22,12 @@ pipeline {
 		stage ("build eSirius-shared") {
 			environment {
 				gitRoot = "eSirius"
+				projectRoot = "eSirius-shared"
 				jdkCompilation = "JDK 1.6.0_20"
 				mvnVersion = "Maven 3.2.1"
-				projectRoot = "eSirius-shared"
+				targetDirectory = ""
 				sourceAppDirectory = ""
 				sourceConfDirectory = ""
-				targetDirectory = ""
 			}
 			steps {
 				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)

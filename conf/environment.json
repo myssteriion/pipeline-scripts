@@ -1,0 +1,147 @@
+{
+	"global" : {
+		"gitLabUrl" : "http://192.168.25.68/eSirius/",
+		"primaryRemote" : "esii@192.168.25.94",
+		"depotFolder" : "depotTest"
+	},
+	"runner" : {
+		"jenkinsUrl" : "http://192.168.25.69:8080",
+		"jobName" : "GIT_eSirius_build_all",
+		"pipelineToken" : "760429"
+	},
+	"dashboard" : {
+		"gitRoot" : "dashboard",
+		"projectRoot" : "dashboard",
+		"jdkCompilation" : "JDK 1.7.0_25",
+		"mvnVersion" : "Maven 3.2.1",
+		"targetDirectory" : "dashboard",
+		"sourceAppDirectory" : "dashboard-webapp/target",
+		"sourceConfDirectory" : ""
+	},
+	"es2i" : {
+		"gitRoot" : "es2i",
+		"projectRoot" : "es2i",
+		"jdkCompilation" : "JDK 1.6.0_20",
+		"mvnVersion" : "Maven 3.2.1",
+		"targetDirectory" : "",
+		"sourceAppDirectory" : "",
+		"sourceConfDirectory" : ""
+	},
+	"eCustomer" : {
+		"gitRoot" : "eCustomer",
+		"projectRoot" : "eCustomer",
+		"jdkCompilation" : "JDK 1.6.0_20",
+		"mvnVersion" : "Maven 3.2.1",
+		"targetDirectory" : "customer",
+		"sourceAppDirectory" : "eCustomer-app/target",
+		"sourceConfDirectory" : "eCustomer-conf/target/eCustomer-conf"
+	},
+	"smsSender" : {
+		"gitRoot" : "smsSender",
+		"projectRoot" : "smsSender",
+		"jdkCompilation" : "JDK 1.6.0_20",
+		"mvnVersion" : "Maven 3.2.1",
+		"targetDirectory" : "smssender",
+		"sourceAppDirectory" : "smsSender-app/target",
+		"sourceConfDirectory" : "smsSender-conf/target/smsSender-conf"
+	},
+	"procyon" : {
+		"gitRoot" : "eStat",
+		"projectRoot" : "procyon",
+		"jdkCompilation" : "JDK 1.6.0_20",
+		"mvnVersion" : "Maven 3.2.1",
+		"targetDirectory" : "",
+		"sourceAppDirectory" : "",
+		"sourceConfDirectory" : ""
+	},
+	"eSecurity" : {
+		"gitRoot" : "eSecurity",
+		"projectRoot" : "esecurity",
+		"jdkCompilation" : "JDK 1.6.0_20",
+		"mvnVersion" : "Maven 3.2.1",
+		"targetDirectory" : "esecurity",
+		"sourceAppDirectory" : "esecurity-gxt-app/target",
+		"sourceConfDirectory" : "esecurity-conf/target/esecurity-conf"
+	},
+	"eSirius-shared" : {
+		"gitRoot" : "eSirius",
+		"projectRoot" : "eSirius-shared",
+		"jdkCompilation" : "JDK 1.6.0_20",
+		"mvnVersion" : "Maven 3.2.1",
+		"targetDirectory" : "",
+		"sourceAppDirectory" : "",
+		"sourceConfDirectory" : ""
+	},
+	"es2i-rsi-connector" : {
+		"gitRoot" : "es2i-rsi-connector",
+		"projectRoot" : "es2i-rsi-connector",
+		"jdkCompilation" : "JDK 1.6.0_20",
+		"mvnVersion" : "Maven 3.2.1",
+		"targetDirectory" : "",
+		"sourceAppDirectory" : "",
+		"sourceConfDirectory" : ""
+	},
+	"eStat" : {
+		"gitRoot" : "eStat",
+		"projectRoot" : "eSirius-estat",
+		"jdkCompilation" : "JDK 1.6.0_20",
+		"mvnVersion" : "Maven 3.2.1",
+		"targetDirectory" : "estat",
+		"sourceAppDirectory" : "eSirius-estat-app/target",
+		"sourceConfDirectory" : "eStatConf/target/eStat-conf"
+	},
+	"History" : {
+		"gitRoot" : "History",
+		"projectRoot" : "eSirius-history",
+		"jdkCompilation" : "JDK 1.6.0_20",
+		"mvnVersion" : "Maven 3.2.1",
+		"targetDirectory" : "esirius-history-event",
+		"sourceAppDirectory" : "eSirius-history-event-app/target",
+		"sourceConfDirectory" : "eSirius-history-event-conf/target/eSirius-history-event-conf"
+	},
+	"ePlanning" : {
+		"gitRoot" : "ePlanning",
+		"projectRoot" : "ePlanning",
+		"jdkCompilation" : "JDK 1.6.0_20",
+		"mvnVersion" : "Maven 3.2.1",
+		"targetDirectory" : "ePlanning",
+		"sourceAppDirectory" : "ePlanning-app/target",
+		"sourceConfDirectory" : "ePlanningConf/target/ePlanningConf"
+	},
+	"eSirius" : {
+		"gitRoot" : "eSirius",
+		"projectRoot" : "eSirius",
+		"jdkCompilation" : "JDK 1.6.0_20",
+		"mvnVersion" : "Maven 3.2.1",
+		"targetDirectory" : "eSirius",
+		"sourceAppDirectory" : "eSirius-app/target",
+		"sourceConfDirectory" : "eSiriusConf/target/eSirius-Conf"
+	},
+	"Appointment" : {
+		"gitRoot" : "Appointment",
+		"projectRoot" : "appointment",
+		"jdkCompilation" : "JDK 1.6.0_20",
+		"mvnVersion" : "Maven 3.2.1",
+		"targetDirectory" : "appointment",
+		"sourceAppDirectory" : "appointment-app/target",
+		"sourceConfDirectory" : "appointment-conf/target/appointment-conf"
+	},
+	"eAdmin" : {
+		"gitRoot" : "eAdmin",
+		"projectRoot" : "eSirius-admin",
+		"jdkCompilation" : "JDK 1.6.0_20",
+		"mvnVersion" : "Maven 3.2.1",
+		"targetDirectory" : "eadmin",
+		"sourceAppDirectory" : "eSirius-admin-app/target",
+		"sourceConfDirectory" : "eSirius-admin-conf/target/eSirius-admin-conf"
+	},
+	"eVision" : {
+		"gitRoot" : "eVision",
+		"projectRoot" : "eSirius-vision",
+		"jdkCompilation" : "JDK 1.6.0_20",
+		"mvnVersion" : "Maven 3.2.1",
+		"targetDirectory" : "evision",
+		"sourceAppDirectory" : "eSirius-vision-app/target",
+		"sourceConfDirectory" : "eSirius-vision-conf/target/eSirius-vision-conf"
+	}
+}

@@ -6,9 +6,9 @@ pipeline {
 		booleanParam(name: "secondaryDeploy", defaultValue: false, description: "déployer sur les serveurs secondaires")
 	}
 	environment {
-		depotFolder = "depotTest"
 		gitLabUrl = "http://192.168.25.68/eSirius/"
 		primaryRemote = "esii@192.168.25.94"
+		depotFolder = "depotTest"
 	}
 	stages {
 		stage ("Initialize") {
@@ -32,12 +32,12 @@ pipeline {
 				stage ("build es2i") {
 					environment {
 						gitRoot = "es2i"
+						projectRoot = "es2i"
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
-						projectRoot = "es2i"
+						targetDirectory = ""
 						sourceAppDirectory = ""
 						sourceConfDirectory = ""
-						targetDirectory = ""
 					}
 					steps {
 						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
@@ -46,12 +46,12 @@ pipeline {
 				stage ("build eCustomer") {
 					environment {
 						gitRoot = "eCustomer"
+						projectRoot = "eCustomer"
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
-						projectRoot = "eCustomer"
+						targetDirectory = "customer"
 						sourceAppDirectory = "eCustomer-app/target"
 						sourceConfDirectory = "eCustomer-conf/target/eCustomer-conf"
-						targetDirectory = "customer"
 					}
 					steps {
 						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
@@ -60,12 +60,12 @@ pipeline {
 				stage ("build smsSender") {
 					environment {
 						gitRoot = "smsSender"
+						projectRoot = "smsSender"
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
-						projectRoot = "smsSender"
+						targetDirectory = "smssender"
 						sourceAppDirectory = "smsSender-app/target"
 						sourceConfDirectory = "smsSender-conf/target/smsSender-conf"
-						targetDirectory = "smssender"
 					}
 					steps {
 						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
@@ -74,12 +74,12 @@ pipeline {
 				stage ("build procyon") {
 					environment {
 						gitRoot = "eStat"
+						projectRoot = "procyon"
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
-						projectRoot = "procyon"
+						targetDirectory = ""
 						sourceAppDirectory = ""
 						sourceConfDirectory = ""
-						targetDirectory = ""
 					}
 					steps {
 						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
@@ -90,12 +90,12 @@ pipeline {
 		stage ("build eSecurity") {
 			environment {
 				gitRoot = "eSecurity"
+				projectRoot = "esecurity"
 				jdkCompilation = "JDK 1.6.0_20"
 				mvnVersion = "Maven 3.2.1"
-				projectRoot = "esecurity"
+				targetDirectory = "esecurity"
 				sourceAppDirectory = "esecurity-gxt-app/target"
 				sourceConfDirectory = "esecurity-conf/target/esecurity-conf"
-				targetDirectory = "esecurity"
 			}
 			steps {
 				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
@@ -106,12 +106,12 @@ pipeline {
 				stage ("build eSirius-shared") {
 					environment {
 						gitRoot = "eSirius"
+						projectRoot = "eSirius-shared"
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
-						projectRoot = "eSirius-shared"
+						targetDirectory = ""
 						sourceAppDirectory = ""
 						sourceConfDirectory = ""
-						targetDirectory = ""
 					}
 					steps {
 						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
@@ -120,12 +120,12 @@ pipeline {
 				stage ("build es2i-rsi-connector") {
 					environment {
 						gitRoot = "es2i-rsi-connector"
+						projectRoot = "es2i-rsi-connector"
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
-						projectRoot = "es2i-rsi-connector"
+						targetDirectory = ""
 						sourceAppDirectory = ""
 						sourceConfDirectory = ""
-						targetDirectory = ""
 					}
 					steps {
 						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
@@ -134,12 +134,12 @@ pipeline {
 				stage ("build eStat") {
 					environment {
 						gitRoot = "eStat"
+						projectRoot = "eSirius-estat"
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
-						projectRoot = "eSirius-estat"
+						targetDirectory = "estat"
 						sourceAppDirectory = "eSirius-estat-app/target"
 						sourceConfDirectory = "eStatConf/target/eStat-conf"
-						targetDirectory = "estat"
 					}
 					steps {
 						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
@@ -152,12 +152,12 @@ pipeline {
 				stage ("build History") {
 					environment {
 						gitRoot = "History"
+						projectRoot = "eSirius-history"
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
-						projectRoot = "eSirius-history"
+						targetDirectory = "esirius-history-event"
 						sourceAppDirectory = "eSirius-history-event-app/target"
 						sourceConfDirectory = "eSirius-history-event-conf/target/eSirius-history-event-conf"
-						targetDirectory = "esirius-history-event"
 					}
 					steps {
 						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
@@ -166,12 +166,12 @@ pipeline {
 				stage ("build ePlanning") {
 					environment {
 						gitRoot = "ePlanning"
+						projectRoot = "ePlanning"
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
-						projectRoot = "ePlanning"
+						targetDirectory = "ePlanning"
 						sourceAppDirectory = "ePlanning-app/target"
 						sourceConfDirectory = "ePlanningConf/target/ePlanningConf"
-						targetDirectory = "ePlanning"
 					}
 					steps {
 						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
@@ -184,12 +184,12 @@ pipeline {
 				stage ("build eSirius") {
 					environment {
 						gitRoot = "eSirius"
+						projectRoot = "eSirius"
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
-						projectRoot = "eSirius"
+						targetDirectory = "eSirius"
 						sourceAppDirectory = "eSirius-app/target"
 						sourceConfDirectory = "eSiriusConf/target/eSirius-Conf"
-						targetDirectory = "eSirius"
 					}
 					steps {
 						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
@@ -198,12 +198,12 @@ pipeline {
 				stage ("build Appointment") {
 					environment {
 						gitRoot = "Appointment"
+						projectRoot = "appointment"
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
-						projectRoot = "appointment"
+						targetDirectory = "appointment"
 						sourceAppDirectory = "appointment-app/target"
 						sourceConfDirectory = "appointment-conf/target/appointment-conf"
-						targetDirectory = "appointment"
 					}
 					steps {
 						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
@@ -216,12 +216,12 @@ pipeline {
 				stage ("build eAdmin") {
 					environment {
 						gitRoot = "eAdmin"
+						projectRoot = "eSirius-admin"
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
-						projectRoot = "eSirius-admin"
+						targetDirectory = "eadmin"
 						sourceAppDirectory = "eSirius-admin-app/target"
 						sourceConfDirectory = "eSirius-admin-conf/target/eSirius-admin-conf"
-						targetDirectory = "eadmin"
 					}
 					steps {
 						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
@@ -230,12 +230,12 @@ pipeline {
 				stage ("build eVision") {
 					environment {
 						gitRoot = "eVision"
+						projectRoot = "eSirius-vision"
 						jdkCompilation = "JDK 1.6.0_20"
 						mvnVersion = "Maven 3.2.1"
-						projectRoot = "eSirius-vision"
+						targetDirectory = "evision"
 						sourceAppDirectory = "eSirius-vision-app/target"
 						sourceConfDirectory = "eSirius-vision-conf/target/eSirius-vision-conf"
-						targetDirectory = "evision"
 					}
 					steps {
 						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
