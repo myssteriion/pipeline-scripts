@@ -65,7 +65,7 @@ public class ConstructHelper {
 				return "booleanParam(name: \"" + param.getName() + "\", defaultValue: " + ((BooleanParameter) param).getDefaultValue() + ", description: \"" + param.getDesc() + "\")";
 			
 			case CHOICE:
-				return "choice(name: \"" + param.getName() + "\", choices: " + ((ChoiceParameter) param).getChoices() + ", description: \"" + param.getDesc() + "\")";
+				return "choice(name: \"" + param.getName() + "\", choices: \"" + ((ChoiceParameter) param).getChoices() + "\", description: \"" + param.getDesc() + "\")";
 				
 			case STRING:
 				return "string(name: \"" + param.getName() + "\", defaultValue: \"" + ((StringParameter) param).getDefaultValue() + "\", description: \"" + param.getDesc() + "\")";
