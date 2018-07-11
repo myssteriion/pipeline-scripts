@@ -1,24 +1,28 @@
 package com.es2i.pipeline.job;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
+import com.es2i.pipeline.job.helper.ConfReader;
 import com.es2i.pipeline.job.helper.ConstrcuctHelper;
 import com.es2i.pipeline.job.helper.PropToEntitiy;
 import com.es2i.pipeline.tools.ConstantTools;
@@ -28,13 +32,13 @@ public class Pipeline {
 	
 	private ConstrcuctHelper constrcuctHelper;
 	
+	private ConfReader confReader;
+	
 	private Properties application;
 	
 	private Map<Integer, String> projectsBuilOne;
 	
 	private Map<Integer, List<String>> projectsBuildAll;
-	
-	private Properties parameters;
 	
 	private Properties environment;
 
@@ -46,8 +50,10 @@ public class Pipeline {
 	
 	public Pipeline() throws IOException {
 		
-		init();
 		constrcuctHelper = ConstrcuctHelper.getInstance();
+		confReader = ConfReader.getInstance();
+		
+		init();
 	}
 	
 	
@@ -66,17 +72,6 @@ public class Pipeline {
 		
 		fillProjectsList();
 	
-		/* */
-		
-		parameters = new Properties();
-		try (InputStream is = getClass().getClassLoader().getResourceAsStream(ConstantTools.PARAM_PROP_FILE)) {
-			parameters.load(is);
-		}
-		expectedKeys = new HashSet<String>();
-		expectedKeys.add(ConstantTools.REVISION_KEY);
-		expectedKeys.add(ConstantTools.SECONDARY_DEPLOY_KEY);
-		Tools.verifyKeys(expectedKeys, parameters.stringPropertyNames(), ConstantTools.TOOLS_PROP_FILE);
-		
 		/* */
 		
 		environment = new Properties();
@@ -157,40 +152,44 @@ public class Pipeline {
 		File jenkinsfile = Paths.get(buildAllDirectory.getAbsolutePath(), ConstantTools.JENKINS_FILE).toFile();
 		jenkinsfile.createNewFile();
 		
-		try (Writer writer = new PrintWriter(jenkinsfile)) {
-			
-			// pipeline - agent - param - env - tools - stages
-			writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
-			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
-			addParamEnvTools(writer, true);
-			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
-			
-			addInitializeStage(writer, true);
-			
-			addCreateDataFolderStage(writer);
-			
-			// all build
-			int nbGroup = projectsBuildAll.size();
-			for (int index = 1; index <= nbGroup; index++) {
-				
-				List<String> groupe = projectsBuildAll.get(index);
-				if (groupe.size() == 1)
-					addStageForProject(writer, groupe.get(0), 0);
-				else
-					addParallelStageForProject(writer, index, groupe);
+		try ( OutputStream os = new FileOutputStream(jenkinsfile) ) {
+			try ( OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8) ) {
+				try ( Writer writer = new PrintWriter(osw) ) {
+					
+					// pipeline - agent - param - env - tools - stages
+					writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
+					writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
+					addParamEnvTools(writer, true);
+					writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
+					
+					addInitializeStage(writer, true);
+					
+					addCreateDataFolderStage(writer);
+					
+					// all build
+					int nbGroup = projectsBuildAll.size();
+					for (int index = 1; index <= nbGroup; index++) {
+						
+						List<String> groupe = projectsBuildAll.get(index);
+						if (groupe.size() == 1)
+							addStageForProject(writer, groupe.get(0), 0);
+						else
+							addParallelStageForProject(writer, index, groupe);
+					}
+					
+					addDeployToSecondaryRemoteStage(writer);
+					
+					// stages - pipeline
+					writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
+					writer.write(constrcuctHelper.endPipeline() + constrcuctHelper.addCRLF());
+					
+					// saut de ligne
+					writer.write(constrcuctHelper.addCRLF());
+					
+					// functions.txt
+					writer.write(constrcuctHelper.getFunctions() );
+				}
 			}
-			
-			addDeployToSecondaryRemoteStage(writer);
-			
-			// stages - pipeline
-			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
-			writer.write(constrcuctHelper.endPipeline() + constrcuctHelper.addCRLF());
-			
-			// saut de ligne
-			writer.write(constrcuctHelper.addCRLF());
-			
-			// functions.txt
-			writer.write(constrcuctHelper.getFunctions() );
 		}
 	}
 	
@@ -284,9 +283,7 @@ public class Pipeline {
 		
 		// parameters
 		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginParameters() + constrcuctHelper.addCRLF());
-		for ( String key : Tools.getKeysFilterByPrefix(parameters, "") ) {
-			
-			Parameter param = PropToEntitiy.transformToParameter(key, parameters.getProperty(key));
+		for (Parameter param : confReader.getParameters()) {
 			if ( (isBuildAll && param.isAllScope()) || (!isBuildAll && param.isMonoScope()) )
 				writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.contentParameters(param) + constrcuctHelper.addCRLF());
 		}
@@ -317,8 +314,7 @@ public class Pipeline {
 
 		// echo all parameters
 		writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.beginWrap() + constrcuctHelper.addCRLF());
-		for ( Entry<Object, Object> entry : parameters.entrySet() ) {
-			Parameter param = PropToEntitiy.transformToParameter(entry.getKey().toString(), entry.getValue().toString());
+		for (Parameter param : confReader.getParameters()) {
 			if ( (isBuildAll && param.isAllScope()) || (!isBuildAll && param.isMonoScope()) ) {
 				String echoStr = constrcuctHelper.infoColor(param.getName() + " : " + constrcuctHelper.dollarParams(param.getName()));
 				writer.write(constrcuctHelper.addTab(5) + constrcuctHelper.echo(echoStr) + constrcuctHelper.addCRLF());

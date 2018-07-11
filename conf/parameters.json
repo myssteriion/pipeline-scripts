@@ -1,0 +1,21 @@
+[
+	{
+		"name": "revision",
+		"type": "string",
+		"defaultValue" : "master",
+		"description" : "branche ou TAG"
+	},
+	{
+		"name": "mavenProfil",
+		"type": "choice",
+		"choices" : "rod_windows, prod_linux, dev_windows, dev_linux, cd",
+		"description" : "profile maven"
+	},
+	{
+		"name": "secondaryDeploy",
+		"type": "boolean",
+		"scope" : "all",
+		"defaultValue" : "false",
+		"description" : "déployer sur les serveurs secondaires"
+	}
+]

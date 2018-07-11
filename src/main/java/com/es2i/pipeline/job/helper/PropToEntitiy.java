@@ -1,25 +1,12 @@
 package com.es2i.pipeline.job.helper;
 
 import com.es2i.pipeline.job.entities.Environment;
-import com.es2i.pipeline.job.entities.Parameter;
 import com.es2i.pipeline.job.entities.Tool;
 import com.es2i.pipeline.tools.ConstantTools;
 import com.es2i.pipeline.tools.Tools;
 
 public class PropToEntitiy {
 
-	public static Parameter transformToParameter(String propName, String propValue) {
-		
-		if ( Tools.isNullOrEmpty(propValue) )
-			throw new IllegalArgumentException("Le propriété " + propName + " est vide");
-		
-		String[] tab = propValue.split(ConstantTools.UNDERSCORE);
-		if (tab == null || (tab.length != 4 && tab.length != 5))
-			throw new IllegalArgumentException("Le propriété " + propName + " n'est pas correct (" + propValue + ")");
-		
-		return new Parameter(tab[0].trim(), tab[1].trim(), tab[2].trim(), tab[3].trim(), (tab.length == 5 ? tab[4].trim() : null));
-	}
-	
 	public static Environment transformToEnvironment(String propName, String propValue) {
 		
 		String[] tab = propName.split("\\" + ConstantTools.DOT);

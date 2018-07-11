@@ -2,6 +2,7 @@ pipeline {
 	agent any
 	parameters {
 		string(name: "revision", defaultValue: "master", description: "branche ou TAG")
+		choice(name: "mavenProfil", choices: rod_windows\nprod_linux\ndev_windows\ndev_linux\ncd\n, description: "profile maven")
 	}
 	environment {
 		depotFolder = "depotTest"
@@ -13,6 +14,7 @@ pipeline {
 			steps {
 				wrap([$class: 'AnsiColorBuildWrapper']) {
 					echo "\u001B[34m revision : ${params.revision} \u001B[m"
+					echo "\u001B[34m mavenProfil : ${params.mavenProfil} \u001B[m"
 				}
 				cleanWs()
 			}

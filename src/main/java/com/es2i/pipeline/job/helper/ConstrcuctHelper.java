@@ -9,6 +9,9 @@ import org.apache.commons.io.IOUtils;
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
 import com.es2i.pipeline.job.entities.Tool;
+import com.es2i.pipeline.job.entities.parameter_impl.BooleanParameter;
+import com.es2i.pipeline.job.entities.parameter_impl.ChoiceParameter;
+import com.es2i.pipeline.job.entities.parameter_impl.StringParameter;
 import com.es2i.pipeline.tools.ConstantTools;
 
 /*
@@ -56,14 +59,20 @@ public class ConstrcuctHelper {
 	
 	public String contentParameters(Parameter param) {
 		
-		if (param.getType().equalsIgnoreCase("String")) {
-			return "string(name: \"" + param.getName() + "\", defaultValue: \"" + param.getDefaultValue() + "\", description: \"" + param.getDesc() + "\")";
-		}
-		else if (param.getType().equalsIgnoreCase("boolean")) {
-			return "booleanParam(name: \"" + param.getName() + "\", defaultValue: " + param.getDefaultValue() + ", description: \"" + param.getDesc() + "\")";
-		}
-		else {
-			return "";
+		switch ( param.getType() ) {
+
+			case BOOLEAN:
+				return "booleanParam(name: \"" + param.getName() + "\", defaultValue: " + ((BooleanParameter) param).getDefaultValue() + ", description: \"" + param.getDesc() + "\")";
+			
+			case CHOICE:
+				return "choice(name: \"" + param.getName() + "\", choices: " + ((ChoiceParameter) param).getChoices() + ", description: \"" + param.getDesc() + "\")";
+				
+			case STRING:
+				return "string(name: \"" + param.getName() + "\", defaultValue: \"" + ((StringParameter) param).getDefaultValue() + "\", description: \"" + param.getDesc() + "\")";
+		
+			// dead code
+			default:
+				return "";
 		}
 	}
 	

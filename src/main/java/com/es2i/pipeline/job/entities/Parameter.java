@@ -2,37 +2,73 @@ package com.es2i.pipeline.job.entities;
 
 import com.es2i.pipeline.tools.Tools;
 
-public class Parameter {
+public abstract class Parameter {
 
+	public enum TypeParameter { BOOLEAN("boolean"), STRING("string"), CHOICE("choice");
+		
+		private String name;
+		
+		private TypeParameter(String name) {
+			this.name = name;
+		}
+		
+		public String getName() {
+			return this.name;
+		}
+		
+		public static TypeParameter getTypeParameterByName(String name) {
+			
+			if ( BOOLEAN.getName().equalsIgnoreCase(name) )
+				return BOOLEAN;
+			else if ( STRING.getName().equalsIgnoreCase(name) )
+				return STRING;
+			else if ( CHOICE.getName().equalsIgnoreCase(name) )
+				return CHOICE;
+			else
+				return null;
+		}
+		
+	}; 
+	
+	public enum ScopeParamater { MONO, ALL, BOTH }; 
+	
+	public enum ParameterKey { NAME("name"), TYPE("type"), SCOPE("scope"), DEFAULT_VALUE("defaultValue"), CHOICES ("choices"), DESCRIPTION("description");
+	
+		private String name;
+	
+		private ParameterKey(String name) {
+			this.name = name;
+		}
+		
+		public String getName() {
+			return this.name;
+		}
+	};
+	
 	private String name;
 	
-	private String type;
-	
-	private String defaultValue;
+	private TypeParameter type;
 	
 	private String desc;
 	
-	private ParamaterScope scope;
-	
-	public enum ParamaterScope { MONO, ALL, BOTH }; 
+	private ScopeParamater scope;
 	
 	
 
-	public Parameter(String name, String type, String defaultValue, String desc, String scope) {
+	public Parameter(String name, TypeParameter type, String desc, String scope) {
 		
 		this.name = name;
 		this.type = type;
-		this.defaultValue = defaultValue;
 		this.desc = desc;
 		
 		if ( Tools.isNullOrEmpty(scope) ) {
-			this.scope = ParamaterScope.BOTH;
+			this.scope = ScopeParamater.BOTH;
 		}
-		else if ( scope.equalsIgnoreCase(ParamaterScope.MONO.toString()) ) {
-			this.scope = ParamaterScope.MONO;
+		else if ( scope.equalsIgnoreCase(ScopeParamater.MONO.toString()) ) {
+			this.scope = ScopeParamater.MONO;
 		}
-		else if ( scope.equalsIgnoreCase(ParamaterScope.ALL.toString()) ) {
-			this.scope = ParamaterScope.ALL;
+		else if ( scope.equalsIgnoreCase(ScopeParamater.ALL.toString()) ) {
+			this.scope = ScopeParamater.ALL;
 		}
 	}
 
@@ -42,12 +78,8 @@ public class Parameter {
 		return name;
 	}
 
-	public String getType() {
+	public TypeParameter getType() {
 		return type;
-	}
-
-	public String getDefaultValue() {
-		return defaultValue;
 	}
 
 	public String getDesc() {
@@ -55,11 +87,11 @@ public class Parameter {
 	}
 	
 	public boolean isMonoScope() {
-		return scope == ParamaterScope.BOTH || scope == ParamaterScope.MONO;
+		return scope == ScopeParamater.BOTH || scope == ScopeParamater.MONO;
 	}
 	
 	public boolean isAllScope() {
-		return scope == ParamaterScope.BOTH || scope == ParamaterScope.ALL;
+		return scope == ScopeParamater.BOTH || scope == ScopeParamater.ALL;
 	}
 	
 }
