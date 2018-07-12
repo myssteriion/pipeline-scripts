@@ -72,15 +72,6 @@
 		"sourceAppDirectory" : "",
 		"sourceConfDirectory" : ""
 	},
-	"es2i-rsi-connector" : {
-		"gitRoot" : "es2i-rsi-connector",
-		"projectRoot" : "es2i-rsi-connector",
-		"jdkCompilation" : "JDK 1.6.0_20",
-		"mvnVersion" : "Maven 3.2.1",
-		"targetDirectory" : "",
-		"sourceAppDirectory" : "",
-		"sourceConfDirectory" : ""
-	},
 	"eStat" : {
 		"gitRoot" : "eStat",
 		"projectRoot" : "eSirius-estat",

@@ -117,20 +117,6 @@ pipeline {
 						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
 					}
 				}
-				stage ("build es2i-rsi-connector") {
-					environment {
-						gitRoot = "es2i-rsi-connector"
-						projectRoot = "es2i-rsi-connector"
-						jdkCompilation = "JDK 1.6.0_20"
-						mvnVersion = "Maven 3.2.1"
-						targetDirectory = ""
-						sourceAppDirectory = ""
-						sourceConfDirectory = ""
-					}
-					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
-					}
-				}
 				stage ("build eStat") {
 					environment {
 						gitRoot = "eStat"
