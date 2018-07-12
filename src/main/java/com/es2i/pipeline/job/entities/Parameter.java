@@ -2,8 +2,17 @@ package com.es2i.pipeline.job.entities;
 
 import com.es2i.pipeline.tools.Tools;
 
+/**
+ * Représente une variable paramètre d'un point de vue Pipeline.
+ * @see conf/parameters.json
+ */
 public abstract class Parameter {
 
+	/**
+	 * boolean => case à cocher
+	 * string => saisie libre
+	 * choice => liste déroulante
+	 */
 	public enum TypeParameter { BOOLEAN("boolean"), STRING("string"), CHOICE("choice");
 		
 		private String name;
@@ -25,13 +34,19 @@ public abstract class Parameter {
 			else if ( CHOICE.getName().equalsIgnoreCase(name) )
 				return CHOICE;
 			else
-				return null;
+				throw new IllegalArgumentException("Le type '" + name + "' n'est pas reconnu pour définir le type d'un paramètre.");
 		}
-		
 	}; 
 	
+	/**
+	 * Les paramètres sont définit dans le même fichier.
+	 * Permet de définir si le paramètre est présent pour les monoBuild (mono), pour le buildAll (all), pour les 2 (both).
+	 */
 	public enum ScopeParamater { MONO, ALL, BOTH }; 
 	
+	/**
+	 * Les propriété obligatoires et facultatives permettant de définir une variable paramètre.
+	 */
 	public enum ParameterKey { NAME("name"), TYPE("type"), SCOPE("scope"), DEFAULT_VALUE("defaultValue"), CHOICES ("choices"), DESCRIPTION("description");
 	
 		private String name;
@@ -43,7 +58,25 @@ public abstract class Parameter {
 		public String getName() {
 			return this.name;
 		}
+		
+		/**
+		 * Retourne le tableau des propriétés obligatoires dans le json (dépend du type).
+		 */
+		public static ParameterKey[] getKeys(TypeParameter type) {
+			
+			if (type == TypeParameter.BOOLEAN || type == TypeParameter.STRING) {
+				ParameterKey[] tab = { NAME, TYPE, DEFAULT_VALUE, DESCRIPTION };
+				return tab;
+			}
+			else if (type == TypeParameter.CHOICE) {
+				ParameterKey[] tab = { NAME, TYPE, CHOICES, DESCRIPTION };
+				return tab;
+			}
+			else
+				throw new IllegalArgumentException("il manque un DEV : définir les champs obligatoires pour le type '" + type + "'.");
+		}
 	};
+
 	
 	private String name;
 	
@@ -71,8 +104,8 @@ public abstract class Parameter {
 			this.scope = ScopeParamater.ALL;
 		}
 	}
-
-
+	
+	
 
 	public String getName() {
 		return name;

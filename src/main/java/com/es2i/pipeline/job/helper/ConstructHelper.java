@@ -14,8 +14,8 @@ import com.es2i.pipeline.job.entities.parameter_impl.ChoiceParameter;
 import com.es2i.pipeline.job.entities.parameter_impl.StringParameter;
 import com.es2i.pipeline.tools.ConstantTools;
 
-/*
- * Singleton
+/**
+ * Singleton. Permet de construire ligne par ligne les fichier Jenkinsfile.
  */
 public class ConstructHelper {
 

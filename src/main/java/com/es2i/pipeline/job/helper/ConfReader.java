@@ -21,19 +21,17 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
-import javax.swing.text.AbstractDocument.BranchElement;
 
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
-import com.es2i.pipeline.job.entities.Parameter.TypeParameter;
 import com.es2i.pipeline.job.entities.parameter_impl.BooleanParameter;
 import com.es2i.pipeline.job.entities.parameter_impl.ChoiceParameter;
 import com.es2i.pipeline.job.entities.parameter_impl.StringParameter;
 import com.es2i.pipeline.tools.ConstantTools;
 import com.es2i.pipeline.tools.Tools;
 
-/*
- * Singleton
+/**
+ * Singleton. Accède à la conf et vérifie l'intégrité des éléments. Possède un cache.
  */
 public class ConfReader {
 
@@ -56,7 +54,6 @@ public class ConfReader {
 	
 	
 	private ConfReader() throws IOException {
-		
 		init();
 	}
 	
@@ -159,38 +156,9 @@ public class ConfReader {
 			try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.PARAM_JSON_FILE) ) {
 				try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
 					try ( JsonReader jsonReader = Json.createReader(is) ) {
-						
 						JsonArray array = jsonReader.readArray();
-						for (int i = 0; i < array.size(); i++) {
-							
-							JsonObject object = array.getJsonObject(i);
-							checkParameter(object);
-							
-							String name = object.getString(Parameter.ParameterKey.NAME.getName(), null);
-							String typeStr = object.getString(Parameter.ParameterKey.TYPE.getName(), null);
-							String scope = object.getString(Parameter.ParameterKey.SCOPE.getName(), null);
-							String defaultValue = object.getString(Parameter.ParameterKey.DEFAULT_VALUE.getName(), null);
-							String description = object.getString(Parameter.ParameterKey.DESCRIPTION.getName());
-							String choices = object.getString(Parameter.ParameterKey.CHOICES.getName(), null);
-							
-							TypeParameter type = Parameter.TypeParameter.getTypeParameterByName(typeStr);
-							choices = replaceValueByPropertiesIfNeedIt(name, choices);
-							
-							switch (type) {
-								
-								case BOOLEAN:
-									parameters.add( new BooleanParameter(name, defaultValue, description, scope) );
-									break;
-								
-								case CHOICE:
-									parameters.add( new ChoiceParameter(name, choices, description, scope) );
-									break;
-									
-								case STRING:
-									parameters.add( new StringParameter(name, defaultValue, description, scope) );
-									break;
-							}
-						}
+						for (int i = 0; i < array.size(); i++)
+							parameters.add( checkAndGetParameter(array.getJsonObject(i)) );
 					}
 				}
 			}
@@ -199,32 +167,35 @@ public class ConfReader {
 		return parameters;
 	}
 	
-	private void checkParameter(JsonObject object) {
+	private Parameter checkAndGetParameter(JsonObject object) throws IOException {
+		
+		String typeStr = object.getString(Parameter.ParameterKey.TYPE.getName(), null);
+		if ( Tools.isNullOrEmpty(typeStr) )
+			throw new IllegalArgumentException("Pour définir un paramètre, la propriétés '" + Parameter.ParameterKey.TYPE.getName() + "' est obligatoire.");
+		
+		Parameter.TypeParameter type = Parameter.TypeParameter.getTypeParameterByName(typeStr);
+		for ( Parameter.ParameterKey paramKey : Parameter.ParameterKey.getKeys(type) ) {
+			
+			String value = object.getString(paramKey.getName(), null);
+			if ( Tools.isNullOrEmpty(value) )
+				throw new IllegalArgumentException("Pour définir un paramètre de type '" + typeStr + "', la propriétés '" + paramKey.getName() + "' est obligatoire.");
+		}
 		
 		String name = object.getString(Parameter.ParameterKey.NAME.getName(), null);
-		String typeStr = object.getString(Parameter.ParameterKey.TYPE.getName(), null);
+		String scope = object.getString(Parameter.ParameterKey.SCOPE.getName(), null);
 		String defaultValue = object.getString(Parameter.ParameterKey.DEFAULT_VALUE.getName(), null);
 		String description = object.getString(Parameter.ParameterKey.DESCRIPTION.getName());
 		String choices = object.getString(Parameter.ParameterKey.CHOICES.getName(), null);
 		
-		if ( Tools.isNullOrEmpty(name) || Tools.isNullOrEmpty(typeStr) || Tools.isNullOrEmpty(description) ) {
-			String message = "Pour définir un paramètre, les propriétés '" + Parameter.ParameterKey.NAME.getName() + "', "
-							+ Parameter.ParameterKey.TYPE.getName() + "', '" + Parameter.ParameterKey.DESCRIPTION.getName() + "' sont obligatoires.";
-			throw new IllegalArgumentException(message);
-		}
+		choices = replaceValueByPropertiesIfNeedIt(name, choices);
 		
-		switch (Parameter.TypeParameter.getTypeParameterByName(typeStr)) {
+		switch (type) {
 		
-			case BOOLEAN:
-			case STRING:
-				if ( Tools.isNullOrEmpty(defaultValue) )
-					throw new IllegalArgumentException("Pour définir un paramètre de type '" + typeStr + "', la propriétés '" + Parameter.ParameterKey.DEFAULT_VALUE.getName() + "' est obligatoire.");
-				break;
-				
-			case CHOICE:
-				if ( Tools.isNullOrEmpty(choices) )
-					throw new IllegalArgumentException("Pour définir un paramètre de type '" + typeStr + "', la propriétés '" + Parameter.ParameterKey.CHOICES.getName() + "' est obligatoire.");
-				break;
+			case BOOLEAN : return new BooleanParameter(name, defaultValue, description, scope);
+			case CHOICE : return new ChoiceParameter(name, choices, description, scope);
+			case STRING : return new StringParameter(name, defaultValue, description, scope);
+			
+			default : throw new IllegalArgumentException("il manque un DEV : définir la classe le type '" + type + "'.");
 		}
 	}
 	
@@ -240,16 +211,12 @@ public class ConfReader {
 					try ( JsonReader jsonReader = Json.createReader(is) ) {
 						
 						JsonObject racineArray = jsonReader.readObject();
+						// global / runner / project
 						for (Entry<String, JsonValue> firstBlockEntry : racineArray.entrySet()) {
 
 							String firstBlockKey = firstBlockEntry.getKey();
 							JsonObject firstBlockObject = firstBlockEntry.getValue().asJsonObject();
-							
-							List<Environment> list = new ArrayList<Environment>();
-							for ( String secondBlockKey : firstBlockObject.keySet() )
-								list.add( new Environment(secondBlockKey, firstBlockObject.getString(secondBlockKey)) );
-							
-							environements.put(firstBlockKey, list);
+							environements.put(firstBlockKey, checkEnvironment(firstBlockKey, firstBlockObject));
 						}
 					}
 				}
@@ -257,6 +224,35 @@ public class ConfReader {
 		}
 		
 		return environements.get(prefix);
+	}
+	
+	private List<Environment> checkEnvironment(String scope, JsonObject object) {
+		
+		Environment.EnvironmentKey[] envKeys = {};
+		switch ( Environment.Scope.getTypeParameterByName(scope) ) {
+			case GLOBAL:
+				envKeys = Environment.EnvironmentKey.getGlobalKeys();
+				break;
+				
+			case RUNNER:
+				envKeys = Environment.EnvironmentKey.getRunnerKeys();
+				break;
+
+			case PROJECT:
+				envKeys = Environment.EnvironmentKey.getProjectKeys();
+				break;
+		}
+		
+		List<Environment> list = new ArrayList<Environment>();
+		for (Environment.EnvironmentKey envKey : envKeys) {
+			String value = object.getString(envKey.getName(), null);
+			if ( envKey.isMandatory() && Tools.isNullOrEmpty(value) )
+				throw new IllegalArgumentException("Pour la variable '" + scope + "', la propriété '" + envKey.getName() + "' est obligatoire.");
+			else
+				list.add( new Environment(envKey.getName(), value) );
+		}
+		
+		return list;
 	}
 	
 	public Map<Integer, String> getProjectsBuildOne() throws IOException {
