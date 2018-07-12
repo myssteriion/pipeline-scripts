@@ -21,6 +21,7 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
+import javax.swing.text.AbstractDocument.BranchElement;
 
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
@@ -66,19 +67,19 @@ public class ConfReader {
 		expectedKeys.add(ConstantTools.RUNNER_REVISIONS_KEY);
 		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ONE_KEY);
 		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ALL_GROUPE1_KEY);
-		Tools.verifyKeys(expectedKeys, application.stringPropertyNames(), ConstantTools.APPLICATION_PROP_FILE);
+		Tools.checkKeys(expectedKeys, application.stringPropertyNames(), ConstantTools.APPLICATION_PROP_FILE);
 		
 		/* */
 		
 		Properties tools = Tools.findPropertyFile(ConstantTools.TOOLS_PROP_FILE);
 		expectedKeys = new HashSet<String>();
-		Tools.verifyKeys(expectedKeys, tools.stringPropertyNames(), ConstantTools.TOOLS_PROP_FILE);
+		Tools.checkKeys(expectedKeys, tools.stringPropertyNames(), ConstantTools.TOOLS_PROP_FILE);
 		
 		/* */
 		
 		Properties remoteDescriptor = Tools.findPropertyFile(ConstantTools.REMOTE_DESCRIPTOR_FILE);
 		expectedKeys = new HashSet<String>();
-		Tools.verifyKeys(expectedKeys, remoteDescriptor.stringPropertyNames(), ConstantTools.REMOTE_DESCRIPTOR_FILE);
+		Tools.checkKeys(expectedKeys, remoteDescriptor.stringPropertyNames(), ConstantTools.REMOTE_DESCRIPTOR_FILE);
 	}
 	
 	
@@ -163,13 +164,16 @@ public class ConfReader {
 						for (int i = 0; i < array.size(); i++) {
 							
 							JsonObject object = array.getJsonObject(i);
-							String name = object.getString(Parameter.ParameterKey.NAME.getName());
-							TypeParameter type = Parameter.TypeParameter.getTypeParameterByName( object.getString(Parameter.ParameterKey.TYPE.getName()) );
+							checkParameter(object);
+							
+							String name = object.getString(Parameter.ParameterKey.NAME.getName(), null);
+							String typeStr = object.getString(Parameter.ParameterKey.TYPE.getName(), null);
 							String scope = object.getString(Parameter.ParameterKey.SCOPE.getName(), null);
 							String defaultValue = object.getString(Parameter.ParameterKey.DEFAULT_VALUE.getName(), null);
 							String description = object.getString(Parameter.ParameterKey.DESCRIPTION.getName());
 							String choices = object.getString(Parameter.ParameterKey.CHOICES.getName(), null);
 							
+							TypeParameter type = Parameter.TypeParameter.getTypeParameterByName(typeStr);
 							choices = replaceValueByPropertiesIfNeedIt(name, choices);
 							
 							switch (type) {
@@ -193,6 +197,35 @@ public class ConfReader {
 		}
 		
 		return parameters;
+	}
+	
+	private void checkParameter(JsonObject object) {
+		
+		String name = object.getString(Parameter.ParameterKey.NAME.getName(), null);
+		String typeStr = object.getString(Parameter.ParameterKey.TYPE.getName(), null);
+		String defaultValue = object.getString(Parameter.ParameterKey.DEFAULT_VALUE.getName(), null);
+		String description = object.getString(Parameter.ParameterKey.DESCRIPTION.getName());
+		String choices = object.getString(Parameter.ParameterKey.CHOICES.getName(), null);
+		
+		if ( Tools.isNullOrEmpty(name) || Tools.isNullOrEmpty(typeStr) || Tools.isNullOrEmpty(description) ) {
+			String message = "Pour définir un paramètre, les propriétés '" + Parameter.ParameterKey.NAME.getName() + "', "
+							+ Parameter.ParameterKey.TYPE.getName() + "', '" + Parameter.ParameterKey.DESCRIPTION.getName() + "' sont obligatoires.";
+			throw new IllegalArgumentException(message);
+		}
+		
+		switch (Parameter.TypeParameter.getTypeParameterByName(typeStr)) {
+		
+			case BOOLEAN:
+			case STRING:
+				if ( Tools.isNullOrEmpty(defaultValue) )
+					throw new IllegalArgumentException("Pour définir un paramètre de type '" + typeStr + "', la propriétés '" + Parameter.ParameterKey.DEFAULT_VALUE.getName() + "' est obligatoire.");
+				break;
+				
+			case CHOICE:
+				if ( Tools.isNullOrEmpty(choices) )
+					throw new IllegalArgumentException("Pour définir un paramètre de type '" + typeStr + "', la propriétés '" + Parameter.ParameterKey.CHOICES.getName() + "' est obligatoire.");
+				break;
+		}
 	}
 	
 	public List<Environment> getEnvironmentByPrefix(String prefix) throws IOException {

@@ -49,3 +49,16 @@ Le fichier décrit les paramètres des scripts. Pour chaque paramètre, il faut 
  	* **choices** : la liste de valeur séparée par le caractère ','  
  	
 Le paramètre **choices** peut faire référence à une propriété d'un fichier properties afin d'éviter les duplications (la forme est $nom_fichier/nom_propriété).
+
+## environment.json
+
+Le sous objet json **global** correspond au bloc **env** en dessous la balise pipeline de buildAll et des monoBuild.  
+Le sous objet json **runner** correspond au bloc **env** en dessous la balise pipeline du runner.  
+Les autres sous objets json sont les projets. La valeur à mettre correspond aux valeurs des propriétés **projects.xxx** du fichier application.properties.  
+
+> NOTE : il y a beaucoup de paramètres pour les projets car il n'y pas de convention de nommages et d'homogénéité. Si l'avenir le permet, refactorer les structures des projets et les nommages afin de limiter les paramètres. Exemple pour evision : gitRoot, projectRoot, targetDirectory et le prefix de sourceAppDirectory et sourceConfDirectory pourrai, moyennant adapatation, être identique !
+
+## functions.txt
+
+Les fonctions groovy qui sont systématiquement concaténées au buildAll et aux monoBuild.  
+Attention au noms des paramètres qui se trouve dedans. Il peut y avoir des impacts en cas de modifications de certains paramètres.

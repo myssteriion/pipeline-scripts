@@ -54,7 +54,7 @@ public class Tools {
 								.collect( Collectors.toList() );
 	}
 
-	public static void verifyKeys(Set<String> expectedKeys, Set<String> actualKeys, String fileName) {
+	public static void checkKeys(Set<String> expectedKeys, Set<String> actualKeys, String fileName) {
 		
 		if ( !actualKeys.containsAll(expectedKeys) ) {
 			String message = "Au moins une clé est manquante dans " + fileName;
