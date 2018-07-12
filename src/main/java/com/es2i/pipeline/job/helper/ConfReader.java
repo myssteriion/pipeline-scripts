@@ -7,7 +7,6 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -151,6 +150,8 @@ public class ConfReader {
 							String description = object.getString(Parameter.ParameterKey.DESCRIPTION.getName());
 							String choices = object.getString(Parameter.ParameterKey.CHOICES.getName(), null);
 							
+							choices = replaceValueByPropertiesIfNeedIt(name, choices);
+							
 							switch (type) {
 								
 								case BOOLEAN:
@@ -244,4 +245,23 @@ public class ConfReader {
 		return projectsBuildAll;
 	}
 
+	
+	
+	private String replaceValueByPropertiesIfNeedIt(String name, String value) throws IOException {
+		
+		if ( Tools.isNullOrEmpty(value) || !value.startsWith(ConstantTools.DOLLAR) )
+			return value;
+		
+		// surpprimer le caracètre '$'
+		String tmp = value.substring(1);
+		String[] valuesTab = tmp.split(ConstantTools.SLASH);
+		if (valuesTab == null || valuesTab.length != 2)
+			throw new IllegalArgumentException("La valeur '" + value + "' de la prorpiété '" + name + "' n'est pas correcte");
+		
+		String propertyFile = valuesTab[0];
+		String propertyKey = valuesTab[1];
+		
+		return Tools.findPropertyFile(propertyFile).getProperty(propertyKey);
+	}
+	
 }

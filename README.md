@@ -46,4 +46,6 @@ Le fichier décrit les paramètres des scripts. Pour chaque paramètre, il faut 
  * si type == boolean ou string :  
  	* **defaultValue** : la valeur par défaut (attention, ici, les booléens sont à encadrer de guillemets)  
  * si type == choice :  
- 	* **choices** : la liste de valeur séparée par le caractère ','
+ 	* **choices** : la liste de valeur séparée par le caractère ','  
+ 	
+Le paramètre **choices** peut faire référence à une propriété d'un fichier properties afin d'éviter les duplications (la forme est $nom_fichier/nom_propriété).

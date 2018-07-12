@@ -9,6 +9,7 @@ public class ConstantTools {
 	public static final String CRLF										= "\n";
 	public static final String COMA										= ",";
 	public static final String DOLLAR									= "$";
+	public static final String SLASH									= "/";
 	
 	/*
 	 * noms des fichiers et dossiers

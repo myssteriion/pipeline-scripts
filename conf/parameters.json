@@ -17,5 +17,12 @@
 		"scope" : "all",
 		"defaultValue" : "false",
 		"description" : "déployer sur les serveurs secondaires"
+	},
+	{
+		"name": "project",
+		"type": "choice",
+		"scope" : "mono",
+		"choices" : "$application.properties/projects.build.one",
+		"description" : "le projet à builder"
 	}
 ]

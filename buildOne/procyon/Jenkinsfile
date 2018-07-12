@@ -3,6 +3,7 @@ pipeline {
 	parameters {
 		string(name: "revision", defaultValue: "master", description: "branche ou TAG")
 		choice(name: "mavenProfil", choices: "prod_windows\nprod_linux\ndev_windows\ndev_linux\ncd\n", description: "profile maven")
+		choice(name: "project", choices: "dashboard\nes2i\neCustomer\nsmsSender\nprocyon\neSecurity\neSirius-shared\neStat\nHistory\nePlanning\neSirius\nAppointment\neAdmin\neVision\n", description: "le projet à builder")
 	}
 	environment {
 		gitLabUrl = "http://192.168.25.68/eSirius/"
@@ -15,6 +16,7 @@ pipeline {
 				wrap([$class: 'AnsiColorBuildWrapper']) {
 					echo "\u001B[34m revision : ${params.revision} \u001B[m"
 					echo "\u001B[34m mavenProfil : ${params.mavenProfil} \u001B[m"
+					echo "\u001B[34m project : ${params.project} \u001B[m"
 				}
 				cleanWs()
 			}

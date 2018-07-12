@@ -57,43 +57,41 @@ public class Pipeline {
 		jenkinsfile.createNewFile();
 		
 		try ( OutputStream os = new FileOutputStream(jenkinsfile) ) {
-			try ( OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8) ) {
-				try ( Writer writer = new PrintWriter(osw) ) {
+			try ( Writer writer = new OutputStreamWriter(os, StandardCharsets.UTF_8) ) {
 					
-					// pipeline - agent - param - env - tools - stages
-					writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
-					writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
-					addParamEnvTools(writer, true);
-					writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
+				// pipeline - agent - param - env - tools - stages
+				writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
+				addParamEnvTools(writer, true);
+				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
+				
+				addInitializeStage(writer, true);
+				
+				addCreateDataFolderStage(writer);
+				
+				// all build
+				Map<Integer, List<String>> projectsBuildAll = confReader.getProjectsBuildAll();
+				int nbGroup = projectsBuildAll.size();
+				for (int index = 1; index <= nbGroup; index++) {
 					
-					addInitializeStage(writer, true);
-					
-					addCreateDataFolderStage(writer);
-					
-					// all build
-					Map<Integer, List<String>> projectsBuildAll = confReader.getProjectsBuildAll();
-					int nbGroup = projectsBuildAll.size();
-					for (int index = 1; index <= nbGroup; index++) {
-						
-						List<String> groupe = projectsBuildAll.get(index);
-						if (groupe.size() == 1)
-							addStageForProject(writer, groupe.get(0), 0);
-						else
-							addParallelStageForProject(writer, index, groupe);
-					}
-					
-					addDeployToSecondaryRemoteStage(writer);
-					
-					// stages - pipeline
-					writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
-					writer.write(constrcuctHelper.endPipeline() + constrcuctHelper.addCRLF());
-					
-					// saut de ligne
-					writer.write(constrcuctHelper.addCRLF());
-					
-					// functions.txt
-					writer.write(constrcuctHelper.getFunctions() );
+					List<String> groupe = projectsBuildAll.get(index);
+					if (groupe.size() == 1)
+						addStageForProject(writer, groupe.get(0), 0);
+					else
+						addParallelStageForProject(writer, index, groupe);
 				}
+				
+				addDeployToSecondaryRemoteStage(writer);
+				
+				// stages - pipeline
+				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.endPipeline() + constrcuctHelper.addCRLF());
+				
+				// saut de ligne
+				writer.write(constrcuctHelper.addCRLF());
+				
+				// functions.txt
+				writer.write(constrcuctHelper.getFunctions() );
 			}
 		}
 	}
