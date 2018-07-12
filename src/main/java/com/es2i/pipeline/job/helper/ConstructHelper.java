@@ -210,8 +210,13 @@ public class ConstructHelper {
 		return sh("ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/" + ConstantTools.ESII_APPLICATION + ".gz");
 	}
 	
-	public String callBuildAll(String revision) {
-		return sh("wget \\\"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=" + revision + "\\\"");
+	public String callBuildAll(String revision, String mavenProfile) {
+		
+		String param = "";
+		if (revision != null && mavenProfile != null) 
+			param = "&revision=" + revision + "&mavenProfile=" + mavenProfile + "\\\"";
+
+		return sh("wget \\\"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}" + param);
 	}
 	
 	public String runBuild() {

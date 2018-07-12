@@ -1,8 +1,8 @@
 pipeline {
 	agent any
 	parameters {
-		string(name: "revision", defaultValue: "master", description: "branche ou TAG")
-		choice(name: "mavenProfil", choices: "prod_windows\nprod_linux\ndev_windows\ndev_linux\ncd\n", description: "profile maven")
+		choice(name: "revision", choices: "master\ndevelop\n", description: "branche ou TAG")
+		choice(name: "mavenProfile", choices: "prod_windows\nprod_linux\ndev_windows\ndev_linux\ncd\n", description: "profile maven")
 		choice(name: "project", choices: "dashboard\nes2i\neCustomer\nsmsSender\nprocyon\neSecurity\neSirius-shared\neStat\nHistory\nePlanning\neSirius\nAppointment\neAdmin\neVision\n", description: "le projet à builder")
 	}
 	environment {
@@ -15,7 +15,7 @@ pipeline {
 			steps {
 				wrap([$class: 'AnsiColorBuildWrapper']) {
 					echo "\u001B[34m revision : ${params.revision} \u001B[m"
-					echo "\u001B[34m mavenProfil : ${params.mavenProfil} \u001B[m"
+					echo "\u001B[34m mavenProfile : ${params.mavenProfile} \u001B[m"
 					echo "\u001B[34m project : ${params.project} \u001B[m"
 				}
 				cleanWs()
@@ -59,7 +59,7 @@ void checkoutRevisionOnRepo(String gitRoot) {
 void mvnCleanInstall(String projectRoot, String jdk, String mvn) {
 	dir ("${projectRoot}") {
 		withMaven (jdk: jdk, maven: mvn) {
-			sh "mvn clean install -P ${params.mavenProfil}"
+			sh "mvn clean install -P ${params.mavenProfile}"
 		}
 	}
 }

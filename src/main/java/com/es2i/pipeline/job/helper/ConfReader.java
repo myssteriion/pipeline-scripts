@@ -40,7 +40,9 @@ public class ConfReader {
 
 	private List<Parameter> parameters;
 	
-	private List<String> runnerBranches;
+	private List<String> runnerRevisions;
+	
+	private List<String> runnerMavenProfiles;
 	
 	private List<String> secondaryRemotes;
 	
@@ -61,7 +63,7 @@ public class ConfReader {
 
 		Properties application = Tools.findPropertyFile(ConstantTools.APPLICATION_PROP_FILE);
 		Set<String> expectedKeys = new HashSet<String>();
-		expectedKeys.add(ConstantTools.RUNNER_BRANCHES_KEY);
+		expectedKeys.add(ConstantTools.RUNNER_REVISIONS_KEY);
 		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ONE_KEY);
 		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ALL_GROUPE1_KEY);
 		Tools.verifyKeys(expectedKeys, application.stringPropertyNames(), ConstantTools.APPLICATION_PROP_FILE);
@@ -91,24 +93,42 @@ public class ConfReader {
 	
 	
 	
-	public List<String> getRunnerBranches() throws IOException {
+	public List<String> getRunnerRevisions() throws IOException {
 		
-		if (runnerBranches == null) {
+		if (runnerRevisions == null) {
 			
-			runnerBranches = new ArrayList<String>();
+			runnerRevisions = new ArrayList<String>();
 			
 			Properties prop = Tools.findPropertyFile(ConstantTools.APPLICATION_PROP_FILE);
-			String[] branches = prop.getProperty(ConstantTools.RUNNER_BRANCHES_KEY).split(ConstantTools.COMA);
-			if ( branches == null || branches.length == 0 || (branches.length == 1 && branches[0].equals("")) ) {
-				runnerBranches.add("master");
-			}
-			else {
-				for (String branche : branches)
-					runnerBranches.add( branche.trim() );
+			String[] revisions = prop.getProperty(ConstantTools.RUNNER_REVISIONS_KEY).split(ConstantTools.COMA);
+			if ( revisions != null && revisions.length > 0 ) {
+				for (String revision : revisions) {
+					if ( !Tools.isNullOrEmpty(revision) ) 
+						runnerRevisions.add( revision.trim() );
+				}
 			}
 		}
 		
-		return runnerBranches;
+		return runnerRevisions;
+	}
+	
+	public List<String> getRunnerMavenProfiles() throws IOException {
+		
+		if (runnerMavenProfiles == null) {
+			
+			runnerMavenProfiles = new ArrayList<String>();
+			
+			Properties prop = Tools.findPropertyFile(ConstantTools.APPLICATION_PROP_FILE);
+			String[] mavenProfiles = prop.getProperty(ConstantTools.RUNNER_MAVEN_PROFILES_KEY).split(ConstantTools.COMA);
+			if ( mavenProfiles != null && mavenProfiles.length > 0 ) {
+				for (String mavenProfile : mavenProfiles) {
+					if ( !Tools.isNullOrEmpty(mavenProfile) ) 
+						runnerMavenProfiles.add( mavenProfile.trim() );
+				}
+			}
+		}
+		
+		return runnerMavenProfiles;
 	}
 	
 	public List<String> getSecondaryRemotes() throws IOException {

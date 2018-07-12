@@ -8,8 +8,10 @@ pipeline {
 	stages {
 		stage ("run") {
 			steps {
-				sh "wget \"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=master\""
-				sh "wget \"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=develop\""
+				sh "wget \"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=master&mavenProfile=prod_windows\""
+				sh "wget \"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=master&mavenProfile=prod_linux\""
+				sh "wget \"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=develop&mavenProfile=prod_windows\""
+				sh "wget \"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=develop&mavenProfile=prod_linux\""
 			}
 		}
 	}

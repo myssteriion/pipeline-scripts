@@ -119,8 +119,18 @@ public class Pipeline {
 			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("run") + constrcuctHelper.addCRLF());
 			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
 			
-			for ( String branche : confReader.getRunnerBranches() )
-				writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.callBuildAll(branche.trim()) + constrcuctHelper.addCRLF());
+			
+			List<String> revisions = confReader.getRunnerRevisions();
+			List<String> mavenProfiles = confReader.getRunnerMavenProfiles();
+			
+			if ( revisions.isEmpty() || mavenProfiles.isEmpty() ) {
+				writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.callBuildAll(null, null) + constrcuctHelper.addCRLF());
+			}
+			else {
+				for (String revision : revisions)
+					for (String mavenProfile : mavenProfiles)
+						writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.callBuildAll(revision.trim(), mavenProfile.trim()) + constrcuctHelper.addCRLF());
+			}
 			
 			// steps - stage - stages
 			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());

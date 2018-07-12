@@ -41,7 +41,8 @@ public class ConstantTools {
 	 * application.properties
 	 */
 	public static final String APPLICATION_PROP_FILE					= "application.properties";
-	public static final String RUNNER_BRANCHES_KEY 						= "runner.branches";
+	public static final String RUNNER_REVISIONS_KEY 					= "runner.revisons";
+	public static final String RUNNER_MAVEN_PROFILES_KEY 				= "runner.mavenProfiles";
 	public static final String PROJECTS_BUILD_ONE_KEY 					= "projects.build.one";
 	public static final String PROJECTS_BUILD_ALL_GROUPE_KEY 			= "projects.build.all.groupe";
 	public static final String PROJECTS_BUILD_ALL_GROUPE1_KEY 			= PROJECTS_BUILD_ALL_GROUPE_KEY + "1";
@@ -65,6 +66,5 @@ public class ConstantTools {
 	 */
 	public static final String REMOTE_DESCRIPTOR_FILE					= "remoteDescriptor.properties";
 	public static final String SECONDARY_REMOTE_KEY 					= "secondary.remote";
-	public static final String SECONDARY_REMOTE1_KEY 					= SECONDARY_REMOTE_KEY + "1";
 
 }
