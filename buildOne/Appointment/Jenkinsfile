@@ -3,7 +3,8 @@ pipeline {
 	parameters {
 		choice(name: "revision", choices: "master\ndevelop\n", description: "branche ou TAG")
 		choice(name: "mavenProfile", choices: "prod_windows\nprod_linux\ndev_windows\ndev_linux\ncd\n", description: "profile maven")
-		choice(name: "project", choices: "dashboard\nes2i\neCustomer\nsmsSender\nprocyon\neSecurity\neSirius-shared\neStat\nHistory\nePlanning\neSirius\nAppointment\neAdmin\neVision\n", description: "le projet à builder")
+		choice(name: "project", choices: "dashboard\nes2i\neCustomer\nsmsSender\nprocyon\neSecurity\neSirius-shared\neStat\nHistory\nePlanning\neSirius\nAppointment\neAdmin\neVision\n", description: "le projet ï¿½ builder")
+		choice(name: "confClient", choices: "<< aucun >>\nRSI\nMEDFAR"\ndescription: "la conf spÃ©cifique")
 	}
 	environment {
 		gitLabUrl = "http://192.168.25.68/eSirius/"
@@ -33,6 +34,22 @@ pipeline {
 			}
 			steps {
 				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)
+			}
+		}
+		stage ("specific conf") {
+			environment {
+				targetDirectory = "appointment"
+			}
+			steps {
+				sh "mkdir -p specificConf"
+				
+				dir ("specificConf") {
+					checkout scm: [ $class: "GitSCM", 
+						userRemoteConfigs: [ [url: "http://192.168.25.68/eSirius/test-external-conf", credentialsId: "root"] ],
+						branches: [ [name: params.confClient] ]
+					  ], poll: false
+				}
+				sh "scp -r specificConf/* ${env.primaryRemote}:${env.depotFolder}/${params.revision}/ESII-Applications/conf/${targetDirectory}"
 			}
 		}
 	}
