@@ -13,6 +13,8 @@ Sauf modification majeur, tout se passe dans les fichiers du dossier conf.
 Modifier les fichiers qui sont dans conf ne nessécite pas un mvn clean install.  
 Si le code java change, faire un clean install de l'application.
 
+> NOTE : dans le cas de mofification des paramètres pipeline (ajout de valeur par exemple), l'interface Jenkins ne se met pas à jours directement, il faut aller dans la configuration du job et faire la même modification
+
 # Exécution
 
 En ligne de commande, se placer à la racine du projet et lancer la commande 'java -jar target/pipelineScripts-1.0.jar'.  
