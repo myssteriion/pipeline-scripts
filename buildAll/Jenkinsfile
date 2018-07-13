@@ -280,7 +280,7 @@ void deploy(String projectRoot, String targetDirectory, String sourceAppDirector
 			if (sourceAppDirectory && sourceAppDirectory != "") {
 				sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
 				sh "scp ${projectRoot}/${sourceAppDirectory}/*.war ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
-				sh "ssh ${env.primaryRemote} unzip ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*.war -d ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/"
+				sh "ssh ${env.primaryRemote} unzip -qq ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*.war -d ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/"
 				sh "ssh ${env.primaryRemote} rm -f ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*.war"
 			}
 			if (sourceConfDirectory && sourceConfDirectory != "") {
