@@ -8,7 +8,7 @@ pipeline {
 	environment {
 		gitLabUrl = "http://192.168.25.68/eSirius/"
 		primaryRemote = "esii@192.168.25.94"
-		depotFolder = "depotTest"
+		depotFolder = "depot"
 	}
 	stages {
 		stage ("Initialize") {
@@ -69,18 +69,18 @@ void deploy(String projectRoot, String targetDirectory, String sourceAppDirector
 	script {
 		
 		if (targetDirectory && targetDirectory != "") {
-			sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/ESII-Applications/app/${targetDirectory}"
-			sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/ESII-Applications/conf/${targetDirectory}"
+			sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
+			sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}"
 		
 			if (sourceAppDirectory && sourceAppDirectory != "") {
-				sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/ESII-Applications/app/${targetDirectory}"
-				sh "scp ${projectRoot}/${sourceAppDirectory}/*.war ${env.primaryRemote}:${env.depotFolder}/${params.revision}/ESII-Applications/app/${targetDirectory}"
-				sh "ssh ${env.primaryRemote} unzip ${env.depotFolder}/${params.revision}/ESII-Applications/app/${targetDirectory}/*.war -d ${env.depotFolder}/${params.revision}/ESII-Applications/app/${targetDirectory}/"
-				sh "ssh ${env.primaryRemote} rm -f ${env.depotFolder}/${params.revision}/ESII-Applications/app/${targetDirectory}/*.war"
+				sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
+				sh "scp ${projectRoot}/${sourceAppDirectory}/*.war ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
+				sh "ssh ${env.primaryRemote} unzip ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*.war -d ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/"
+				sh "ssh ${env.primaryRemote} rm -f ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*.war"
 			}
 			if (sourceConfDirectory && sourceConfDirectory != "") {
-				sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/ESII-Applications/conf/${targetDirectory}"
-				sh "scp -r ${projectRoot}/${sourceConfDirectory}/* ${env.primaryRemote}:${env.depotFolder}/${params.revision}/ESII-Applications/conf/${targetDirectory}"
+				sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}"
+				sh "scp -r ${projectRoot}/${sourceConfDirectory}/* ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}"
 			}
 		}
 	}
@@ -89,7 +89,7 @@ void deploy(String projectRoot, String targetDirectory, String sourceAppDirector
 void deployToSecondaryRemote(String secondaryRemote) {
 	sh "ssh ${secondaryRemote} \"rm -rf ESII-Applications && mkdir -p ESII-Applications\""
 	
-	sh "scp -r ${env.primaryRemote}:${env.depotFolder}/${params.revision}/ESII-Applications.gz ${secondaryRemote}:"
+	sh "scp -r ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications.gz ${secondaryRemote}:"
 	sh "ssh ${secondaryRemote} tar -xf ESII-Applications.gz"
 	
 	sh "ssh ${secondaryRemote} rm -rf ESII-Applications.gz"

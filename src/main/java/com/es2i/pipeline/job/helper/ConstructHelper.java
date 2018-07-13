@@ -187,12 +187,12 @@ public class ConstructHelper {
 
 	
 	public String cleanPrimaryRemote() {
-		return sh("ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}");
+		return sh("ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${params.mavenProfile}");
 	}
 	
 	public String createDataFolderOnPrimaryRemote() {
 		
-		String str = "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/";
+		String str = "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/";
 		str += ConstantTools.ESII_APPLICATION + "/" + ConstantTools.DATA + "/" + ConstantTools.EVENT_STORAGE + "/";
 		
 		return sh(str);
@@ -200,14 +200,14 @@ public class ConstructHelper {
 	
 	public String createTarOnPrimaryRemote() {
 		
-		String str = "ssh ${env.primaryRemote} \\\"cd ${env.depotFolder}/${params.revision} && tar -cf ";
+		String str = "ssh ${env.primaryRemote} \\\"cd ${env.depotFolder}/${params.revision}/${params.mavenProfile} && tar -cf ";
 		str += ConstantTools.ESII_APPLICATION + ".gz " + ConstantTools.ESII_APPLICATION + "\\\"";
 		
 		return sh(str);
 	}
 	
 	public String removeTarOnPrimaryRemote() {
-		return sh("ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/" + ConstantTools.ESII_APPLICATION + ".gz");
+		return sh("ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${params.mavenProfile}/" + ConstantTools.ESII_APPLICATION + ".gz");
 	}
 	
 	public String callBuildAll(String revision, String mavenProfile) {
