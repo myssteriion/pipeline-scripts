@@ -2,8 +2,18 @@
 	a - copier le contenu du fichier "/home/jenkins/.ssh/id_rsa.pub" (clé publique)
 	
 2 - Sur la machine de destination :
-	a - coller la clé public à la fin du fichier "/home/$(user)/.ssh/authorized_keys" (créer le fichier si nécessaire ou bien ajouter la clé à la fin de celui-ci)
+	a - créer le user "jenkins" (si nécessaire)
+	b - coller la clé public à la fin du fichier "/home/jenkins/.ssh/authorized_keys" (créer le fichier si nécessaire ou bien ajouter la clé à la fin de celui-ci)
+
+------------------------------
+
+1 -  Sur la machine du dépot (voir "environement.json" -> "primaryRemote")
+	a - copier le contenu du fichier "/home/jenkins/.ssh/id_rsa.pub" (clé publique)
+	
+2 - Sur la machine de destination :
+	a - créer le user "jenkins" (si nécessaire)
+	b - coller la clé public à la fin du fichier "/home/jenkins/.ssh/authorized_keys" (créer le fichier si nécessaire ou bien ajouter la clé à la fin de celui-ci)
 
 remarque :
-Dans l'application Jenkins, le crédential est déjà créé et se nomme "esii (debian-ic (et autres machines de déploiement))".
-Le user de connexion aux machines distantes doit être "esii". Si ce n'est pas le cas, il faudra ajouter autant de crédentials dans jenkins qu'il y a de user différent.
+1 - les droits sont importants, si vous créez le dossier ".ssh" ou le fichier "authorized_keys", le chmod doit être 700
+2 - Dans l'application Jenkins, le crédential est déjà créé et se nomme "jenkins (debian-ic (et autres machines de déploiement))".

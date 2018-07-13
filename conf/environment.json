@@ -1,7 +1,7 @@
 {
 	"global" : {
 		"gitLabUrl" : "http://192.168.25.68/eSirius/",
-		"primaryRemote" : "esii@192.168.25.94",
+		"primaryRemote" : "jenkins@192.168.25.94",
 		"depotFolder" : "depot"
 	},
 	"runner" : {

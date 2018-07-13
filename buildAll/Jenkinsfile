@@ -7,7 +7,7 @@ pipeline {
 	}
 	environment {
 		gitLabUrl = "http://192.168.25.68/eSirius/"
-		primaryRemote = "esii@192.168.25.94"
+		primaryRemote = "jenkins@192.168.25.94"
 		depotFolder = "depot"
 	}
 	stages {
@@ -234,7 +234,7 @@ pipeline {
 				script {
 					if (params.secondaryDeploy) {
 						sh "ssh ${env.primaryRemote} \"cd ${env.depotFolder}/${params.revision}/${params.mavenProfile} && tar -cf ESII-Applications.gz ESII-Applications\""
-						deployToSecondaryRemote("esii@192.168.25.22")
+						deployToSecondaryRemote("jenkins@192.168.25.22")
 						sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications.gz"
 					}
 				}
