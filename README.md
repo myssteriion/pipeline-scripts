@@ -10,6 +10,9 @@ Permet de générer automatiquement tous les scripts pipelines d'eSirius.
 # Paramétrages
 
 Sauf modification majeur, tout se passe dans les fichiers du dossier conf.  
+
+> IMPORTANT : il ne faut pas directement modifier les jenkinsfile ! Il faut passer par la conf et exécuter le jar. Avec l'outil GitKraken, il sera alors très facile de vérifier que les jenkinsfile sont ok
+
 Modifier les fichiers qui sont dans conf ne nessécite pas un mvn clean install.  
 Si le code java change, faire un clean install de l'application.
 
