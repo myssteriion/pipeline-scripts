@@ -102,43 +102,45 @@ public class Pipeline {
 		File jenkinsfile = Paths.get(runnerDirecrory.getAbsolutePath(), ConstantTools.JENKINS_FILE).toFile();
 		jenkinsfile.createNewFile();
 		
-		try (Writer writer = new PrintWriter(jenkinsfile)) {
-			
-			// pipeline - agent
-			writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
-			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
-			
-			// global runner env
-			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
-			for ( Environment env : confReader.getEnvironmentByPrefix(ConstantTools.RUNNER_KEY) )
-				writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.contentEnv(env) + constrcuctHelper.addCRLF());
-			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
-			
-			// stages - stage - steps
-			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
-			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("run") + constrcuctHelper.addCRLF());
-			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
-			
-			
-			List<String> revisions = confReader.getRunnerRevisions();
-			List<String> mavenProfiles = confReader.getRunnerMavenProfiles();
-			
-			if ( revisions.isEmpty() || mavenProfiles.isEmpty() ) {
-				writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.callBuildAll(null, null) + constrcuctHelper.addCRLF());
+		try ( OutputStream os = new FileOutputStream(jenkinsfile) ) {
+			try ( Writer writer = new OutputStreamWriter(os, StandardCharsets.UTF_8) ) {
+				
+				// pipeline - agent
+				writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
+				
+				// global runner env
+				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
+				for ( Environment env : confReader.getEnvironmentByPrefix(ConstantTools.RUNNER_KEY) )
+					writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.contentEnv(env) + constrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
+				
+				// stages - stage - steps
+				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("run") + constrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
+				
+				
+				List<String> revisions = confReader.getRunnerRevisions();
+				List<String> mavenProfiles = confReader.getRunnerMavenProfiles();
+				
+				if ( revisions.isEmpty() || mavenProfiles.isEmpty() ) {
+					writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.callBuildAll(null, null) + constrcuctHelper.addCRLF());
+				}
+				else {
+					for (String revision : revisions)
+						for (String mavenProfile : mavenProfiles)
+							writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.callBuildAll(revision.trim(), mavenProfile.trim()) + constrcuctHelper.addCRLF());
+				}
+				
+				// steps - stage - stages
+				writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
+				
+				// pipeline
+				writer.write(constrcuctHelper.endPipeline());
 			}
-			else {
-				for (String revision : revisions)
-					for (String mavenProfile : mavenProfiles)
-						writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.callBuildAll(revision.trim(), mavenProfile.trim()) + constrcuctHelper.addCRLF());
-			}
-			
-			// steps - stage - stages
-			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());
-			writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
-			writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
-			
-			// pipeline
-			writer.write(constrcuctHelper.endPipeline());
 		}
 	}
 	
@@ -156,27 +158,29 @@ public class Pipeline {
 			File jenkinsfile = Paths.get(projectDirecrory.getAbsolutePath(), ConstantTools.JENKINS_FILE).toFile();
 			jenkinsfile.createNewFile();
 			
-			try (Writer writer = new PrintWriter(jenkinsfile)) {
+			try ( OutputStream os = new FileOutputStream(jenkinsfile) ) {
+				try ( Writer writer = new OutputStreamWriter(os, StandardCharsets.UTF_8) ) {
 				
-				// pipeline - agent - param - env - tools - stages
-				writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
-				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
-				addParamEnvTools(writer, false);
-				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
-				
-				addInitializeStage(writer, false);
-				
-				addStageForProject(writer, project, 0);
-				
-				// stages - pipeline
-				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
-				writer.write(constrcuctHelper.endPipeline() + constrcuctHelper.addCRLF());
-				
-				// saut de ligne
-				writer.write(constrcuctHelper.addCRLF());
-				
-				// functions.txt
-				writer.write(constrcuctHelper.getFunctions());
+					// pipeline - agent - param - env - tools - stages
+					writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
+					writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
+					addParamEnvTools(writer, false);
+					writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
+					
+					addInitializeStage(writer, false);
+					
+					addStageForProject(writer, project, 0);
+					
+					// stages - pipeline
+					writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
+					writer.write(constrcuctHelper.endPipeline() + constrcuctHelper.addCRLF());
+					
+					// saut de ligne
+					writer.write(constrcuctHelper.addCRLF());
+					
+					// functions.txt
+					writer.write(constrcuctHelper.getFunctions());
+				}
 			}
 		}
 		
