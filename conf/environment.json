@@ -13,7 +13,7 @@
 		"gitRoot" : "dashboard",
 		"projectRoot" : "dashboard",
 		"jdkCompilation" : "JDK 1.7.0_25",
-		"mvnVersion" : "Maven 3.2.1",
+		"mvnVersion" : "Maven 3.3.9",
 		"targetDirectory" : "dashboard",
 		"sourceAppDirectory" : "dashboard-webapp/target",
 		"sourceConfDirectory" : ""
