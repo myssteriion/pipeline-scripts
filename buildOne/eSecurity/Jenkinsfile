@@ -3,7 +3,7 @@ pipeline {
 	parameters {
 		choice(name: "revision", choices: "master\ndevelop\nbuild\n", description: "branche ou TAG")
 		choice(name: "mavenProfile", choices: "prod_windows\nprod_linux\ndev_windows\ndev_linux\ncd\n", description: "profile maven")
-		choice(name: "project", choices: "dashboard\nes2i\neCustomer\nsmsSender\nprocyon\neSecurity\neSirius-shared\neStat\nHistory\nePlanning\neSirius\nAppointment\neAdmin\neVision\n", description: "le projet à builder")
+		choice(name: "project", choices: "es2i\neCustomer\nsmsSender\nprocyon\neSecurity\neSirius-shared\neStat\nHistory\nePlanning\neSirius\nAppointment\neAdmin\neVision\n", description: "le projet à builder")
 	}
 	environment {
 		gitLabUrl = "http://192.168.25.68/eSirius/"
