@@ -23,17 +23,15 @@ Si le code java change, faire un clean install de l'application.
 En ligne de commande, se placer à la racine du projet et lancer la commande 'java -jar target/pipelineScripts-1.0.jar'.  
 Les fichiers générés sont à commiter sur le repo Git.
 
-# Info pratiques
-
-Le répertoire à partir duquel lancer la commande java -jar doit être la racine du projet.  
-Le jar généré ne doit pas être déplacé car il utilise en chemin relatif le dossier 'conf' ainsi que le dossier 'target/libs'.
+> IMPORTANT : le répertoire à partir duquel lancer la commande java -jar doit être la racine du projet. Le jar généré ne doit pas être déplacé car il utilise en chemin relatif le dossier 'conf' ainsi que le dossier 'target/libs'. 
 
 # Paramètre $
 
 Dans _functions.json_, il y des variable de la forme __${xxx}__ ou __$xxx__. De même dans les sources (centralisé dans _ConstructHelper__).  
 La syntaxe __${xxx}__ sera écrit tel quel dans le pipeline généré car c'est une variable d'environement (d'un point de vue pipeline).  
 La syntaxe __$xxx__ est remplacé directent par le code java lors de l'exécution du jar => ce sont donc des valeurs en dur dans le pipeline.  
-Les blocs vides (d'un point de vue pipeline) sont des erreurs de syntaxe (attention au bloc _parameter_, _tools_ et _env_ vide => commenter les blocs si nécessaire).
+
+> NOTE : les blocs vides (d'un point de vue pipeline) sont des erreurs de syntaxe (attention au bloc _parameter_, _tools_ et _env_ vide => commenter les blocs si nécessaire) 
 
 # Dossier conf 
 ## parameters.json
@@ -66,4 +64,4 @@ Les autres sous objets json sont les projets. La valeur à mettre correspond aux
 ## functions.txt
 
 Les fonctions groovy qui sont systématiquement concaténées au buildAll et aux monoBuild.  
-Attention au noms des paramètres qui se trouve dedans. Il peut y avoir des impacts en cas de modifications de certains paramètres.
+Les fonctions sont systématiquement concaténées au buildAll et aux monoBuild.
