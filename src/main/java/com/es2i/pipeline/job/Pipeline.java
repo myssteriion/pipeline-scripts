@@ -75,9 +75,9 @@ public class Pipeline {
 					
 					List<String> groupe = projectsBuildAll.get(index);
 					if (groupe.size() == 1)
-						addStageForProject(writer, groupe.get(0), 0);
+						addStageForProject(writer, groupe.get(0), false, true);
 					else
-						addParallelStageForProject(writer, index, groupe);
+						addParallelStageForProject(writer, index, groupe, true);
 				}
 				
 				addDeployToSecondaryRemoteStage(writer);
@@ -168,7 +168,7 @@ public class Pipeline {
 					
 					addInitializeStage(writer, false);
 					
-					addStageForProject(writer, project, 0);
+					addStageForProject(writer, project, false, false);
 					
 					// stages - pipeline
 					writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
@@ -281,7 +281,9 @@ public class Pipeline {
 		}
 	}
 	
-	private void addStageForProject(Writer writer, String project, int identToAdd) throws IOException, URISyntaxException {
+	private void addStageForProject(Writer writer, String project, boolean insideParallelBloc, boolean isBuildAll) throws IOException, URISyntaxException {
+		
+		int identToAdd = insideParallelBloc ? 2 : 0;
 		
 		// stage
 		writer.write(constrcuctHelper.addTab(2 + identToAdd) + constrcuctHelper.beginStage("build " + project) + constrcuctHelper.addCRLF());
@@ -294,21 +296,24 @@ public class Pipeline {
 		
 		// steps
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
+		if (!isBuildAll)
+			writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.cleanProjectPrimaryRemote() + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.runBuild() + constrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.deploy() + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());
 		
 		// stage
 		writer.write(constrcuctHelper.addTab(2 + identToAdd) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 	
-	private void addParallelStageForProject(Writer writer, int index, List<String> groupe) throws IOException, URISyntaxException {
+	private void addParallelStageForProject(Writer writer, int index, List<String> groupe, boolean isBuildAll) throws IOException, URISyntaxException {
 		
 		// stage - parallel
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("build groupe " + index) + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginParallel() + constrcuctHelper.addCRLF());
 		
 		for (String project : groupe)
-			addStageForProject(writer, project, 2);
+			addStageForProject(writer, project, true, isBuildAll);
 		
 		// parallel - stage
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endParallel() + constrcuctHelper.addCRLF());

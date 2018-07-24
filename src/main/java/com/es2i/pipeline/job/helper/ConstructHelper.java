@@ -187,9 +187,13 @@ public class ConstructHelper {
 
 	
 	public String cleanPrimaryRemote() {
-		return sh("ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${params.mavenProfile}");
+		return "cleanPrimaryRemote()";
 	}
 	
+	public String cleanProjectPrimaryRemote() { 
+		return "cleanProjectPrimaryRemote(env.targetDirectory)"; 
+	}
+	 
 	public String createDataFolderOnPrimaryRemote() {
 		
 		String str = "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/";
@@ -220,7 +224,11 @@ public class ConstructHelper {
 	}
 	
 	public String runBuild() {
-		return "runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)";
+		return "runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)";
+	}
+	
+	public String deploy() {
+		return "deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)";
 	}
 	
 	public String runDeployToSecondaryRemote(String remote) {
