@@ -1,11 +1,11 @@
-void runBuild(String gitRoot, String projectRoot, String jdk, String mvn, String targetDirectory, String sourceAppDirectory, String sourceConfDirectory) {
+void runBuild(String gitRoot, String projectRoot, String jdk, String mvn, String targetDirectory, String sourceAppDirectory, String sourceExtension, String sourceConfDirectory) {
 	
 	sh "mkdir -p ${gitRoot}"
 
 	dir ("${gitRoot}") {
 		checkoutRevisionOnRepo(gitRoot)
 		mvnCleanInstall(projectRoot, jdk, mvn)
-		deploy(projectRoot, targetDirectory, sourceAppDirectory, sourceConfDirectory)
+		deploy(projectRoot, targetDirectory, sourceAppDirectory, sourceExtension, sourceConfDirectory)
 	}
 }
 
@@ -24,7 +24,7 @@ void mvnCleanInstall(String projectRoot, String jdk, String mvn) {
 	}
 }
 
-void deploy(String projectRoot, String targetDirectory, String sourceAppDirectory, String sourceConfDirectory) {
+void deploy(String projectRoot, String targetDirectory, String sourceAppDirectory, String sourceExtension, String sourceConfDirectory) {
 
 	script {
 		
@@ -34,9 +34,9 @@ void deploy(String projectRoot, String targetDirectory, String sourceAppDirector
 		
 			if (sourceAppDirectory && sourceAppDirectory != "") {
 				sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/$esiiFolder/$appFolder/${targetDirectory}"
-				sh "scp ${projectRoot}/${sourceAppDirectory}/*.war ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/$esiiFolder/$appFolder/${targetDirectory}"
-				sh returnStatus: true, script: "ssh ${env.primaryRemote} unzip -qq -o ${env.depotFolder}/${params.revision}/${params.mavenProfile}/$esiiFolder/$appFolder/${targetDirectory}/*.war -d ${env.depotFolder}/${params.revision}/${params.mavenProfile}/$esiiFolder/$appFolder/${targetDirectory}/"
-				sh "ssh ${env.primaryRemote} rm -f ${env.depotFolder}/${params.revision}/${params.mavenProfile}/$esiiFolder/$appFolder/${targetDirectory}/*.war"
+				sh "scp ${projectRoot}/${sourceAppDirectory}/*${sourceExtension} ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/$esiiFolder/$appFolder/${targetDirectory}"
+				sh returnStatus: true, script: "ssh ${env.primaryRemote} unzip -qq -o ${env.depotFolder}/${params.revision}/${params.mavenProfile}/$esiiFolder/$appFolder/${targetDirectory}/*${sourceExtension} -d ${env.depotFolder}/${params.revision}/${params.mavenProfile}/$esiiFolder/$appFolder/${targetDirectory}/"
+				sh "ssh ${env.primaryRemote} rm -f ${env.depotFolder}/${params.revision}/${params.mavenProfile}/$esiiFolder/$appFolder/${targetDirectory}/*${sourceExtension}"
 			}
 			if (sourceConfDirectory && sourceConfDirectory != "") {
 				sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/$esiiFolder/$confFolder/${targetDirectory}"

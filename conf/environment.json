@@ -16,6 +16,7 @@
 		"mvnVersion" : "Maven 3.3.9",
 		"targetDirectory" : "dashboard",
 		"sourceAppDirectory" : "dashboard-webapp/target",
+		"sourceExtension" : ".war",
 		"sourceConfDirectory" : ""
 	},
 	"es2i" : {
@@ -25,6 +26,7 @@
 		"mvnVersion" : "Maven 3.2.1",
 		"targetDirectory" : "",
 		"sourceAppDirectory" : "",
+		"sourceExtension" : "",
 		"sourceConfDirectory" : ""
 	},
 	"eCustomer" : {
@@ -34,6 +36,7 @@
 		"mvnVersion" : "Maven 3.2.1",
 		"targetDirectory" : "customer",
 		"sourceAppDirectory" : "eCustomer-app/target",
+		"sourceExtension" : ".war",
 		"sourceConfDirectory" : "eCustomer-conf/target/eCustomer-conf"
 	},
 	"smsSender" : {
@@ -43,6 +46,7 @@
 		"mvnVersion" : "Maven 3.2.1",
 		"targetDirectory" : "smssender",
 		"sourceAppDirectory" : "smsSender-app/target",
+		"sourceExtension" : ".war",
 		"sourceConfDirectory" : "smsSender-conf/target/smsSender-conf"
 	},
 	"procyon" : {
@@ -52,6 +56,7 @@
 		"mvnVersion" : "Maven 3.2.1",
 		"targetDirectory" : "",
 		"sourceAppDirectory" : "",
+		"sourceExtension" : "",
 		"sourceConfDirectory" : ""
 	},
 	"eSecurity" : {
@@ -61,6 +66,7 @@
 		"mvnVersion" : "Maven 3.2.1",
 		"targetDirectory" : "esecurity",
 		"sourceAppDirectory" : "esecurity-gxt-app/target",
+		"sourceExtension" : ".war",
 		"sourceConfDirectory" : "esecurity-conf/target/esecurity-conf"
 	},
 	"eSirius-shared" : {
@@ -70,6 +76,7 @@
 		"mvnVersion" : "Maven 3.2.1",
 		"targetDirectory" : "",
 		"sourceAppDirectory" : "",
+		"sourceExtension" : "",
 		"sourceConfDirectory" : ""
 	},
 	"eStat" : {
@@ -79,6 +86,7 @@
 		"mvnVersion" : "Maven 3.2.1",
 		"targetDirectory" : "estat",
 		"sourceAppDirectory" : "eSirius-estat-app/target",
+		"sourceExtension" : ".war",
 		"sourceConfDirectory" : "eStatConf/target/eStat-conf"
 	},
 	"History" : {
@@ -88,6 +96,7 @@
 		"mvnVersion" : "Maven 3.2.1",
 		"targetDirectory" : "esirius-history-event",
 		"sourceAppDirectory" : "eSirius-history-event-app/target",
+		"sourceExtension" : ".war",
 		"sourceConfDirectory" : "eSirius-history-event-conf/target/eSirius-history-event-conf"
 	},
 	"ePlanning" : {
@@ -97,6 +106,7 @@
 		"mvnVersion" : "Maven 3.2.1",
 		"targetDirectory" : "ePlanning",
 		"sourceAppDirectory" : "ePlanning-app/target",
+		"sourceExtension" : ".war",
 		"sourceConfDirectory" : "ePlanningConf/target/ePlanningConf"
 	},
 	"eSirius" : {
@@ -106,6 +116,7 @@
 		"mvnVersion" : "Maven 3.2.1",
 		"targetDirectory" : "eSirius",
 		"sourceAppDirectory" : "eSirius-app/target",
+		"sourceExtension" : ".war",
 		"sourceConfDirectory" : "eSiriusConf/target/eSirius-Conf"
 	},
 	"Appointment" : {
@@ -115,6 +126,7 @@
 		"mvnVersion" : "Maven 3.2.1",
 		"targetDirectory" : "appointment",
 		"sourceAppDirectory" : "appointment-app/target",
+		"sourceExtension" : ".war",
 		"sourceConfDirectory" : "appointment-conf/target/appointment-conf"
 	},
 	"eAdmin" : {
@@ -124,6 +136,7 @@
 		"mvnVersion" : "Maven 3.2.1",
 		"targetDirectory" : "eadmin",
 		"sourceAppDirectory" : "eSirius-admin-app/target",
+		"sourceExtension" : ".war",
 		"sourceConfDirectory" : "eSirius-admin-conf/target/eSirius-admin-conf"
 	},
 	"eVision" : {
@@ -133,6 +146,7 @@
 		"mvnVersion" : "Maven 3.2.1",
 		"targetDirectory" : "evision",
 		"sourceAppDirectory" : "eSirius-vision-app/target",
+		"sourceExtension" : ".war",
 		"sourceConfDirectory" : "eSirius-vision-conf/target/eSirius-vision-conf"
 	}
 }

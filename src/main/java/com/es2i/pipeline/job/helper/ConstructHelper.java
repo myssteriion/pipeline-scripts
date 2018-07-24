@@ -220,7 +220,7 @@ public class ConstructHelper {
 	}
 	
 	public String runBuild() {
-		return "runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceConfDirectory)";
+		return "runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)";
 	}
 	
 	public String runDeployToSecondaryRemote(String remote) {

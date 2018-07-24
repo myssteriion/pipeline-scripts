@@ -45,7 +45,8 @@ public class Environment {
 		
 		// project
 		GIT_ROOT("gitRoot", true), PROJECT_ROOT("projectRoot", true), JDK_COMPILATION("jdkCompilation", true), MVN_VERSION("mvnVersion", true),
-		TARGET_DIRECTORY("targetDirectory", false), SOURCE_APP_DIRECTORY("sourceAppDirectory", false), SOURCE_CON_DIRECTORY("sourceConfDirectory", false);
+		TARGET_DIRECTORY("targetDirectory", false), SOURCE_APP_DIRECTORY("sourceAppDirectory", false), SOURCE_EXTENSION("sourceExtension", false),
+		SOURCE_CON_DIRECTORY("sourceConfDirectory", false);
 		
 		private String name;
 		
@@ -84,7 +85,7 @@ public class Environment {
 		 * Retourne le tableau des propriétés obligatoires pour le scope 'project' dans le json.
 		 */
 		public static EnvironmentKey[] getProjectKeys() {
-			EnvironmentKey[] tab = { GIT_ROOT, PROJECT_ROOT, JDK_COMPILATION, MVN_VERSION, TARGET_DIRECTORY, SOURCE_APP_DIRECTORY, SOURCE_CON_DIRECTORY };
+			EnvironmentKey[] tab = { GIT_ROOT, PROJECT_ROOT, JDK_COMPILATION, MVN_VERSION, TARGET_DIRECTORY, SOURCE_APP_DIRECTORY, SOURCE_EXTENSION, SOURCE_CON_DIRECTORY };
 			return tab;
 		}
 	};
