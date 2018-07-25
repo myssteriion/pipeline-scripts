@@ -1,5 +1,7 @@
 package com.es2i.pipeline.job.entities;
 
+import com.es2i.pipeline.tools.ConstantTools;
+
 
 /**
  * Représente une variable environement d'un point de vue Pipeline.
@@ -8,25 +10,16 @@ package com.es2i.pipeline.job.entities;
 public class Environment {
 
 	/**
-	 * Permet de répartir les différentes propriétés.
+	 * Les variables d'environements sont définit dans le même fichier (sauf pour dashboard).
+	 * Permet de déterminer les différentes clés.
 	 */
-	public enum Scope { GLOBAL("global"), RUNNER("runner"), PROJECT("project");
-		
-		private String name;
+	public enum ScopeEnvironment { GLOBAL, RUNNER, PROJECT;
 	
-		private Scope(String name) {
-			this.name = name;
-		}
-		
-		public String getName() {
-			return this.name;
-		}
-	
-		public static Scope getTypeParameterByName(String name) {
+		public static ScopeEnvironment findScopeEnvironmentByName(String name) {
 			
-			if ( GLOBAL.getName().equalsIgnoreCase(name) )
+			if ( GLOBAL.toString().equalsIgnoreCase(name) )
 				return GLOBAL;
-			else if ( RUNNER.getName().equalsIgnoreCase(name) )
+			else if ( RUNNER.toString().equalsIgnoreCase(name) )
 				return RUNNER;
 			else 
 				return PROJECT;
@@ -65,28 +58,20 @@ public class Environment {
 			return this.isMandatory;
 		}
 		
-		/**
-		 * Retourne le tableau des propriétés obligatoires pour le scope 'global' dans le json.
-		 */
-		public static EnvironmentKey[] getGlobalKeys() {
-			EnvironmentKey[] tab = { GIT_LAB_URL, PRIMARY_REMOTE, DEPOT_FOLDER };
-			return tab;
-		}
-		
-		/**
-		 * Retourne le tableau des propriétés obligatoires pour le scope 'runner' dans le json.
-		 */
-		public static EnvironmentKey[] getRunnerKeys() {
-			EnvironmentKey[] tab = { JENKINS_URL, JOB_NAME_REMOTE, PIPELINE_TOKEN };
-			return tab;
-		}
-		
-		/**
-		 * Retourne le tableau des propriétés obligatoires pour le scope 'project' dans le json.
-		 */
-		public static EnvironmentKey[] getProjectKeys() {
-			EnvironmentKey[] tab = { GIT_ROOT, PROJECT_ROOT, JDK_COMPILATION, MVN_VERSION, TARGET_DIRECTORY, SOURCE_APP_DIRECTORY, SOURCE_EXTENSION, SOURCE_CON_DIRECTORY };
-			return tab;
+		public static EnvironmentKey[] getKeys(String scope) {
+			
+			if ( scope.equalsIgnoreCase(ConstantTools.GLOBAL_KEY) ) {
+				EnvironmentKey[] tab = { GIT_LAB_URL, PRIMARY_REMOTE, DEPOT_FOLDER };
+				return tab;
+			}
+			else if ( scope.equalsIgnoreCase(ConstantTools.RUNNER_KEY) ) {
+				EnvironmentKey[] tab = { JENKINS_URL, JOB_NAME_REMOTE, PIPELINE_TOKEN };
+				return tab;
+			}
+			else {
+				EnvironmentKey[] tab = { GIT_ROOT, PROJECT_ROOT, JDK_COMPILATION, MVN_VERSION, TARGET_DIRECTORY, SOURCE_APP_DIRECTORY, SOURCE_EXTENSION, SOURCE_CON_DIRECTORY };
+				return tab;
+			}
 		}
 	};
 	

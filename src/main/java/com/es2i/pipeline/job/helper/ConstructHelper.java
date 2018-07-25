@@ -193,7 +193,7 @@ public class ConstructHelper {
 	public String cleanProjectPrimaryRemote() { 
 		return "cleanProjectPrimaryRemote(env.targetDirectory)"; 
 	}
-	 
+	
 	public String createDataFolderOnPrimaryRemote() {
 		
 		String str = "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/";
@@ -234,6 +234,25 @@ public class ConstructHelper {
 	public String runDeployToSecondaryRemote(String remote) {
 		return "deployToSecondaryRemote(\"" + remote + "\")";
 	}
+	
+	
+	public String ifBackDeploy() {
+		return "if (params.backDeploy) {";
+	}
+	
+	public String endIfBackDeploy() {
+		return "}";
+	}
+	
+	public String ifFrontDeploy() {
+		return "if (params.frontDeploy) {";
+	}
+	
+	public String endIfFrontDeploy() {
+		return "}";
+	}
+	
+	
 	
 	
 	public String addTab(int nb) {

@@ -1,5 +1,7 @@
 package com.es2i.pipeline.job.entities;
 
+import com.es2i.pipeline.job.Pipeline;
+import com.es2i.pipeline.job.Pipeline.BuildType;
 import com.es2i.pipeline.tools.Tools;
 
 /**
@@ -40,9 +42,9 @@ public abstract class Parameter {
 	
 	/**
 	 * Les paramètres sont définit dans le même fichier.
-	 * Permet de définir si le paramètre est présent pour les monoBuild (mono), pour le buildAll (all), pour les 2 (both).
+	 * Permet de définir si le paramètre est présent pour les monoBuild (mono), pour le buildAll (all), pour tous (every).
 	 */
-	public enum ScopeParamater { MONO, ALL, BOTH }; 
+	public enum ScopeParamater { MONO, ALL, DASH, EVERY }; 
 	
 	/**
 	 * Les propriété obligatoires et facultatives permettant de définir une variable paramètre.
@@ -95,13 +97,16 @@ public abstract class Parameter {
 		this.desc = desc;
 		
 		if ( Tools.isNullOrEmpty(scope) ) {
-			this.scope = ScopeParamater.BOTH;
+			this.scope = ScopeParamater.EVERY;
 		}
 		else if ( scope.equalsIgnoreCase(ScopeParamater.MONO.toString()) ) {
 			this.scope = ScopeParamater.MONO;
 		}
 		else if ( scope.equalsIgnoreCase(ScopeParamater.ALL.toString()) ) {
 			this.scope = ScopeParamater.ALL;
+		}
+		else if ( scope.equalsIgnoreCase(ScopeParamater.DASH.toString()) ) {
+			this.scope = ScopeParamater.DASH;
 		}
 	}
 	
@@ -119,12 +124,10 @@ public abstract class Parameter {
 		return desc;
 	}
 	
-	public boolean isMonoScope() {
-		return scope == ScopeParamater.BOTH || scope == ScopeParamater.MONO;
+	public boolean isInScope(Pipeline.BuildType buildType) {
+		return this.scope == ScopeParamater.EVERY 
+				|| (this.scope == ScopeParamater.ALL && buildType == BuildType.ALL_BUILD)
+				|| (this.scope == ScopeParamater.MONO && buildType == BuildType.MONO_BUILD) 
+				|| (this.scope == ScopeParamater.DASH && buildType == BuildType.DASHBOARD) ;
 	}
-	
-	public boolean isAllScope() {
-		return scope == ScopeParamater.BOTH || scope == ScopeParamater.ALL;
-	}
-	
 }

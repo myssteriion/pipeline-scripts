@@ -22,6 +22,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
 
+import com.es2i.pipeline.job.entities.Dashboard;
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
 import com.es2i.pipeline.job.entities.parameter_impl.BooleanParameter;
@@ -47,6 +48,8 @@ public class ConfReader {
 	
 	private Map<String, List<Environment>> environements;
 
+	private Dashboard dashboard;
+	
 	private Map<Integer, String> projectsBuilOne;
 	
 	private Map<Integer, List<String>> projectsBuildAll;
@@ -226,25 +229,50 @@ public class ConfReader {
 		return environements.get(prefix);
 	}
 	
+	public Dashboard getDashboard() throws IOException {
+		
+		if (dashboard == null) {
+			dashboard = new Dashboard();
+			
+			try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.DASHBOARD_ENV_PROP_FILE) ) {
+				try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
+					try ( JsonReader jsonReader = Json.createReader(is) ) {
+						
+						// back
+						JsonObject racineArray = jsonReader.readObject();
+						JsonArray jsonArray = racineArray.getJsonArray(ConstantTools.BACK);
+						
+						for (int i = 0; i < jsonArray.size(); i++) {
+							JsonObject object = jsonArray.get(i).asJsonObject();
+							for (Map.Entry<String, JsonValue> entry : object.entrySet() ) {
+								String secondKey = entry.getKey();
+								dashboard.addBackEnvironements(secondKey, checkEnvironment(secondKey, entry.getValue().asJsonObject()));
+							}
+						}
+						
+						// front
+						jsonArray = racineArray.getJsonArray(ConstantTools.FRONT);
+						
+						for (int i = 0; i < jsonArray.size(); i++) {
+							JsonObject object = jsonArray.get(i).asJsonObject();
+							for (Map.Entry<String, JsonValue> entry : object.entrySet() ) {
+								String secondKey = entry.getKey();
+								dashboard.addFrontEnvironements(secondKey, checkEnvironment(secondKey, entry.getValue().asJsonObject()));
+							}
+						}
+					}
+				}
+			}
+		}
+			
+		return dashboard;
+	}
+	
 	private List<Environment> checkEnvironment(String scope, JsonObject object) {
 		
-		Environment.EnvironmentKey[] envKeys = {};
-		switch ( Environment.Scope.getTypeParameterByName(scope) ) {
-			case GLOBAL:
-				envKeys = Environment.EnvironmentKey.getGlobalKeys();
-				break;
-				
-			case RUNNER:
-				envKeys = Environment.EnvironmentKey.getRunnerKeys();
-				break;
-
-			case PROJECT:
-				envKeys = Environment.EnvironmentKey.getProjectKeys();
-				break;
-		}
-		
 		List<Environment> list = new ArrayList<Environment>();
-		for (Environment.EnvironmentKey envKey : envKeys) {
+		
+		for (Environment.EnvironmentKey envKey : Environment.EnvironmentKey.getKeys(scope)) {
 			String value = object.getString(envKey.getName(), null);
 			if ( envKey.isMandatory() && Tools.isNullOrEmpty(value) )
 				throw new IllegalArgumentException("Pour la variable '" + scope + "', la propriété '" + envKey.getName() + "' est obligatoire.");

@@ -24,5 +24,19 @@
 		"scope" : "mono",
 		"choices" : "$application.properties/projects.build.one",
 		"description" : "le projet à builder"
+	},
+	{
+		"name": "backDeploy",
+		"type": "boolean",
+		"scope" : "dash",
+		"defaultValue" : "true",
+		"description" : "déployer le back"
+	},
+	{
+		"name": "frontDeploy",
+		"type": "boolean",
+		"scope" : "dash",
+		"defaultValue" : "true",
+		"description" : "déployer le front"
 	}
 ]

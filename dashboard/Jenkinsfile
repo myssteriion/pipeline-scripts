@@ -1,0 +1,155 @@
+pipeline {
+	agent any
+	parameters {
+		choice(name: "revision", choices: "master\ndevelop\nbuild\n", description: "branche ou TAG")
+		choice(name: "mavenProfile", choices: "prod_windows\nprod_linux\ndev_windows\ndev_linux\ncd\n", description: "profile maven")
+		booleanParam(name: "backDeploy", defaultValue: true, description: "déployer le back")
+		booleanParam(name: "frontDeploy", defaultValue: true, description: "déployer le front")
+	}
+	environment {
+		gitLabUrl = "http://192.168.25.68/eSirius/"
+		primaryRemote = "jenkins@192.168.25.94"
+		depotFolder = "depot"
+	}
+	stages {
+		stage ("Initialize") {
+			steps {
+				wrap([$class: 'AnsiColorBuildWrapper']) {
+					echo "\u001B[34m revision : ${params.revision} \u001B[m"
+					echo "\u001B[34m mavenProfile : ${params.mavenProfile} \u001B[m"
+					echo "\u001B[34m backDeploy : ${params.backDeploy} \u001B[m"
+					echo "\u001B[34m frontDeploy : ${params.frontDeploy} \u001B[m"
+				}
+				cleanWs()
+			}
+		}
+		stage ("build dashboard-webapp") {
+			environment {
+				gitRoot = "dashboard"
+				projectRoot = "dashboard/dashboard-webapp"
+				jdkCompilation = "JDK 1.7.0_25"
+				mvnVersion = "Maven 3.3.9"
+				targetDirectory = "dashboard-back"
+				sourceAppDirectory = "target"
+				sourceExtension = ".war"
+				sourceConfDirectory = ""
+			}
+			steps {
+				script {
+					if (params.backDeploy) {
+						cleanProjectPrimaryRemote(env.targetDirectory)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+						deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+					}
+				}
+			}
+		}
+		stage ("build dashboard-front") {
+			environment {
+				gitRoot = "dashboard"
+				projectRoot = "dashboard/dashboard-front"
+				jdkCompilation = "JDK 1.7.0_25"
+				mvnVersion = "Maven 3.3.9"
+				targetDirectory = "dashboard-front"
+				sourceAppDirectory = "target/assembly"
+				sourceExtension = ".zip"
+				sourceConfDirectory = ""
+			}
+			steps {
+				script {
+					if (params.frontDeploy) {
+						cleanProjectPrimaryRemote(env.targetDirectory)
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+						deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+					}
+				}
+			}
+		}
+		stage ("build dashboard-backoffice") {
+			environment {
+				gitRoot = "dashboard"
+				projectRoot = "dashboard/dashboard-backoffice"
+				jdkCompilation = "JDK 1.7.0_25"
+				mvnVersion = "Maven 3.3.9"
+				targetDirectory = "dashboard-front"
+				sourceAppDirectory = "target/assembly"
+				sourceExtension = ".zip"
+				sourceConfDirectory = ""
+			}
+			steps {
+				script {
+					if (params.frontDeploy) {
+						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
+						deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+					}
+				}
+			}
+		}
+	}
+}
+
+void runBuild(String gitRoot, String projectRoot, String jdk, String mvn) {
+	
+	sh "mkdir -p ${gitRoot}"
+
+	dir ("${gitRoot}") {
+		checkoutRevisionOnRepo(gitRoot)
+		mvnCleanInstall(projectRoot, jdk, mvn)
+	}
+}
+
+void checkoutRevisionOnRepo(String gitRoot) {
+	checkout scm: [ $class: "GitSCM", 
+					userRemoteConfigs: [ [url: env.gitLabUrl+gitRoot, credentialsId: "root"] ],
+					branches: [ [name: params.revision] ]
+				  ], poll: false
+}
+
+void mvnCleanInstall(String projectRoot, String jdk, String mvn) {
+	dir ("${projectRoot}") {
+		withMaven (jdk: jdk, maven: mvn) {
+			sh "mvn clean install -P ${params.mavenProfile}"
+		}
+	}
+}
+
+void cleanPrimaryRemote() {
+	sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${params.mavenProfile}"
+}
+
+void cleanProjectPrimaryRemote(String targetDirectory) {
+	script {
+		if (targetDirectory && targetDirectory != "") { 
+			sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}" 
+			sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}" 
+		}
+	}
+}
+
+void deploy(String gitRoot, String projectRoot, String targetDirectory, String sourceAppDirectory, String sourceExtension, String sourceConfDirectory) {
+	dir ("${gitRoot}") {
+		script {
+			if (targetDirectory && targetDirectory != "") {
+				if (sourceAppDirectory && sourceAppDirectory != "") {
+					sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
+					sh "scp ${projectRoot}/${sourceAppDirectory}/*${sourceExtension} ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
+					sh returnStatus: true, script: "ssh ${env.primaryRemote} unzip -qq -o ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*${sourceExtension} -d ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/"
+					sh "ssh ${env.primaryRemote} rm -f ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*${sourceExtension}"
+				}
+				if (sourceConfDirectory && sourceConfDirectory != "") {
+					sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}"
+					sh "scp -r ${projectRoot}/${sourceConfDirectory}/* ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}"
+				}
+			}
+		}
+	}
+}
+
+void deployToSecondaryRemote(String secondaryRemote) {
+	sh "ssh ${secondaryRemote} \"rm -rf ESII-Applications && mkdir -p ESII-Applications\""
+	
+	sh "scp -r ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications.gz ${secondaryRemote}:"
+	sh "ssh ${secondaryRemote} tar -xf ESII-Applications.gz"
+	
+	sh "ssh ${secondaryRemote} rm -rf ESII-Applications.gz"
+}

@@ -1,0 +1,42 @@
+{
+	"back" : [
+		{
+			"dashboard-webapp" : {
+				"gitRoot" : "dashboard",
+				"projectRoot" : "dashboard/dashboard-webapp",
+				"jdkCompilation" : "JDK 1.7.0_25",
+				"mvnVersion" : "Maven 3.3.9",
+				"targetDirectory" : "dashboard-back",
+				"sourceAppDirectory" : "target",
+				"sourceExtension" : ".war",
+				"sourceConfDirectory" : ""
+			}
+		}
+	],
+	"front" : [
+		{
+			"dashboard-backoffice" : {
+				"gitRoot" : "dashboard",
+				"projectRoot" : "dashboard/dashboard-backoffice",
+				"jdkCompilation" : "JDK 1.7.0_25",
+				"mvnVersion" : "Maven 3.3.9",
+				"targetDirectory" : "dashboard-front",
+				"sourceAppDirectory" : "target/assembly",
+				"sourceExtension" : ".zip",
+				"sourceConfDirectory" : ""
+			}
+		},
+		{
+			"dashboard-front" : {
+				"gitRoot" : "dashboard",
+				"projectRoot" : "dashboard/dashboard-front",
+				"jdkCompilation" : "JDK 1.7.0_25",
+				"mvnVersion" : "Maven 3.3.9",
+				"targetDirectory" : "dashboard-front",
+				"sourceAppDirectory" : "target/assembly",
+				"sourceExtension" : ".zip",
+				"sourceConfDirectory" : ""
+			}
+		}
+	]
+}

@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
+import com.es2i.pipeline.job.entities.Dashboard;
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
 import com.es2i.pipeline.job.helper.ConfReader;
@@ -25,6 +26,7 @@ public class Pipeline {
 	
 	private ConfReader confReader;
 	
+	public enum BuildType { MONO_BUILD, ALL_BUILD, DASHBOARD }
 	
 	
 	public Pipeline() throws IOException {
@@ -40,13 +42,15 @@ public class Pipeline {
 		clean();
 		generateBuildAll();
 		generateRunner();
-		genetateAllBuildOne();
+		generateAllBuildOne();
+		generateDashboard();
 	}
 	
 	private void clean() throws IOException {
 
 		Tools.deleteIfExists( Paths.get(ConstantTools.BUILD_ALL_DIRECTORY) );
 		Tools.deleteIfExists( Paths.get(ConstantTools.BUILD_ONE_DIRECTORY) );
+		Tools.deleteIfExists( Paths.get(ConstantTools.DASHBOARD_DIRECTORY) );
 	}
 	
 	private void generateBuildAll() throws IOException, URISyntaxException {
@@ -61,10 +65,10 @@ public class Pipeline {
 				// pipeline - agent - param - env - tools - stages
 				writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
 				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
-				addParamEnvTools(writer, true);
+				addParamEnvTools(writer, BuildType.ALL_BUILD);
 				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
 				
-				addInitializeStage(writer, true);
+				addInitializeStage(writer, BuildType.ALL_BUILD);
 				
 				addCreateDataFolderStage(writer);
 				
@@ -75,9 +79,9 @@ public class Pipeline {
 					
 					List<String> groupe = projectsBuildAll.get(index);
 					if (groupe.size() == 1)
-						addStageForProject(writer, groupe.get(0), false, true);
+						addStageForProject(writer, groupe.get(0), false, BuildType.ALL_BUILD);
 					else
-						addParallelStageForProject(writer, index, groupe, true);
+						addParallelStageForProject(writer, index, groupe, BuildType.ALL_BUILD);
 				}
 				
 				addDeployToSecondaryRemoteStage(writer);
@@ -143,12 +147,12 @@ public class Pipeline {
 		}
 	}
 	
-	private void genetateAllBuildOne() throws IOException, URISyntaxException {
+	private void generateAllBuildOne() throws IOException, URISyntaxException {
 		
 		File monoBuildDirecrory = Tools.createDirectoryIfNeedIt( Paths.get(ConstantTools.BUILD_ONE_DIRECTORY) ).toFile();
 		
 		// all buildOne	
-		 Map<Integer, String> projectsBuilOne = confReader.getProjectsBuildOne();
+		Map<Integer, String> projectsBuilOne = confReader.getProjectsBuildOne();
 		for (int index = 1; index <= projectsBuilOne.size(); index++) {
 				
 			String project = projectsBuilOne.get(index);
@@ -163,12 +167,12 @@ public class Pipeline {
 					// pipeline - agent - param - env - tools - stages
 					writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
 					writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
-					addParamEnvTools(writer, false);
+					addParamEnvTools(writer, BuildType.MONO_BUILD);
 					writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
 					
-					addInitializeStage(writer, false);
+					addInitializeStage(writer, BuildType.MONO_BUILD);
 					
-					addStageForProject(writer, project, false, false);
+					addStageForProject(writer, project, false, BuildType.MONO_BUILD);
 					
 					// stages - pipeline
 					writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
@@ -185,14 +189,122 @@ public class Pipeline {
 		
 	}
 	
+	private void generateDashboard() throws IOException, URISyntaxException {
+		
+		File dashboardDirectory = Tools.createDirectoryIfNeedIt( Paths.get(ConstantTools.DASHBOARD_DIRECTORY) ).toFile();
+		File jenkinsfile = Paths.get(dashboardDirectory.getAbsolutePath(), ConstantTools.JENKINS_FILE).toFile();
+		jenkinsfile.createNewFile();
+		
+		try ( OutputStream os = new FileOutputStream(jenkinsfile) ) {
+			try ( Writer writer = new OutputStreamWriter(os, StandardCharsets.UTF_8) ) {
+					
+				// pipeline - agent - param - env - tools - stages
+				writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
+				addParamEnvTools(writer, BuildType.DASHBOARD);
+				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
+				
+				addInitializeStage(writer, BuildType.DASHBOARD);
+				
+				
+				Dashboard dashboard = confReader.getDashboard();
+				
+				// afin de clean une seul fois le target
+				boolean isFirst = true;
+				
+				// back
+				for (Map.Entry<String, List<Environment>> entry : dashboard.getBackEnvironements().entrySet()) {
+
+					// stage
+					writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("build " + entry.getKey()) + constrcuctHelper.addCRLF());
+					
+					// env
+					writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
+					for (Environment environment : entry.getValue()) 
+						writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.contentEnv(environment) + constrcuctHelper.addCRLF());
+					writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
+					
+					// steps - script
+					writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
+					writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.beginScript() + constrcuctHelper.addCRLF());
+					
+					// if
+					writer.write(constrcuctHelper.addTab(5) + constrcuctHelper.ifBackDeploy() + constrcuctHelper.addCRLF());
+					if (isFirst) {
+						writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.cleanProjectPrimaryRemote() + constrcuctHelper.addCRLF());
+						isFirst = false;
+					}
+					writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.runBuild() + constrcuctHelper.addCRLF());
+					writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.deploy() + constrcuctHelper.addCRLF());
+					writer.write(constrcuctHelper.addTab(5) + constrcuctHelper.endIfBackDeploy() + constrcuctHelper.addCRLF());
+					
+					// script - steps
+					writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.endScript() + constrcuctHelper.addCRLF());
+					writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());
+					
+					// stage
+					writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
+				}
+				
+				
+				isFirst = true;
+				
+				// front
+				for (Map.Entry<String, List<Environment>> entry : dashboard.getFrontEnvironements().entrySet()) {
+					
+					// stage
+					writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("build " + entry.getKey()) + constrcuctHelper.addCRLF());
+					
+					// env
+					writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
+					for (Environment environment : entry.getValue()) 
+						writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.contentEnv(environment) + constrcuctHelper.addCRLF());
+					writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
+					
+					// steps - script
+					writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
+					writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.beginScript() + constrcuctHelper.addCRLF());
+					
+					// if
+					writer.write(constrcuctHelper.addTab(5) + constrcuctHelper.ifFrontDeploy() + constrcuctHelper.addCRLF());
+					if (isFirst) {
+						writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.cleanProjectPrimaryRemote() + constrcuctHelper.addCRLF());
+						isFirst = false;
+					}
+					writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.runBuild() + constrcuctHelper.addCRLF());
+					writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.deploy() + constrcuctHelper.addCRLF());
+					writer.write(constrcuctHelper.addTab(5) + constrcuctHelper.endIfFrontDeploy() + constrcuctHelper.addCRLF());
+					
+					// script - steps
+					writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.endScript() + constrcuctHelper.addCRLF());
+					writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());
+					
+					// stage
+					writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
+				}
+				
+				
+				// stages - pipeline
+				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.endPipeline() + constrcuctHelper.addCRLF());
+				
+				// saut de ligne
+				writer.write(constrcuctHelper.addCRLF());
+				
+				// functions.txt
+				writer.write(constrcuctHelper.getFunctions() );
+			}
+		}
+	}
 	
 	
-	private void addParamEnvTools(Writer writer, boolean isBuildAll) throws IOException, URISyntaxException {
+	
+	private void addParamEnvTools(Writer writer, BuildType buildType) throws IOException, URISyntaxException {
 		
 		// parameters
 		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginParameters() + constrcuctHelper.addCRLF());
 		for (Parameter param : confReader.getParameters()) {
-			if ( (isBuildAll && param.isAllScope()) || (!isBuildAll && param.isMonoScope()) )
+			if ( param.isInScope(buildType) )
 				writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.contentParameters(param) + constrcuctHelper.addCRLF());
 		}
 		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endParameters() + constrcuctHelper.addCRLF());
@@ -212,7 +324,7 @@ public class Pipeline {
 //		writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endTools() + constrcuctHelper.addCRLF());
 	}
 	
-	private void addInitializeStage(Writer writer, boolean isBuildAll) throws IOException, URISyntaxException {
+	private void addInitializeStage(Writer writer, BuildType buildType) throws IOException, URISyntaxException {
 		
 		// stage - steps
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("Initialize") + constrcuctHelper.addCRLF());
@@ -221,7 +333,7 @@ public class Pipeline {
 		// echo all parameters
 		writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.beginWrap() + constrcuctHelper.addCRLF());
 		for (Parameter param : confReader.getParameters()) {
-			if ( (isBuildAll && param.isAllScope()) || (!isBuildAll && param.isMonoScope()) ) {
+			if ( param.isInScope(buildType) ) {
 				String echoStr = constrcuctHelper.infoColor(param.getName() + " : " + constrcuctHelper.dollarParams(param.getName()));
 				writer.write(constrcuctHelper.addTab(5) + constrcuctHelper.echo(echoStr) + constrcuctHelper.addCRLF());
 			}
@@ -232,7 +344,7 @@ public class Pipeline {
 		writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.cleanWs() + constrcuctHelper.addCRLF());
 		
 		// clean remote
-		if (isBuildAll)
+		if (buildType == BuildType.ALL_BUILD)
 			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.cleanPrimaryRemote() + constrcuctHelper.addCRLF());
 		
 		// steps - stage
@@ -281,7 +393,7 @@ public class Pipeline {
 		}
 	}
 	
-	private void addStageForProject(Writer writer, String project, boolean insideParallelBloc, boolean isBuildAll) throws IOException, URISyntaxException {
+	private void addStageForProject(Writer writer, String project, boolean insideParallelBloc, BuildType buildType) throws IOException, URISyntaxException {
 		
 		int identToAdd = insideParallelBloc ? 2 : 0;
 		
@@ -296,7 +408,7 @@ public class Pipeline {
 		
 		// steps
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
-		if (!isBuildAll)
+		if (buildType == BuildType.MONO_BUILD)
 			writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.cleanProjectPrimaryRemote() + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.runBuild() + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.deploy() + constrcuctHelper.addCRLF());
@@ -306,14 +418,14 @@ public class Pipeline {
 		writer.write(constrcuctHelper.addTab(2 + identToAdd) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 	
-	private void addParallelStageForProject(Writer writer, int index, List<String> groupe, boolean isBuildAll) throws IOException, URISyntaxException {
+	private void addParallelStageForProject(Writer writer, int index, List<String> groupe, BuildType buildType) throws IOException, URISyntaxException {
 		
 		// stage - parallel
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("build groupe " + index) + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginParallel() + constrcuctHelper.addCRLF());
 		
 		for (String project : groupe)
-			addStageForProject(writer, project, true, isBuildAll);
+			addStageForProject(writer, project, true, buildType);
 		
 		// parallel - stage
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endParallel() + constrcuctHelper.addCRLF());

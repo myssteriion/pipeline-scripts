@@ -18,6 +18,7 @@ public class ConstantTools {
 	public static final String RUNNER_DIRECTORY 						= "runner";
 	public static final String BUILD_ALL_DIRECTORY						= "buildAll";
 	public static final String BUILD_ONE_DIRECTORY						= "buildOne";
+	public static final String DASHBOARD_DIRECTORY						= "dashboard";
 	
 	/*
 	 * arboressence pour le déploiement
@@ -60,6 +61,13 @@ public class ConstantTools {
 	public static final String ENV_PROP_FILE 							= "environment.json";
 	public static final String GLOBAL_KEY 								= "global";
 	public static final String RUNNER_KEY 								= "runner";
+	
+	/*
+	 * dashboard
+	 */
+	public static final String DASHBOARD_ENV_PROP_FILE 					= "dashboard/environment.json";
+	public static final String BACK 									= "back";
+	public static final String FRONT 									= "front";
 	
 	/*
 	 * remoteDescriptor.properties
