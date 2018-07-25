@@ -6,7 +6,8 @@ pipeline {
 		pipelineToken = "760429"
 	}
 	stages {
-		stage ("run") {
+	stages {
+		stage ("runner") {
 			steps {
 				sh "wget \"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=master&mavenProfile=prod_windows\""
 				sh "wget \"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}&revision=master&mavenProfile=prod_linux\""

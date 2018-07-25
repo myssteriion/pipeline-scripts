@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,11 +22,15 @@ import javax.json.JsonReader;
 import javax.json.JsonValue;
 
 import com.es2i.pipeline.job.entities.Environment;
-import com.es2i.pipeline.job.entities.Parameter;
-import com.es2i.pipeline.job.entities.parameter_impl.BooleanParameter;
-import com.es2i.pipeline.job.entities.parameter_impl.ChoiceParameter;
-import com.es2i.pipeline.job.entities.parameter_impl.StringParameter;
-import com.es2i.pipeline.job.script.Dashboard;
+import com.es2i.pipeline.job.entities.parameter.Parameter;
+import com.es2i.pipeline.job.entities.parameter.impl.BooleanParameter;
+import com.es2i.pipeline.job.entities.parameter.impl.ChoiceParameter;
+import com.es2i.pipeline.job.entities.parameter.impl.StringParameter;
+import com.es2i.pipeline.job.script.Script;
+import com.es2i.pipeline.job.script.impl.BuildAll;
+import com.es2i.pipeline.job.script.impl.BuildOne;
+import com.es2i.pipeline.job.script.impl.Dashboard;
+import com.es2i.pipeline.job.script.impl.Runner;
 import com.es2i.pipeline.tools.ConstantTools;
 import com.es2i.pipeline.tools.Tools;
 
@@ -37,22 +40,16 @@ import com.es2i.pipeline.tools.Tools;
 public class ConfReader {
 
 	private static ConfReader instance;
+	
+	private Runner runner;
 
-	private List<Parameter> parameters;
+	private BuildAll buildAll;
 	
-	private List<String> runnerRevisions;
+	private BuildOne buildOne;
 	
-	private List<String> runnerMavenProfiles;
-	
-	private List<String> secondaryRemotes;
-	
-	private Map<String, List<Environment>> environements;
-
 	private Dashboard dashboard;
 	
-	private Map<Integer, String> projectsBuilOne;
 	
-	private Map<Integer, List<String>> projectsBuildAll;
 	
 	
 	
@@ -68,12 +65,6 @@ public class ConfReader {
 		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ONE_KEY);
 		expectedKeys.add(ConstantTools.PROJECTS_BUILD_ALL_GROUPE1_KEY);
 		Tools.checkKeys(expectedKeys, application.stringPropertyNames(), ConstantTools.APPLICATION_PROP_FILE);
-		
-		/* */
-		
-		Properties tools = Tools.findPropertyFile(ConstantTools.TOOLS_PROP_FILE);
-		expectedKeys = new HashSet<String>();
-		Tools.checkKeys(expectedKeys, tools.stringPropertyNames(), ConstantTools.TOOLS_PROP_FILE);
 		
 		/* */
 		
@@ -94,82 +85,235 @@ public class ConfReader {
 	
 	
 	
-	public List<String> getRunnerRevisions() throws IOException {
+	public Runner getRunner() throws IOException {
 		
-		if (runnerRevisions == null) {
-			
-			runnerRevisions = new ArrayList<String>();
-			
-			Properties prop = Tools.findPropertyFile(ConstantTools.APPLICATION_PROP_FILE);
-			String[] revisions = prop.getProperty(ConstantTools.RUNNER_REVISIONS_KEY).split(ConstantTools.COMA);
-			if ( revisions != null && revisions.length > 0 ) {
-				for (String revision : revisions) {
-					if ( !Tools.isNullOrEmpty(revision) ) 
-						runnerRevisions.add( revision.trim() );
-				}
+		if (runner == null) {
+			runner = new Runner();
+			runner.setRevisions( getRunnerRevisions() );
+			runner.setMavenProfiles( getRunnerMavenProfiles() );
+			runner.setEnvironements( getRunnerEnvironment() );
+		}
+		
+		return runner;
+	}
+	
+	private List<String> getRunnerRevisions() throws IOException {
+		
+		List<String> runnerRevisions = new ArrayList<String>();
+		
+		Properties prop = Tools.findPropertyFile(ConstantTools.APPLICATION_PROP_FILE);
+		String[] revisions = prop.getProperty(ConstantTools.RUNNER_REVISIONS_KEY).split(ConstantTools.COMA);
+		if ( revisions != null && revisions.length > 0 ) {
+			for (String revision : revisions) {
+				if ( !Tools.isNullOrEmpty(revision) ) 
+					runnerRevisions.add( revision.trim() );
 			}
 		}
 		
 		return runnerRevisions;
 	}
 	
-	public List<String> getRunnerMavenProfiles() throws IOException {
+	private List<String> getRunnerMavenProfiles() throws IOException {
 		
-		if (runnerMavenProfiles == null) {
-			
-			runnerMavenProfiles = new ArrayList<String>();
-			
-			Properties prop = Tools.findPropertyFile(ConstantTools.APPLICATION_PROP_FILE);
-			String[] mavenProfiles = prop.getProperty(ConstantTools.RUNNER_MAVEN_PROFILES_KEY).split(ConstantTools.COMA);
-			if ( mavenProfiles != null && mavenProfiles.length > 0 ) {
-				for (String mavenProfile : mavenProfiles) {
-					if ( !Tools.isNullOrEmpty(mavenProfile) ) 
-						runnerMavenProfiles.add( mavenProfile.trim() );
-				}
+		List<String> runnerMavenProfiles = new ArrayList<String>();
+		
+		Properties prop = Tools.findPropertyFile(ConstantTools.APPLICATION_PROP_FILE);
+		String[] mavenProfiles = prop.getProperty(ConstantTools.RUNNER_MAVEN_PROFILES_KEY).split(ConstantTools.COMA);
+		if ( mavenProfiles != null && mavenProfiles.length > 0 ) {
+			for (String mavenProfile : mavenProfiles) {
+				if ( !Tools.isNullOrEmpty(mavenProfile) ) 
+					runnerMavenProfiles.add( mavenProfile.trim() );
 			}
 		}
 		
 		return runnerMavenProfiles;
 	}
-	
-	public List<String> getSecondaryRemotes() throws IOException {
-		
-		if (secondaryRemotes == null) {
-			
-			secondaryRemotes = new ArrayList<String>();
-			
-			Properties prop = Tools.findPropertyFile(ConstantTools.REMOTE_DESCRIPTOR_FILE);
-			int index = 1;
-			String key = ConstantTools.SECONDARY_REMOTE_KEY + index;
-			while ( prop.containsKey(key) ) {
-				secondaryRemotes.add( prop.getProperty(key) );
-				index++;
-				key = ConstantTools.SECONDARY_REMOTE_KEY + index;
-			}
-		}
-		
-		return secondaryRemotes;
-	}
 
-	public List<Parameter> getParameters() throws IOException {
+	private List<Environment> getRunnerEnvironment() throws IOException {
 		
-		if (parameters == null) {
+		List<Environment> runnerEnvironements = new ArrayList<Environment>();
 		
-			parameters = new ArrayList<Parameter>();
-			try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.PARAM_JSON_FILE) ) {
-				try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
-					try ( JsonReader jsonReader = Json.createReader(is) ) {
-						JsonArray array = jsonReader.readArray();
-						for (int i = 0; i < array.size(); i++)
-							parameters.add( checkAndGetParameter(array.getJsonObject(i)) );
-					}
+		try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.ENV_PROP_FILE) ) {
+			try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
+				try ( JsonReader jsonReader = Json.createReader(is) ) {
+					
+					JsonObject objects = jsonReader.readObject();
+					JsonObject runnerObject = objects.getJsonObject(ConstantTools.RUNNER_KEY);
+					runnerEnvironements = checkEnvironment(ConstantTools.RUNNER_DIRECTORY, runnerObject);
 				}
 			}
 		}
 		
-		return parameters;
+		return runnerEnvironements;
+	}
+
+
+	public BuildAll getBuildAll() throws IOException {
+		
+		if (buildAll == null) {
+			buildAll = new BuildAll();
+			buildAll.setProjects( getBuildAllProjects() );
+			buildAll.setParameters( getBuilAllParameters() );
+			buildAll.setEnvironements( getBuilAllEnvironment() );
+			buildAll.setSecondaryRemotes( getSecondaryRemotes() );
+			buildAll.setProjectsEnvironements( getProjectsEnvironmentsByPrefix(buildAll.getProjectsList()) );
+		}
+		
+		return buildAll;
 	}
 	
+	private Map<Integer, List<String>> getBuildAllProjects() throws IOException {
+		
+		Map<Integer, List<String>> projects = new HashMap<Integer, List<String>>();
+			
+		Properties prop = Tools.findPropertyFile(ConstantTools.APPLICATION_PROP_FILE);
+		
+		projects = new HashMap<Integer, List<String>>();
+		int index = 1;
+		String key = ConstantTools.PROJECTS_BUILD_ALL_GROUPE_KEY + index;
+		while ( prop.containsKey(key) ) {
+			String[] projectsTab = prop.getProperty(key).split(ConstantTools.COMA);
+			if (projectsTab != null) {
+				projects.put( index, Arrays.asList(projectsTab).stream().map(String::trim).collect(Collectors.toList()) );
+			}
+			index++;
+			key = ConstantTools.PROJECTS_BUILD_ALL_GROUPE_KEY + index;
+		}
+		
+		return projects;
+	}
+	
+	private List<Parameter> getBuilAllParameters() throws IOException {
+		return getParameters(BuildAll.class);
+	}
+
+	private List<Environment> getBuilAllEnvironment() throws IOException {
+		return getGlobalEnvironment();
+	}
+	
+	private List<String> getSecondaryRemotes() throws IOException {
+		
+		List<String> secondaryRemotes = new ArrayList<String>();
+		
+		Properties prop = Tools.findPropertyFile(ConstantTools.REMOTE_DESCRIPTOR_FILE);
+		int index = 1;
+		String key = ConstantTools.SECONDARY_REMOTE_KEY + index;
+		while ( prop.containsKey(key) ) {
+			secondaryRemotes.add( prop.getProperty(key) );
+			index++;
+			key = ConstantTools.SECONDARY_REMOTE_KEY + index;
+		}
+		
+		return secondaryRemotes;
+	}
+	
+	
+	public BuildOne getBuildOne() throws IOException {
+		
+		if (buildOne == null) {
+			buildOne = new BuildOne();
+			buildOne.setProjects( getBuildOneProjects() );
+			buildOne.setParameters( getBuilOneParameters() );
+			buildOne.setEnvironements( getBuilOneEnvironment() );
+			buildOne.setProjectsEnvironements( getProjectsEnvironmentsByPrefix(buildOne.getProjectsList()) );
+		}
+		
+		return buildOne;
+	}
+	
+	private Map<Integer, String> getBuildOneProjects() throws IOException {
+		
+		Map<Integer, String> projects = new HashMap<Integer, String>();
+		
+		Properties prop = Tools.findPropertyFile(ConstantTools.APPLICATION_PROP_FILE);
+		
+		projects = new HashMap<Integer, String>();
+		String[] projectsList = prop.getProperty(ConstantTools.PROJECTS_BUILD_ONE_KEY).split(ConstantTools.COMA);
+		if (projectsList != null) {
+			for (int index = 0; index < projectsList.length; index++)
+				projects.put(index+1, projectsList[index].trim());
+		}
+		
+		return projects;
+	}
+
+	private List<Parameter> getBuilOneParameters() throws IOException {
+		return getParameters(BuildOne.class);
+	}
+	
+	private List<Environment> getBuilOneEnvironment() throws IOException {
+		return getGlobalEnvironment();
+	}
+
+
+	public Dashboard getDashboard() throws IOException {
+		
+		if (dashboard == null) {
+			dashboard = new Dashboard();
+			dashboard.setParameters( getDashboardParameters() );
+			dashboard.setEnvironements( getDashboardEnvironment() );
+			dashboard.setFrontEnvironments( getDashboardFrontEnvironments() );
+			dashboard.setBackEnvironments( getDashboardBackEnvironments() );
+		}
+			
+		return dashboard;
+	}
+	
+	private List<Parameter> getDashboardParameters() throws IOException {
+		return getParameters(Dashboard.class);
+	}
+	
+	private List<Environment> getDashboardEnvironment() throws IOException {
+		return getGlobalEnvironment();
+	}
+	
+	private Map<String, List<Environment>> getDashboardFrontEnvironments() throws IOException {
+		return getDashboardEnvironments(ConstantTools.FRONT);
+	}
+	
+	private Map<String, List<Environment>> getDashboardBackEnvironments() throws IOException {
+		return getDashboardEnvironments(ConstantTools.BACK);
+	}
+	
+	
+	
+	private List<Parameter> getParameters(Class<? extends Script> scriptClass) throws IOException {
+		
+		Parameter.ScopeParamater current;
+		
+		if ( scriptClass.equals(BuildAll.class) )
+			current = Parameter.ScopeParamater.BUILDALL;
+		
+		else if ( scriptClass.equals(BuildOne.class) )
+			current = Parameter.ScopeParamater.BUILDONE;
+		
+		else if ( scriptClass.equals(Dashboard.class) )
+			current = Parameter.ScopeParamater.DASHBOARD;
+		
+		else
+			throw new IllegalArgumentException("TECH : il faut définir la classe '" + scriptClass.toString() + "'.");
+		
+		
+		List<Parameter> parameters = new ArrayList<Parameter>();
+		
+		try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.PARAM_JSON_FILE) ) {
+			try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
+				try ( JsonReader jsonReader = Json.createReader(is) ) {
+					
+					JsonArray objects = jsonReader.readArray();
+
+					for (int i = 0; i < objects.size(); i++) {
+						Parameter param = checkAndGetParameter( objects.getJsonObject(i) );
+						if (param.getScope() == current || param.getScope() == Parameter.ScopeParamater.EVERY)
+							parameters.add(param);
+					}
+				}
+			}
+		}
+	
+		return parameters;
+	}
+
 	private Parameter checkAndGetParameter(JsonObject object) throws IOException {
 		
 		String typeStr = object.getString(Parameter.ParameterKey.TYPE.getName(), null);
@@ -201,129 +345,7 @@ public class ConfReader {
 			default : throw new IllegalArgumentException("il manque un DEV : définir la classe le type '" + type + "'.");
 		}
 	}
-	
-	public List<Environment> getEnvironmentByPrefix(String prefix) throws IOException {
-		
-		if ( environements == null)
-			environements = new HashMap<String, List<Environment>>();
-			
-		if ( !environements.containsKey(prefix) ) {
-			
-			try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.ENV_PROP_FILE) ) {
-				try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
-					try ( JsonReader jsonReader = Json.createReader(is) ) {
-						
-						JsonObject racineArray = jsonReader.readObject();
-						// global / runner / project
-						for (Entry<String, JsonValue> firstBlockEntry : racineArray.entrySet()) {
 
-							String firstBlockKey = firstBlockEntry.getKey();
-							JsonObject firstBlockObject = firstBlockEntry.getValue().asJsonObject();
-							environements.put(firstBlockKey, checkEnvironment(firstBlockKey, firstBlockObject));
-						}
-					}
-				}
-			}
-		}
-		
-		return environements.get(prefix);
-	}
-	
-	public Dashboard getDashboard() throws IOException {
-		
-		if (dashboard == null) {
-			dashboard = new Dashboard();
-			
-			try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.DASHBOARD_ENV_PROP_FILE) ) {
-				try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
-					try ( JsonReader jsonReader = Json.createReader(is) ) {
-						
-						// back
-						JsonObject racineArray = jsonReader.readObject();
-						JsonArray jsonArray = racineArray.getJsonArray(ConstantTools.BACK);
-						
-						for (int i = 0; i < jsonArray.size(); i++) {
-							JsonObject object = jsonArray.get(i).asJsonObject();
-							for (Map.Entry<String, JsonValue> entry : object.entrySet() ) {
-								String secondKey = entry.getKey();
-								dashboard.addBackEnvironements(secondKey, checkEnvironment(secondKey, entry.getValue().asJsonObject()));
-							}
-						}
-						
-						// front
-						jsonArray = racineArray.getJsonArray(ConstantTools.FRONT);
-						
-						for (int i = 0; i < jsonArray.size(); i++) {
-							JsonObject object = jsonArray.get(i).asJsonObject();
-							for (Map.Entry<String, JsonValue> entry : object.entrySet() ) {
-								String secondKey = entry.getKey();
-								dashboard.addFrontEnvironements(secondKey, checkEnvironment(secondKey, entry.getValue().asJsonObject()));
-							}
-						}
-					}
-				}
-			}
-		}
-			
-		return dashboard;
-	}
-	
-	private List<Environment> checkEnvironment(String scope, JsonObject object) {
-		
-		List<Environment> list = new ArrayList<Environment>();
-		
-		for (Environment.EnvironmentKey envKey : Environment.EnvironmentKey.getKeys(scope)) {
-			String value = object.getString(envKey.getName(), null);
-			if ( envKey.isMandatory() && Tools.isNullOrEmpty(value) )
-				throw new IllegalArgumentException("Pour la variable '" + scope + "', la propriété '" + envKey.getName() + "' est obligatoire.");
-			else
-				list.add( new Environment(envKey.getName(), value) );
-		}
-		
-		return list;
-	}
-	
-	public Map<Integer, String> getProjectsBuildOne() throws IOException {
-		
-		if (projectsBuilOne == null) {
-			
-			Properties prop = Tools.findPropertyFile(ConstantTools.APPLICATION_PROP_FILE);
-			
-			projectsBuilOne = new HashMap<Integer, String>();
-			String[] projectsList = prop.getProperty(ConstantTools.PROJECTS_BUILD_ONE_KEY).split(ConstantTools.COMA);
-			if (projectsList != null) {
-				for (int index = 0; index < projectsList.length; index++)
-					projectsBuilOne.put(index+1, projectsList[index].trim());
-			}
-		}
-		
-		return projectsBuilOne;
-	}
-	
-	public Map<Integer, List<String>> getProjectsBuildAll() throws IOException {
-		
-		if (projectsBuildAll == null) {
-			
-			Properties prop = Tools.findPropertyFile(ConstantTools.APPLICATION_PROP_FILE);
-			
-			projectsBuildAll = new HashMap<Integer, List<String>>();
-			int index = 1;
-			String key = ConstantTools.PROJECTS_BUILD_ALL_GROUPE_KEY + index;
-			while ( prop.containsKey(key) ) {
-				String[] projectsTab = prop.getProperty(key).split(ConstantTools.COMA);
-				if (projectsTab != null) {
-					projectsBuildAll.put( index, Arrays.asList(projectsTab).stream().map(String::trim).collect(Collectors.toList()) );
-				}
-				index++;
-				key = ConstantTools.PROJECTS_BUILD_ALL_GROUPE_KEY + index;
-			}
-		}
-		
-		return projectsBuildAll;
-	}
-
-	
-	
 	private String replaceValueByPropertiesIfNeedIt(String name, String value) throws IOException {
 		
 		if ( Tools.isNullOrEmpty(value) || !value.startsWith(ConstantTools.DOLLAR) )
@@ -339,6 +361,91 @@ public class ConfReader {
 		String propertyKey = valuesTab[1];
 		
 		return Tools.findPropertyFile(propertyFile).getProperty(propertyKey);
+	}
+
+	
+	private List<Environment> getGlobalEnvironment() throws IOException {
+			
+		List<Environment> globalEnvironements = new ArrayList<Environment>();
+		
+		try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.ENV_PROP_FILE) ) {
+			try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
+				try ( JsonReader jsonReader = Json.createReader(is) ) {
+					
+					JsonObject racineArray = jsonReader.readObject();
+					JsonObject jsonObject = racineArray.getJsonObject(ConstantTools.GLOBAL_KEY);
+					globalEnvironements = checkEnvironment(ConstantTools.GLOBAL_KEY, jsonObject);
+				}
+			}
+		}
+		
+		return globalEnvironements;
+	}
+
+	private List<Environment> checkEnvironment(String scope, JsonObject object) {
+		
+		List<Environment> list = new ArrayList<Environment>();
+		
+		for (Environment.EnvironmentKey envKey : Environment.EnvironmentKey.getKeys(scope)) {
+			String value = object.getString(envKey.getName(), null);
+			if ( envKey.isMandatory() && Tools.isNullOrEmpty(value) )
+				throw new IllegalArgumentException("Pour la variable '" + scope + "', la propriété '" + envKey.getName() + "' est obligatoire.");
+			else
+				list.add( new Environment(envKey.getName(), value) );
+		}
+		
+		return list;
+	}
+	
+	
+	private Map<String, List<Environment>> getProjectsEnvironmentsByPrefix(List<String> projects) throws IOException {
+		
+		Map<String, List<Environment>> projectsEnvironments = new HashMap<String, List<Environment>>();
+			
+		try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.ENV_PROP_FILE) ) {
+			try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
+				try ( JsonReader jsonReader = Json.createReader(is) ) {
+					
+					JsonObject racineArray = jsonReader.readObject();
+					// global / runner / project
+					for (Map.Entry<String, JsonValue> firstBlockEntry : racineArray.entrySet()) {
+
+						String firstBlockKey = firstBlockEntry.getKey();
+						JsonObject firstBlockObject = firstBlockEntry.getValue().asJsonObject();
+						if ( projects.contains(firstBlockKey) )
+							projectsEnvironments.put(firstBlockKey, checkEnvironment(firstBlockKey, firstBlockObject));
+					}
+				}
+			}
+		}
+		
+		return projectsEnvironments;
+	}
+
+	private Map<String, List<Environment>> getDashboardEnvironments(String frontOrBack) throws IOException {
+		
+		Map<String, List<Environment>> backEnvironments = new HashMap<String, List<Environment>>();
+		
+		try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.DASHBOARD_ENV_PROP_FILE) ) {
+			try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
+				try ( JsonReader jsonReader = Json.createReader(is) ) {
+					
+					// back
+					JsonObject racineArray = jsonReader.readObject();
+					JsonArray jsonArray = racineArray.getJsonArray(frontOrBack);
+					
+					for (int i = 0; i < jsonArray.size(); i++) {
+						JsonObject object = jsonArray.get(i).asJsonObject();
+						for (Map.Entry<String, JsonValue> entry : object.entrySet() ) {
+							String secondKey = entry.getKey();
+							backEnvironments.put(secondKey, checkEnvironment(secondKey, entry.getValue().asJsonObject()));
+						}
+					}
+				}
+			}
+		}
+		
+		return backEnvironments;
 	}
 	
 }

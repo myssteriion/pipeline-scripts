@@ -41,10 +41,11 @@ Le fichier décrit les paramètres des scripts. Pour chaque paramètre, il faut 
 
  * **name** : le nom du paramètre
  * **type** : le type du paramètre (valeur possible : [boolean, string, choice])
- * **scope** : (facultatif) (valeur possible : [mono, all]) permet de définir si le paramètre est :  
-	* uniquement présent sur le monoBuild (mono)  
-	* uniquement présent sur le buildAll (all)  
-	* sur les deux (ne pas renseigner la clé)
+ * **scope** : (facultatif) (valeur possible : [buildOne, buildAll, dashboard]) permet de définir si le paramètre est :  
+	* uniquement présent sur les buildOne  
+	* uniquement présent sur le buildAll
+	* uniquement présent sur le dashboard  
+	* tous (ne pas renseigner la clé)
  * **description** : la description du paramètre
  * si type == boolean ou string :  
  	* **defaultValue** : la valeur par défaut (attention, ici, les booléens sont à encadrer de guillemets)  
@@ -55,13 +56,18 @@ Le paramètre **choices** peut faire référence à une propriété d'un fichier
 
 ## environment.json
 
-Le sous objet json **global** correspond au bloc **env** en dessous la balise pipeline de buildAll et des monoBuild.  
+Le sous objet json **global** correspond au bloc **env** en dessous la balise pipeline de buildAll et des buildOne.  
 Le sous objet json **runner** correspond au bloc **env** en dessous la balise pipeline du runner.  
 Les autres sous objets json sont les projets. La valeur à mettre correspond aux valeurs des propriétés **projects.xxx** du fichier application.properties.  
 
 > NOTE : il y a beaucoup de paramètres pour les projets car il n'y pas de convention de nommages et d'homogénéité. Si l'avenir le permet, refactorer les structures des projets et les nommages afin de limiter les paramètres. Exemple pour evision : gitRoot, projectRoot, targetDirectory et le prefix de sourceAppDirectory et sourceConfDirectory pourrai, moyennant adapatation, être identique !
 
+## tools.json
+
+Le sous objet json **global** correspond au bloc **tools** en dessous la balise pipeline de buildAll et des buildOne.  
+Le sous objet json **runner** correspond au bloc **tools** en dessous la balise pipeline du runner.  
+
 ## functions.txt
 
-Les fonctions groovy qui sont systématiquement concaténées au buildAll et aux monoBuild.  
-Les fonctions sont systématiquement concaténées au buildAll et aux monoBuild.
+Les fonctions groovy qui sont systématiquement concaténées au buildAll et aux buildOne.  
+Les fonctions sont systématiquement concaténées au buildAll et aux buildOne.

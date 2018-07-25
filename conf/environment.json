@@ -9,16 +9,6 @@
 		"jobName" : "GIT_eSirius_build_all",
 		"pipelineToken" : "760429"
 	},
-	"dashboard" : {
-		"gitRoot" : "dashboard",
-		"projectRoot" : "dashboard",
-		"jdkCompilation" : "JDK 1.7.0_25",
-		"mvnVersion" : "Maven 3.3.9",
-		"targetDirectory" : "dashboard",
-		"sourceAppDirectory" : "dashboard-webapp/target",
-		"sourceExtension" : ".war",
-		"sourceConfDirectory" : ""
-	},
 	"es2i" : {
 		"gitRoot" : "es2i",
 		"projectRoot" : "es2i",

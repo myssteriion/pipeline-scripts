@@ -1,7 +1,5 @@
-package com.es2i.pipeline.job.entities;
+package com.es2i.pipeline.job.entities.parameter;
 
-import com.es2i.pipeline.job.Pipeline;
-import com.es2i.pipeline.job.Pipeline.BuildType;
 import com.es2i.pipeline.tools.Tools;
 
 /**
@@ -42,9 +40,9 @@ public abstract class Parameter {
 	
 	/**
 	 * Les paramètres sont définit dans le même fichier.
-	 * Permet de définir si le paramètre est présent pour les monoBuild (mono), pour le buildAll (all), pour le dashboard (dash), pour tous (every).
+	 * Permet de définir si le paramètre est présent pour les buildOne, pour le buildAll, pour le dashboard, pour tous (every).
 	 */
-	public enum ScopeParamater { MONO, ALL, DASH, EVERY }; 
+	public enum ScopeParamater { BUILDONE, BUILDALL, DASHBOARD, EVERY }; 
 	
 	/**
 	 * Les propriété obligatoires et facultatives permettant de définir une variable paramètre.
@@ -99,14 +97,14 @@ public abstract class Parameter {
 		if ( Tools.isNullOrEmpty(scope) ) {
 			this.scope = ScopeParamater.EVERY;
 		}
-		else if ( scope.equalsIgnoreCase(ScopeParamater.MONO.toString()) ) {
-			this.scope = ScopeParamater.MONO;
+		else if ( scope.equalsIgnoreCase(ScopeParamater.BUILDONE.toString()) ) {
+			this.scope = ScopeParamater.BUILDONE;
 		}
-		else if ( scope.equalsIgnoreCase(ScopeParamater.ALL.toString()) ) {
-			this.scope = ScopeParamater.ALL;
+		else if ( scope.equalsIgnoreCase(ScopeParamater.BUILDALL.toString()) ) {
+			this.scope = ScopeParamater.BUILDALL;
 		}
-		else if ( scope.equalsIgnoreCase(ScopeParamater.DASH.toString()) ) {
-			this.scope = ScopeParamater.DASH;
+		else if ( scope.equalsIgnoreCase(ScopeParamater.DASHBOARD.toString()) ) {
+			this.scope = ScopeParamater.DASHBOARD;
 		}
 	}
 	
@@ -124,11 +122,8 @@ public abstract class Parameter {
 		return desc;
 	}
 	
-	public boolean isInScope(Pipeline.BuildType buildType) {
-		return this.scope == ScopeParamater.EVERY 
-				|| (this.scope == ScopeParamater.ALL && buildType == BuildType.ALL_BUILD)
-				|| (this.scope == ScopeParamater.MONO && buildType == BuildType.MONO_BUILD) 
-				|| (this.scope == ScopeParamater.DASH && buildType == BuildType.DASHBOARD) ;
+	public ScopeParamater getScope() {
+		return this.scope;
 	}
 
 }

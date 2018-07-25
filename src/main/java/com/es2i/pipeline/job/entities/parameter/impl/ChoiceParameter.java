@@ -1,6 +1,6 @@
-package com.es2i.pipeline.job.entities.parameter_impl;
+package com.es2i.pipeline.job.entities.parameter.impl;
 
-import com.es2i.pipeline.job.entities.Parameter;
+import com.es2i.pipeline.job.entities.parameter.Parameter;
 import com.es2i.pipeline.tools.ConstantTools;
 
 public class ChoiceParameter extends Parameter {

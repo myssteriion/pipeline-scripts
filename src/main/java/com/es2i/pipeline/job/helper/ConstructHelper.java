@@ -7,11 +7,11 @@ import java.net.URISyntaxException;
 import org.apache.commons.io.IOUtils;
 
 import com.es2i.pipeline.job.entities.Environment;
-import com.es2i.pipeline.job.entities.Parameter;
 import com.es2i.pipeline.job.entities.Tool;
-import com.es2i.pipeline.job.entities.parameter_impl.BooleanParameter;
-import com.es2i.pipeline.job.entities.parameter_impl.ChoiceParameter;
-import com.es2i.pipeline.job.entities.parameter_impl.StringParameter;
+import com.es2i.pipeline.job.entities.parameter.Parameter;
+import com.es2i.pipeline.job.entities.parameter.impl.BooleanParameter;
+import com.es2i.pipeline.job.entities.parameter.impl.ChoiceParameter;
+import com.es2i.pipeline.job.entities.parameter.impl.StringParameter;
 import com.es2i.pipeline.tools.ConstantTools;
 
 /**
