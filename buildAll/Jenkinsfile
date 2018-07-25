@@ -41,8 +41,14 @@ pipeline {
 						sourceConfDirectory = ""
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
-						deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						sh "mkdir -p ${env.gitRoot}"
+						dir ("${env.gitRoot}") {
+							checkoutRevisionOnRepo(env.gitRoot)
+							dir ("${env.projectRoot}") {
+								mvnCleanInstall(env.projectRoot, env.jdkCompilation, env.mvnVersion)
+							}
+							deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						}
 					}
 				}
 				stage ("build eCustomer") {
@@ -57,8 +63,14 @@ pipeline {
 						sourceConfDirectory = "eCustomer-conf/target/eCustomer-conf"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
-						deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						sh "mkdir -p ${env.gitRoot}"
+						dir ("${env.gitRoot}") {
+							checkoutRevisionOnRepo(env.gitRoot)
+							dir ("${env.projectRoot}") {
+								mvnCleanInstall(env.projectRoot, env.jdkCompilation, env.mvnVersion)
+							}
+							deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						}
 					}
 				}
 				stage ("build smsSender") {
@@ -73,8 +85,14 @@ pipeline {
 						sourceConfDirectory = "smsSender-conf/target/smsSender-conf"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
-						deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						sh "mkdir -p ${env.gitRoot}"
+						dir ("${env.gitRoot}") {
+							checkoutRevisionOnRepo(env.gitRoot)
+							dir ("${env.projectRoot}") {
+								mvnCleanInstall(env.projectRoot, env.jdkCompilation, env.mvnVersion)
+							}
+							deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						}
 					}
 				}
 				stage ("build procyon") {
@@ -89,8 +107,14 @@ pipeline {
 						sourceConfDirectory = ""
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
-						deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						sh "mkdir -p ${env.gitRoot}"
+						dir ("${env.gitRoot}") {
+							checkoutRevisionOnRepo(env.gitRoot)
+							dir ("${env.projectRoot}") {
+								mvnCleanInstall(env.projectRoot, env.jdkCompilation, env.mvnVersion)
+							}
+							deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						}
 					}
 				}
 			}
@@ -107,8 +131,14 @@ pipeline {
 				sourceConfDirectory = "esecurity-conf/target/esecurity-conf"
 			}
 			steps {
-				runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
-				deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+				sh "mkdir -p ${env.gitRoot}"
+				dir ("${env.gitRoot}") {
+					checkoutRevisionOnRepo(env.gitRoot)
+					dir ("${env.projectRoot}") {
+						mvnCleanInstall(env.projectRoot, env.jdkCompilation, env.mvnVersion)
+					}
+					deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+				}
 			}
 		}
 		stage ("build groupe 3") {
@@ -125,8 +155,14 @@ pipeline {
 						sourceConfDirectory = ""
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
-						deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						sh "mkdir -p ${env.gitRoot}"
+						dir ("${env.gitRoot}") {
+							checkoutRevisionOnRepo(env.gitRoot)
+							dir ("${env.projectRoot}") {
+								mvnCleanInstall(env.projectRoot, env.jdkCompilation, env.mvnVersion)
+							}
+							deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						}
 					}
 				}
 				stage ("build eStat") {
@@ -141,8 +177,14 @@ pipeline {
 						sourceConfDirectory = "eStatConf/target/eStat-conf"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
-						deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						sh "mkdir -p ${env.gitRoot}"
+						dir ("${env.gitRoot}") {
+							checkoutRevisionOnRepo(env.gitRoot)
+							dir ("${env.projectRoot}") {
+								mvnCleanInstall(env.projectRoot, env.jdkCompilation, env.mvnVersion)
+							}
+							deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						}
 					}
 				}
 			}
@@ -161,8 +203,14 @@ pipeline {
 						sourceConfDirectory = "eSirius-history-event-conf/target/eSirius-history-event-conf"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
-						deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						sh "mkdir -p ${env.gitRoot}"
+						dir ("${env.gitRoot}") {
+							checkoutRevisionOnRepo(env.gitRoot)
+							dir ("${env.projectRoot}") {
+								mvnCleanInstall(env.projectRoot, env.jdkCompilation, env.mvnVersion)
+							}
+							deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						}
 					}
 				}
 				stage ("build ePlanning") {
@@ -177,8 +225,14 @@ pipeline {
 						sourceConfDirectory = "ePlanningConf/target/ePlanningConf"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
-						deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						sh "mkdir -p ${env.gitRoot}"
+						dir ("${env.gitRoot}") {
+							checkoutRevisionOnRepo(env.gitRoot)
+							dir ("${env.projectRoot}") {
+								mvnCleanInstall(env.projectRoot, env.jdkCompilation, env.mvnVersion)
+							}
+							deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						}
 					}
 				}
 			}
@@ -197,8 +251,14 @@ pipeline {
 						sourceConfDirectory = "eSiriusConf/target/eSirius-Conf"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
-						deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						sh "mkdir -p ${env.gitRoot}"
+						dir ("${env.gitRoot}") {
+							checkoutRevisionOnRepo(env.gitRoot)
+							dir ("${env.projectRoot}") {
+								mvnCleanInstall(env.projectRoot, env.jdkCompilation, env.mvnVersion)
+							}
+							deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						}
 					}
 				}
 				stage ("build Appointment") {
@@ -213,8 +273,14 @@ pipeline {
 						sourceConfDirectory = "appointment-conf/target/appointment-conf"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
-						deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						sh "mkdir -p ${env.gitRoot}"
+						dir ("${env.gitRoot}") {
+							checkoutRevisionOnRepo(env.gitRoot)
+							dir ("${env.projectRoot}") {
+								mvnCleanInstall(env.projectRoot, env.jdkCompilation, env.mvnVersion)
+							}
+							deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						}
 					}
 				}
 			}
@@ -233,8 +299,14 @@ pipeline {
 						sourceConfDirectory = "eSirius-admin-conf/target/eSirius-admin-conf"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
-						deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						sh "mkdir -p ${env.gitRoot}"
+						dir ("${env.gitRoot}") {
+							checkoutRevisionOnRepo(env.gitRoot)
+							dir ("${env.projectRoot}") {
+								mvnCleanInstall(env.projectRoot, env.jdkCompilation, env.mvnVersion)
+							}
+							deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						}
 					}
 				}
 				stage ("build eVision") {
@@ -249,8 +321,14 @@ pipeline {
 						sourceConfDirectory = "eSirius-vision-conf/target/eSirius-vision-conf"
 					}
 					steps {
-						runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)
-						deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						sh "mkdir -p ${env.gitRoot}"
+						dir ("${env.gitRoot}") {
+							checkoutRevisionOnRepo(env.gitRoot)
+							dir ("${env.projectRoot}") {
+								mvnCleanInstall(env.projectRoot, env.jdkCompilation, env.mvnVersion)
+							}
+							deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+						}
 					}
 				}
 			}
@@ -269,16 +347,6 @@ pipeline {
 	}
 }
 
-void runBuild(String gitRoot, String projectRoot, String jdk, String mvn) {
-	
-	sh "mkdir -p ${gitRoot}"
-
-	dir ("${gitRoot}") {
-		checkoutRevisionOnRepo(gitRoot)
-		mvnCleanInstall(projectRoot, jdk, mvn)
-	}
-}
-
 void checkoutRevisionOnRepo(String gitRoot) {
 	checkout scm: [ $class: "GitSCM", 
 					userRemoteConfigs: [ [url: env.gitLabUrl+gitRoot, credentialsId: "root"] ],
@@ -286,11 +354,9 @@ void checkoutRevisionOnRepo(String gitRoot) {
 				  ], poll: false
 }
 
-void mvnCleanInstall(String projectRoot, String jdk, String mvn) {
-	dir ("${projectRoot}") {
-		withMaven (jdk: jdk, maven: mvn) {
-			sh "mvn clean install -P ${params.mavenProfile}"
-		}
+void mvnCleanInstall(String projectRoot, String jdkCompilation, String mvnVersion) {
+	withMaven (jdk: jdkCompilation, maven: mvnVersion) {
+		sh "mvn clean install -P ${params.mavenProfile}"
 	}
 }
 
@@ -308,19 +374,17 @@ void cleanProjectPrimaryRemote(String targetDirectory) {
 }
 
 void deploy(String gitRoot, String projectRoot, String targetDirectory, String sourceAppDirectory, String sourceExtension, String sourceConfDirectory) {
-	dir ("${gitRoot}") {
-		script {
-			if (targetDirectory && targetDirectory != "") {
-				if (sourceAppDirectory && sourceAppDirectory != "") {
-					sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
-					sh "scp ${projectRoot}/${sourceAppDirectory}/*${sourceExtension} ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
-					sh returnStatus: true, script: "ssh ${env.primaryRemote} unzip -qq -o ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*${sourceExtension} -d ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/"
-					sh "ssh ${env.primaryRemote} rm -f ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*${sourceExtension}"
-				}
-				if (sourceConfDirectory && sourceConfDirectory != "") {
-					sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}"
-					sh "scp -r ${projectRoot}/${sourceConfDirectory}/* ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}"
-				}
+	script {
+		if (targetDirectory && targetDirectory != "") {
+			if (sourceAppDirectory && sourceAppDirectory != "") {
+				sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
+				sh "scp ${projectRoot}/${sourceAppDirectory}/*${sourceExtension} ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
+				sh returnStatus: true, script: "ssh ${env.primaryRemote} unzip -qq -o ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*${sourceExtension} -d ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/"
+				sh "ssh ${env.primaryRemote} rm -f ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*${sourceExtension}"
+			}
+			if (sourceConfDirectory && sourceConfDirectory != "") {
+				sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}"
+				sh "scp -r ${projectRoot}/${sourceConfDirectory}/* ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}"
 			}
 		}
 	}

@@ -42,7 +42,7 @@ public abstract class Parameter {
 	
 	/**
 	 * Les paramètres sont définit dans le même fichier.
-	 * Permet de définir si le paramètre est présent pour les monoBuild (mono), pour le buildAll (all), pour tous (every).
+	 * Permet de définir si le paramètre est présent pour les monoBuild (mono), pour le buildAll (all), pour le dashboard (dash), pour tous (every).
 	 */
 	public enum ScopeParamater { MONO, ALL, DASH, EVERY }; 
 	
@@ -130,4 +130,5 @@ public abstract class Parameter {
 				|| (this.scope == ScopeParamater.MONO && buildType == BuildType.MONO_BUILD) 
 				|| (this.scope == ScopeParamater.DASH && buildType == BuildType.DASHBOARD) ;
 	}
+
 }

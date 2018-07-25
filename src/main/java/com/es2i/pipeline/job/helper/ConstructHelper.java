@@ -38,7 +38,9 @@ public class ConstructHelper {
 	}
 	
 	
-	
+	/*
+	 * Begin and end
+	 */
 	public String beginPipeline() {
 		return "pipeline {";
 	}
@@ -163,6 +165,9 @@ public class ConstructHelper {
 	}
 	
 	
+	/*
+	 * functions.txt
+	 */
 	public String getFunctions() throws IOException, URISyntaxException {
 		
 		InputStream is = ConstructHelper.class.getClassLoader().getResourceAsStream(ConstantTools.FUNCTIONS_FILE);
@@ -176,7 +181,9 @@ public class ConstructHelper {
 		return str;
 	}
 
-	
+	/*
+	 * if
+	 */
 	public String beginIfSecondaryDeploy() {
 		return "if (params.secondaryDeploy) {";
 	}
@@ -185,15 +192,26 @@ public class ConstructHelper {
 		return "}";
 	}
 
-	
-	public String cleanPrimaryRemote() {
-		return "cleanPrimaryRemote()";
+	public String beginIfBackDeploy() {
+		return "if (params.backDeploy) {";
 	}
 	
-	public String cleanProjectPrimaryRemote() { 
-		return "cleanProjectPrimaryRemote(env.targetDirectory)"; 
+	public String endIfBackDeploy() {
+		return "}";
 	}
 	
+	public String beginIfFrontDeploy() {
+		return "if (params.frontDeploy) {";
+	}
+	
+	public String endIfFrontDeploy() {
+		return "}";
+	}
+	
+	
+	/*
+	 * shell
+	 */
 	public String createDataFolderOnPrimaryRemote() {
 		
 		String str = "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/";
@@ -201,7 +219,7 @@ public class ConstructHelper {
 		
 		return sh(str);
 	}
-	
+
 	public String createTarOnPrimaryRemote() {
 		
 		String str = "ssh ${env.primaryRemote} \\\"cd ${env.depotFolder}/${params.revision}/${params.mavenProfile} && tar -cf ";
@@ -214,6 +232,10 @@ public class ConstructHelper {
 		return sh("ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${params.mavenProfile}/" + ConstantTools.ESII_APPLICATION + ".gz");
 	}
 	
+	
+	/*
+	 * Intrégration Continue (runner)
+	 */
 	public String callBuildAll(String revision, String mavenProfile) {
 		
 		String param = "";
@@ -223,8 +245,24 @@ public class ConstructHelper {
 		return sh("wget \\\"${env.jenkinsUrl}/view/GIT/job/${env.jobName}/buildWithParameters?token=${env.pipelineToken}" + param);
 	}
 	
-	public String runBuild() {
-		return "runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion)";
+	
+	/*
+	 * Appel des fonctions groovy (voir functions.txt)
+	 */
+	public String checkoutRevisionOnRepo() {
+		return "checkoutRevisionOnRepo(env.gitRoot)";
+	}
+	
+	public String mvnCleanInstall() {
+		return "mvnCleanInstall(env.projectRoot, env.jdkCompilation, env.mvnVersion)";
+	}
+	
+	public String cleanPrimaryRemote() {
+		return "cleanPrimaryRemote()";
+	}
+	
+	public String cleanProjectPrimaryRemote() { 
+		return "cleanProjectPrimaryRemote(env.targetDirectory)"; 
 	}
 	
 	public String deploy() {
@@ -236,25 +274,43 @@ public class ConstructHelper {
 	}
 	
 	
-	public String ifBackDeploy() {
-		return "if (params.backDeploy) {";
+	/*
+	 * Clean Jenkins WS
+	 */
+	public String cleanWs() {
+		return "cleanWs()";
 	}
 	
-	public String endIfBackDeploy() {
+	/*
+	 * mkdir gitroot
+	 */
+	public String mkdirGitRoot() {
+		return sh("mkdir -p ${env.gitRoot}");
+	}
+	
+	/*
+	 * dir
+	 */
+	public String beginDirGitRoot() {
+		return "dir (\"${env.gitRoot}\") {";
+	}
+	
+	public String endDirGitRoot() {
 		return "}";
 	}
 	
-	public String ifFrontDeploy() {
-		return "if (params.frontDeploy) {";
+	public String beginDirProjectRoot() {
+		return "dir (\"${env.projectRoot}\") {";
 	}
 	
-	public String endIfFrontDeploy() {
+	public String endDirProjectRoot() {
 		return "}";
 	}
 	
 	
-	
-	
+	/*
+	 * indentation et fonctions (sh, echo...)
+	 */
 	public String addTab(int nb) {
 		
 		String str = "";
@@ -274,10 +330,6 @@ public class ConstructHelper {
 	
 	public String sh(String str) {
 		return "sh \"" + str + "\"";
-	}
-	
-	public String cleanWs() {
-		return "cleanWs()";
 	}
 	
 	/**
