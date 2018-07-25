@@ -35,7 +35,8 @@ import com.es2i.pipeline.tools.ConstantTools;
 import com.es2i.pipeline.tools.Tools;
 
 /**
- * Singleton. Accède à la conf et vérifie l'intégrité des éléments. Possède un cache.
+ * Singleton. Accède à la conf et vérifie l'intégrité des éléments et aliment les objets de type Script.
+ * Possède un cache.
  */
 public class ConfReader {
 
@@ -48,8 +49,6 @@ public class ConfReader {
 	private BuildOne buildOne;
 	
 	private Dashboard dashboard;
-	
-	
 	
 	
 	
@@ -85,6 +84,10 @@ public class ConfReader {
 	
 	
 	
+	/*
+	 * Le script Runner.
+	 */
+	
 	public Runner getRunner() throws IOException {
 		
 		if (runner == null) {
@@ -97,6 +100,24 @@ public class ConfReader {
 		return runner;
 	}
 	
+	private List<Environment> getRunnerEnvironment() throws IOException {
+		
+		List<Environment> runnerEnvironements = new ArrayList<Environment>();
+		
+		try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.ENV_PROP_FILE) ) {
+			try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
+				try ( JsonReader jsonReader = Json.createReader(is) ) {
+					
+					JsonObject objects = jsonReader.readObject();
+					JsonObject runnerObject = objects.getJsonObject(ConstantTools.RUNNER_KEY);
+					runnerEnvironements = checkEnvironment(ConstantTools.RUNNER_DIRECTORY, runnerObject);
+				}
+			}
+		}
+		
+		return runnerEnvironements;
+	}
+
 	private List<String> getRunnerRevisions() throws IOException {
 		
 		List<String> runnerRevisions = new ArrayList<String>();
@@ -129,37 +150,31 @@ public class ConfReader {
 		return runnerMavenProfiles;
 	}
 
-	private List<Environment> getRunnerEnvironment() throws IOException {
-		
-		List<Environment> runnerEnvironements = new ArrayList<Environment>();
-		
-		try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.ENV_PROP_FILE) ) {
-			try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
-				try ( JsonReader jsonReader = Json.createReader(is) ) {
-					
-					JsonObject objects = jsonReader.readObject();
-					JsonObject runnerObject = objects.getJsonObject(ConstantTools.RUNNER_KEY);
-					runnerEnvironements = checkEnvironment(ConstantTools.RUNNER_DIRECTORY, runnerObject);
-				}
-			}
-		}
-		
-		return runnerEnvironements;
-	}
 
-
+	/*
+	 * Le script BuilAll.
+	 */
+	
 	public BuildAll getBuildAll() throws IOException {
 		
 		if (buildAll == null) {
 			buildAll = new BuildAll();
 			buildAll.setProjects( getBuildAllProjects() );
+			buildAll.setSecondaryRemotes( getSecondaryRemotes() );
 			buildAll.setParameters( getBuilAllParameters() );
 			buildAll.setEnvironements( getBuilAllEnvironment() );
-			buildAll.setSecondaryRemotes( getSecondaryRemotes() );
 			buildAll.setProjectsEnvironements( getProjectsEnvironmentsByPrefix(buildAll.getProjectsList()) );
 		}
 		
 		return buildAll;
+	}
+	
+	private List<Parameter> getBuilAllParameters() throws IOException {
+		return getParameters(BuildAll.class);
+	}
+
+	private List<Environment> getBuilAllEnvironment() throws IOException {
+		return getGlobalEnvironment();
 	}
 	
 	private Map<Integer, List<String>> getBuildAllProjects() throws IOException {
@@ -182,15 +197,7 @@ public class ConfReader {
 		
 		return projects;
 	}
-	
-	private List<Parameter> getBuilAllParameters() throws IOException {
-		return getParameters(BuildAll.class);
-	}
 
-	private List<Environment> getBuilAllEnvironment() throws IOException {
-		return getGlobalEnvironment();
-	}
-	
 	private List<String> getSecondaryRemotes() throws IOException {
 		
 		List<String> secondaryRemotes = new ArrayList<String>();
@@ -208,6 +215,10 @@ public class ConfReader {
 	}
 	
 	
+	/*
+	 * Le script BuildOne.
+	 */
+	
 	public BuildOne getBuildOne() throws IOException {
 		
 		if (buildOne == null) {
@@ -221,6 +232,14 @@ public class ConfReader {
 		return buildOne;
 	}
 	
+	private List<Parameter> getBuilOneParameters() throws IOException {
+		return getParameters(BuildOne.class);
+	}
+	
+	private List<Environment> getBuilOneEnvironment() throws IOException {
+		return getGlobalEnvironment();
+	}
+
 	private Map<Integer, String> getBuildOneProjects() throws IOException {
 		
 		Map<Integer, String> projects = new HashMap<Integer, String>();
@@ -237,23 +256,19 @@ public class ConfReader {
 		return projects;
 	}
 
-	private List<Parameter> getBuilOneParameters() throws IOException {
-		return getParameters(BuildOne.class);
-	}
 	
-	private List<Environment> getBuilOneEnvironment() throws IOException {
-		return getGlobalEnvironment();
-	}
-
-
+	/*
+	 * Le script Dashboard.
+	 */
+	
 	public Dashboard getDashboard() throws IOException {
 		
 		if (dashboard == null) {
 			dashboard = new Dashboard();
-			dashboard.setParameters( getDashboardParameters() );
-			dashboard.setEnvironements( getDashboardEnvironment() );
 			dashboard.setFrontEnvironments( getDashboardFrontEnvironments() );
 			dashboard.setBackEnvironments( getDashboardBackEnvironments() );
+			dashboard.setParameters( getDashboardParameters() );
+			dashboard.setEnvironements( getDashboardEnvironment() );
 		}
 			
 		return dashboard;
@@ -275,7 +290,61 @@ public class ConfReader {
 		return getDashboardEnvironments(ConstantTools.BACK);
 	}
 	
+	private Map<String, List<Environment>> getDashboardEnvironments(String frontOrBack) throws IOException {
+		
+		Map<String, List<Environment>> backEnvironments = new HashMap<String, List<Environment>>();
+		
+		try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.DASHBOARD_ENV_PROP_FILE) ) {
+			try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
+				try ( JsonReader jsonReader = Json.createReader(is) ) {
+					
+					// back
+					JsonObject racineArray = jsonReader.readObject();
+					JsonArray jsonArray = racineArray.getJsonArray(frontOrBack);
+					
+					for (int i = 0; i < jsonArray.size(); i++) {
+						JsonObject object = jsonArray.get(i).asJsonObject();
+						for (Map.Entry<String, JsonValue> entry : object.entrySet() ) {
+							String secondKey = entry.getKey();
+							backEnvironments.put(secondKey, checkEnvironment(secondKey, entry.getValue().asJsonObject()));
+						}
+					}
+				}
+			}
+		}
+		
+		return backEnvironments;
+	}
 	
+	
+	
+	/*
+	 * Le code mutualisé.
+	 */
+	
+	private Map<String, List<Environment>> getProjectsEnvironmentsByPrefix(List<String> projects) throws IOException {
+		
+		Map<String, List<Environment>> projectsEnvironments = new HashMap<String, List<Environment>>();
+			
+		try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.ENV_PROP_FILE) ) {
+			try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
+				try ( JsonReader jsonReader = Json.createReader(is) ) {
+					
+					JsonObject racineArray = jsonReader.readObject();
+					// global / runner / project
+					for (Map.Entry<String, JsonValue> firstBlockEntry : racineArray.entrySet()) {
+
+						String firstBlockKey = firstBlockEntry.getKey();
+						JsonObject firstBlockObject = firstBlockEntry.getValue().asJsonObject();
+						if ( projects.contains(firstBlockKey) )
+							projectsEnvironments.put(firstBlockKey, checkEnvironment(firstBlockKey, firstBlockObject));
+					}
+				}
+			}
+		}
+		
+		return projectsEnvironments;
+	}
 	
 	private List<Parameter> getParameters(Class<? extends Script> scriptClass) throws IOException {
 		
@@ -363,7 +432,6 @@ public class ConfReader {
 		return Tools.findPropertyFile(propertyFile).getProperty(propertyKey);
 	}
 
-	
 	private List<Environment> getGlobalEnvironment() throws IOException {
 			
 		List<Environment> globalEnvironements = new ArrayList<Environment>();
@@ -396,56 +464,5 @@ public class ConfReader {
 		
 		return list;
 	}
-	
-	
-	private Map<String, List<Environment>> getProjectsEnvironmentsByPrefix(List<String> projects) throws IOException {
-		
-		Map<String, List<Environment>> projectsEnvironments = new HashMap<String, List<Environment>>();
-			
-		try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.ENV_PROP_FILE) ) {
-			try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
-				try ( JsonReader jsonReader = Json.createReader(is) ) {
-					
-					JsonObject racineArray = jsonReader.readObject();
-					// global / runner / project
-					for (Map.Entry<String, JsonValue> firstBlockEntry : racineArray.entrySet()) {
 
-						String firstBlockKey = firstBlockEntry.getKey();
-						JsonObject firstBlockObject = firstBlockEntry.getValue().asJsonObject();
-						if ( projects.contains(firstBlockKey) )
-							projectsEnvironments.put(firstBlockKey, checkEnvironment(firstBlockKey, firstBlockObject));
-					}
-				}
-			}
-		}
-		
-		return projectsEnvironments;
-	}
-
-	private Map<String, List<Environment>> getDashboardEnvironments(String frontOrBack) throws IOException {
-		
-		Map<String, List<Environment>> backEnvironments = new HashMap<String, List<Environment>>();
-		
-		try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.DASHBOARD_ENV_PROP_FILE) ) {
-			try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
-				try ( JsonReader jsonReader = Json.createReader(is) ) {
-					
-					// back
-					JsonObject racineArray = jsonReader.readObject();
-					JsonArray jsonArray = racineArray.getJsonArray(frontOrBack);
-					
-					for (int i = 0; i < jsonArray.size(); i++) {
-						JsonObject object = jsonArray.get(i).asJsonObject();
-						for (Map.Entry<String, JsonValue> entry : object.entrySet() ) {
-							String secondKey = entry.getKey();
-							backEnvironments.put(secondKey, checkEnvironment(secondKey, entry.getValue().asJsonObject()));
-						}
-					}
-				}
-			}
-		}
-		
-		return backEnvironments;
-	}
-	
 }

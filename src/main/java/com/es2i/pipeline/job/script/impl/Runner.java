@@ -7,8 +7,14 @@ import com.es2i.pipeline.job.script.Script;
 
 public class Runner extends Script {
 
+	/**
+	 * La liste des revisions de l'IC.
+	 */
 	private List<String> revisions;
 	
+	/**
+	 * La liste des profiles maven de l'IC.
+	 */
 	private List<String> mavenProfiles;
 
 	

@@ -49,10 +49,10 @@ public class ConstantTools {
 	public static final String PROJECTS_BUILD_ALL_GROUPE1_KEY 			= PROJECTS_BUILD_ALL_GROUPE_KEY + "1";
 	
 	/*
-	 * parameters.json / tools.properties / functions.txt
+	 * parameters.json / tools.json / functions.txt
 	 */
 	public static final String PARAM_JSON_FILE 							= "parameters.json";
-	public static final String TOOLS_PROP_FILE 							= "tools.properties";
+	public static final String TOOLS_JSON_FILE 							= "tools.json";
 	public static final String FUNCTIONS_FILE 							= "functions.txt";
 	
 	/*

@@ -9,8 +9,18 @@ import com.es2i.pipeline.job.script.Script;
 
 public class Dashboard extends Script {
 
+	/**
+	 * La liste des projets FRONT et de ses variables d'environements.
+	 * 	key : 		le nom du projet
+	 *  value : 	la liste des variables d'environements.	
+	 */
 	private Map<String, List<Environment>> frontEnvironments;
 	
+	/**
+	 * La liste des projets BACK et de ses variables d'environements.
+	 * 	key : 		le nom du projet
+	 *  value : 	la liste des variables d'environements.	
+	 */
 	private Map<String, List<Environment>> backEnvironments;
 
 		

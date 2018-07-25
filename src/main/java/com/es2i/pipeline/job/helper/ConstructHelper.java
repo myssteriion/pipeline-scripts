@@ -38,9 +38,11 @@ public class ConstructHelper {
 	}
 	
 	
+	
 	/*
 	 * Begin and end
 	 */
+	
 	public String beginPipeline() {
 		return "pipeline {";
 	}
@@ -168,6 +170,7 @@ public class ConstructHelper {
 	/*
 	 * functions.txt
 	 */
+	
 	public String getFunctions() throws IOException, URISyntaxException {
 		
 		InputStream is = ConstructHelper.class.getClassLoader().getResourceAsStream(ConstantTools.FUNCTIONS_FILE);
@@ -181,9 +184,11 @@ public class ConstructHelper {
 		return str;
 	}
 
+	
 	/*
 	 * if
 	 */
+	
 	public String beginIfSecondaryDeploy() {
 		return "if (params.secondaryDeploy) {";
 	}
@@ -236,6 +241,7 @@ public class ConstructHelper {
 	/*
 	 * Intrégration Continue (runner)
 	 */
+	
 	public String callBuildAll(String revision, String mavenProfile) {
 		
 		String param = "";
@@ -249,6 +255,7 @@ public class ConstructHelper {
 	/*
 	 * Appel des fonctions groovy (voir functions.txt)
 	 */
+	
 	public String checkoutRevisionOnRepo() {
 		return "checkoutRevisionOnRepo(env.gitRoot)";
 	}
@@ -288,9 +295,11 @@ public class ConstructHelper {
 		return sh("mkdir -p ${env.gitRoot}");
 	}
 	
+	
 	/*
 	 * dir
 	 */
+	
 	public String beginDirGitRoot() {
 		return "dir (\"${env.gitRoot}\") {";
 	}
@@ -311,6 +320,7 @@ public class ConstructHelper {
 	/*
 	 * indentation et fonctions (sh, echo...)
 	 */
+	
 	public String addTab(int nb) {
 		
 		String str = "";

@@ -1,5 +1,9 @@
 package com.es2i.pipeline.job.entities;
 
+/**
+ * Représente une variable tools d'un point de vue Pipeline.
+ * @see conf/tools.json
+ */
 public class Tool {
 
 	private String name;
