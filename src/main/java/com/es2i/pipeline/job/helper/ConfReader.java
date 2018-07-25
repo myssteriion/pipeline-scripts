@@ -22,12 +22,12 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
 
-import com.es2i.pipeline.job.entities.Dashboard;
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
 import com.es2i.pipeline.job.entities.parameter_impl.BooleanParameter;
 import com.es2i.pipeline.job.entities.parameter_impl.ChoiceParameter;
 import com.es2i.pipeline.job.entities.parameter_impl.StringParameter;
+import com.es2i.pipeline.job.script.Dashboard;
 import com.es2i.pipeline.tools.ConstantTools;
 import com.es2i.pipeline.tools.Tools;
 

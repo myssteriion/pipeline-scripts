@@ -1,8 +1,10 @@
-package com.es2i.pipeline.job.entities;
+package com.es2i.pipeline.job.script;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.es2i.pipeline.job.entities.Environment;
 
 public class Dashboard {
 

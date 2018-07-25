@@ -12,11 +12,11 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
-import com.es2i.pipeline.job.entities.Dashboard;
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Parameter;
 import com.es2i.pipeline.job.helper.ConfReader;
 import com.es2i.pipeline.job.helper.ConstructHelper;
+import com.es2i.pipeline.job.script.Dashboard;
 import com.es2i.pipeline.tools.ConstantTools;
 import com.es2i.pipeline.tools.Tools;
 
