@@ -72,13 +72,10 @@ public class Pipeline {
 				
 				Runner runner = confReader.getRunner();
 				
-				// pipeline - agent - param - env - tools - stages
+				// pipeline - agent - param - env - tools - stages - stage - steps
 				writer.write(constrcuctHelper.beginPipeline() + constrcuctHelper.addCRLF());
 				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.agent() + constrcuctHelper.addCRLF());
 				addParamEnvTools(writer, runner);
-				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
-				
-				// stages - stage - steps
 				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.beginStages() + constrcuctHelper.addCRLF());
 				writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("runner") + constrcuctHelper.addCRLF());
 				writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
@@ -97,12 +94,10 @@ public class Pipeline {
 							writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.callBuildAll(revision.trim(), mavenProfile.trim()) + constrcuctHelper.addCRLF());
 				}
 				
-				// steps - stage - stages
+				// steps - stage - stages - pipeline
 				writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());
 				writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 				writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
-				
-				// pipeline
 				writer.write(constrcuctHelper.endPipeline());
 			}
 		}
