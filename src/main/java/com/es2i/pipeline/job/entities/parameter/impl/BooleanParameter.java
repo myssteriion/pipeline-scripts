@@ -8,9 +8,8 @@ public class BooleanParameter extends Parameter {
 	
 	
 	
-	public BooleanParameter(String name, String defaultValue, String desc, String scope) {
-		
-		super(name, TypeParameter.BOOLEAN, desc, scope);
+	public BooleanParameter(String name, String defaultValue, String desc) {
+		super(name, TypeParameter.BOOLEAN, desc);
 		this.defaultValue = defaultValue;
 	}
 
@@ -18,6 +17,11 @@ public class BooleanParameter extends Parameter {
 	
 	public String getDefaultValue() {
 		return defaultValue;
+	}
+	
+	@Override
+	public String toString() {
+		return "BooleanParameter [" + super.toString() + ", defaultValue=" + defaultValue + "]";
 	}
 	
 }

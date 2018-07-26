@@ -8,9 +8,8 @@ public class StringParameter extends Parameter {
 	
 	
 	
-	public StringParameter(String name, String defaultValue, String desc, String scope) {
-		
-		super(name, TypeParameter.STRING, desc, scope);
+	public StringParameter(String name, String defaultValue, String desc) {
+		super(name, TypeParameter.STRING, desc);
 		this.defaultValue = defaultValue;
 	}
 
@@ -18,6 +17,11 @@ public class StringParameter extends Parameter {
 	
 	public String getDefaultValue() {
 		return defaultValue;
+	}
+
+	@Override
+	public String toString() {
+		return "StringParameter [" + super.toString() + ", defaultValue=" + defaultValue + "]";
 	}
 	
 }

@@ -6,9 +6,9 @@ pipeline {
 		choice(name: "project", choices: "es2i\neCustomer\nsmsSender\nprocyon\neSecurity\neSirius-shared\neStat\nHistory\nePlanning\neSirius\nAppointment\neAdmin\neVision\n", description: "le projet à builder")
 	}
 	environment {
+		depotFolder = "depot"
 		gitLabUrl = "http://192.168.25.68/eSirius/"
 		primaryRemote = "jenkins@192.168.25.94"
-		depotFolder = "depot"
 	}
 	stages {
 		stage ("Initialize") {

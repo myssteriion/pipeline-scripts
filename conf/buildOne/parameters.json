@@ -1,0 +1,8 @@
+[
+	{
+		"name": "project",
+		"type": "choice",
+		"choices" : "$buildOne/application.properties/projects",
+		"description" : "le projet à builder"
+	}
+]

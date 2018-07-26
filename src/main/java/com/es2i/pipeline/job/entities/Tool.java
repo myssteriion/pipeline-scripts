@@ -26,5 +26,10 @@ public class Tool {
 	public String getValue() {
 		return value;
 	}
+
+	@Override
+	public String toString() {
+		return "Tool [name=" + name + ", value=" + value + "]";
+	}
 	
 }

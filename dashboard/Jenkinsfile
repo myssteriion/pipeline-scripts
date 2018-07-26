@@ -7,9 +7,9 @@ pipeline {
 		booleanParam(name: "frontDeploy", defaultValue: true, description: "déployer le front")
 	}
 	environment {
+		depotFolder = "depot"
 		gitLabUrl = "http://192.168.25.68/eSirius/"
 		primaryRemote = "jenkins@192.168.25.94"
-		depotFolder = "depot"
 	}
 	stages {
 		stage ("Initialize") {

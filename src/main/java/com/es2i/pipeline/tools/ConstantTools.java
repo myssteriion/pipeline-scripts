@@ -10,6 +10,7 @@ public class ConstantTools {
 	public static final String COMA										= ",";
 	public static final String DOLLAR									= "$";
 	public static final String SLASH									= "/";
+	public static final String DOT										= ".";
 	
 	/*
 	 * noms des fichiers et dossiers
@@ -39,40 +40,48 @@ public class ConstantTools {
 	public static final String CONF_PARAM 								= DOLLAR + "confFolder";
 	
 	/*
-	 * application.properties
+	 * dossiers conf (en fonction des script générés)
+	 */
+	public static final String RUNNER_FOLDER 							= "runner" + SLASH;
+	public static final String BUILD_ALL_FOLDER 						= "buildAll" + SLASH;
+	public static final String BUILD_ONE_FOLDER 						= "buildOne" + SLASH;
+	public static final String DASHBOARD_FOLDER 						= "dashboard" + SLASH;
+	
+	/*
+	 * fichiers conf
 	 */
 	public static final String APPLICATION_PROP_FILE					= "application.properties";
-	public static final String RUNNER_REVISIONS_KEY 					= "runner.revisons";
-	public static final String RUNNER_MAVEN_PROFILES_KEY 				= "runner.mavenProfiles";
-	public static final String PROJECTS_BUILD_ONE_KEY 					= "projects.build.one";
-	public static final String PROJECTS_BUILD_ALL_GROUPE_KEY 			= "projects.build.all.groupe";
-	public static final String PROJECTS_BUILD_ALL_GROUPE1_KEY 			= PROJECTS_BUILD_ALL_GROUPE_KEY + "1";
-	
-	/*
-	 * parameters.json / tools.json / functions.txt
-	 */
 	public static final String PARAM_JSON_FILE 							= "parameters.json";
 	public static final String TOOLS_JSON_FILE 							= "tools.json";
+	public static final String ENV_PROP_FILE 							= "environment.properties";
+	public static final String PROJECT_ENV_PROP_FILE 					= "project_environment.properties";
 	public static final String FUNCTIONS_FILE 							= "functions.txt";
 	
+	public static final String SECONDARY_REMOTE_FILE					= "secondaryRemote.properties";
+	
 	/*
-	 * environment.json
+	 * runner
 	 */
-	public static final String ENV_PROP_FILE 							= "environment.json";
-	public static final String GLOBAL_KEY 								= "global";
-	public static final String RUNNER_KEY 								= "runner";
+	public static final String RUNNER_REVISIONS_KEY 					= "revisons";
+	public static final String RUNNER_MAVEN_PROFILES_KEY 				= "mavenProfiles";
+	
+	/*
+	 * buildAll
+	 */
+	public static final String BUILD_ALL_PROJECTS_GROUPE_KEY 			= "projects.groupe";
+	public static final String BUILD_ALL_PROJECTS_GROUPE1_KEY 			= BUILD_ALL_PROJECTS_GROUPE_KEY + "1";
+	public static final String SECONDARY_REMOTE_KEY 					= "secondary.remote";
+	public static final String SECONDARY_REMOTE1_KEY 					= SECONDARY_REMOTE_KEY + "1";
+	
+	/*
+	 * buildOne
+	 */
+	public static final String PROJECTS_BUILD_ONE_KEY 					= "projects";
 	
 	/*
 	 * dashboard
 	 */
-	public static final String DASHBOARD_ENV_PROP_FILE 					= "dashboard/environment.json";
 	public static final String BACK 									= "back";
 	public static final String FRONT 									= "front";
-	
-	/*
-	 * remoteDescriptor.properties
-	 */
-	public static final String REMOTE_DESCRIPTOR_FILE					= "remoteDescriptor.properties";
-	public static final String SECONDARY_REMOTE_KEY 					= "secondary.remote";
 
 }

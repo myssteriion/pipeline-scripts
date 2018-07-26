@@ -1,0 +1,14 @@
+[
+	{
+		"name": "backDeploy",
+		"type": "boolean",
+		"defaultValue" : "true",
+		"description" : "déployer le back"
+	},
+	{
+		"name": "frontDeploy",
+		"type": "boolean",
+		"defaultValue" : "true",
+		"description" : "déployer le front"
+	}
+]

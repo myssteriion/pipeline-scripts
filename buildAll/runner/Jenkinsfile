@@ -1,9 +1,9 @@
 pipeline {
 	agent any
 	environment {
+		pipelineToken = "760429"
 		jenkinsUrl = "http://192.168.25.69:8080"
 		jobName = "GIT_eSirius_build_all"
-		pipelineToken = "760429"
 	}
 	stages {
 		stage ("runner") {

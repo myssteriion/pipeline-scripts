@@ -6,9 +6,9 @@ pipeline {
 		booleanParam(name: "secondaryDeploy", defaultValue: false, description: "déployer sur les serveurs secondaires")
 	}
 	environment {
+		depotFolder = "depot"
 		gitLabUrl = "http://192.168.25.68/eSirius/"
 		primaryRemote = "jenkins@192.168.25.94"
-		depotFolder = "depot"
 	}
 	stages {
 		stage ("Initialize") {

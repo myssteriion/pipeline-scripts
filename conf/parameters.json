@@ -10,33 +10,5 @@
 		"type": "choice",
 		"choices" : "$application.properties/mavenProfiles",
 		"description" : "profile maven"
-	},
-	{
-		"name": "secondaryDeploy",
-		"type": "boolean",
-		"scope" : "buildAll",
-		"defaultValue" : "false",
-		"description" : "déployer sur les serveurs secondaires"
-	},
-	{
-		"name": "project",
-		"type": "choice",
-		"scope" : "buildOne",
-		"choices" : "$application.properties/projects.build.one",
-		"description" : "le projet à builder"
-	},
-	{
-		"name": "backDeploy",
-		"type": "boolean",
-		"scope" : "dashboard",
-		"defaultValue" : "true",
-		"description" : "déployer le back"
-	},
-	{
-		"name": "frontDeploy",
-		"type": "boolean",
-		"scope" : "dashboard",
-		"defaultValue" : "true",
-		"description" : "déployer le front"
 	}
 ]

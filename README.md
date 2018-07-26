@@ -41,11 +41,6 @@ Le fichier décrit les paramètres des scripts. Pour chaque paramètre, il faut 
 
  * **name** : le nom du paramètre
  * **type** : le type du paramètre (valeur possible : [boolean, string, choice])
- * **scope** : (facultatif) (valeur possible : [buildOne, buildAll, dashboard]) permet de définir si le paramètre est :  
-	* uniquement présent sur les buildOne  
-	* uniquement présent sur le buildAll
-	* uniquement présent sur le dashboard  
-	* tous (ne pas renseigner la clé)
  * **description** : la description du paramètre
  * si type == boolean ou string :  
  	* **defaultValue** : la valeur par défaut (attention, ici, les booléens sont à encadrer de guillemets)  

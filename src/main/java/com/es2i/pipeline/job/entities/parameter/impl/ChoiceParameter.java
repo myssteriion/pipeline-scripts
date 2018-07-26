@@ -9,9 +9,8 @@ public class ChoiceParameter extends Parameter {
 	
 	
 	
-	public ChoiceParameter(String name, String choices, String desc, String scope) {
-		
-		super(name, TypeParameter.CHOICE, desc, scope);
+	public ChoiceParameter(String name, String choices, String desc) {
+		super(name, TypeParameter.CHOICE, desc);
 		
 		String[] elements = choices.split(ConstantTools.COMA);
 		
@@ -29,6 +28,11 @@ public class ChoiceParameter extends Parameter {
 	
 	public String getChoices() {
 		return choices;
+	}
+	
+	@Override
+	public String toString() {
+		return "ChoiceParameter [" + super.toString() + ", choices=" + choices + "]";
 	}
 	
 }

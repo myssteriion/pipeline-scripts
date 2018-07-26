@@ -1,0 +1,8 @@
+[
+	{
+		"name": "secondaryDeploy",
+		"type": "boolean",
+		"defaultValue" : "false",
+		"description" : "déployer sur les serveurs secondaires"
+	}
+]
