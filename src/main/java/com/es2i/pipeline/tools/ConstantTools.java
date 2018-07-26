@@ -27,7 +27,7 @@ public class ConstantTools {
 	public static final String APP 										= "app";
 	public static final String CONF 									= "conf";
 	public static final String DATA 									= "data";
-	public static final String EVENT_STORAGE 							= "enventStorage";
+	public static final String EVENT_STORAGE 							= "event-storage";
 	
 	/*
 	 * Le code java va directement remplacer des valeurs qui seront dans le Jenkinsfile.

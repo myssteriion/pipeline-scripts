@@ -24,7 +24,7 @@ pipeline {
 		}
 		stage ("Create data folder") {
 			steps {
-				sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/data/enventStorage/"
+				sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/data/event-storage/"
 			}
 		}
 		stage ("build groupe 1") {
