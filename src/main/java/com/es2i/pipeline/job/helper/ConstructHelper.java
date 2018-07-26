@@ -90,8 +90,11 @@ public class ConstructHelper {
 	}
 	
 	public String contentEnv(Environment env) {
-		
 		return env.getName() + " = \"" + env.getValue() + "\"";
+	}
+	
+	public String contentEnv(String key, String value) {
+		return key + " = \"" + value + "\"";
 	}
 	
 	public String endEnv() {
@@ -213,6 +216,30 @@ public class ConstructHelper {
 		return "}";
 	}
 	
+	public String beginIfTargetDirectory() {
+		return "if (env.targetDirectory && env.targetDirectory != \"\") {";
+	}
+	
+	public String endIfTargetDirectory() {
+		return "}";
+	}
+	
+	public String beginIfSourceAppDirectory() {
+		return "if (env.sourceAppDirectory && env.sourceAppDirectory != \"\") {";
+	}
+	
+	public String endIfSourceAppDirectory() {
+		return "}";
+	}
+	
+	public String beginIfSourceConfDirectory() {
+		return "if (env.sourceConfDirectory && env.sourceConfDirectory != \"\") {";
+	}
+	
+	public String endIfSourceConfDirectory() {
+		return "}";
+	}
+	
 	
 	/*
 	 * shell
@@ -272,8 +299,18 @@ public class ConstructHelper {
 		return "cleanProjectPrimaryRemote(env.targetDirectory)"; 
 	}
 	
-	public String deploy() {
-		return "deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)";
+	public String deployApp(int i) {
+		if (i == 0)
+			return "deployApp(env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension)";
+		else
+			return "deployApp(env.projectRoot, env.targetDirectory, env.sourceAppDirectory" + i +", env.sourceExtension)";
+	}
+	
+	public String deployConf(int i) {
+		if (i == 0)
+			return "deployConf(env.projectRoot, env.targetDirectory, env.sourceConfDirectory)";
+		else
+			return "deployConf(env.projectRoot, env.targetDirectory, env.sourceConfDirectory" + i + ")";
 	}
 	
 	public String runDeployToSecondaryRemote(String remote) {
@@ -289,12 +326,20 @@ public class ConstructHelper {
 	}
 	
 	/*
-	 * mkdir gitroot
+	 * mkdir
 	 */
+	
 	public String mkdirGitRoot() {
 		return sh("mkdir -p ${env.gitRoot}");
 	}
 	
+	public String mkdirRemoteAppTargetDirectory() {
+		return sh("ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}");
+	}
+	
+	public String mkdirRemoteConfTargetDirectory() {
+		return sh("ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}");
+	}
 	
 	/*
 	 * dir

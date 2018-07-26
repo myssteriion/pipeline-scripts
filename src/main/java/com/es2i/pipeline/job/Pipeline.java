@@ -11,8 +11,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.es2i.pipeline.job.entities.Environment;
+import com.es2i.pipeline.job.entities.ProjectKeyEnum;
 import com.es2i.pipeline.job.entities.Tool;
 import com.es2i.pipeline.job.entities.parameter.Parameter;
 import com.es2i.pipeline.job.helper.ConfReader;
@@ -60,7 +62,7 @@ public class Pipeline {
 	
 	
 	
-	private void generateRunner() throws IOException, URISyntaxException {
+	private void generateRunner() throws IOException {
 		
 		// création du fichier physique
 		File runnerDirecrory = Tools.createDirectoryIfNeedIt( Paths.get(ConstantTools.BUILD_ALL_DIRECTORY, ConstantTools.RUNNER_DIRECTORY) ).toFile();
@@ -248,6 +250,10 @@ public class Pipeline {
 		else
 			getProjectsEnvironments = dashboard.getFrontEnvironments();
 			
+		// nombre d'App et de Conf à déployer (car c'esst un tableau)
+		int nbAppDeploy = 1;
+		int nbConfDeploy = 1;
+		
 		for (Map.Entry<String, List<Environment>> entry : getProjectsEnvironments.entrySet()) {
 
 			// stage
@@ -255,8 +261,21 @@ public class Pipeline {
 			
 			// env
 			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
-			for (Environment environment : entry.getValue()) 
-				writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.contentEnv(environment) + constrcuctHelper.addCRLF());
+			for (Environment environment : entry.getValue()) {
+				
+				if ( environment.isList() ) {
+					Map<String, String> map = environment.getValuesSplitted();
+					for ( String key : map.keySet().stream().sorted(String.CASE_INSENSITIVE_ORDER).collect(Collectors.toList()) )
+						writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.contentEnv(key, map.get(key)) + constrcuctHelper.addCRLF());
+					
+					if ( environment.getName().equals( ProjectKeyEnum.SOURCE_APP_DIRECTORY.getName() ) )
+						nbAppDeploy = map.size();
+					if ( environment.getName().equals( ProjectKeyEnum.SOURCE_CONF_DIRECTORY.getName() ) )
+						nbConfDeploy = map.size();
+				}
+				else
+					writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.contentEnv(environment) + constrcuctHelper.addCRLF());
+			}
 			writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 			
 			// steps - script
@@ -269,23 +288,25 @@ public class Pipeline {
 			else 
 				writer.write(constrcuctHelper.addTab(5) + constrcuctHelper.beginIfFrontDeploy() + constrcuctHelper.addCRLF());
 			
-			
+			// clean du dossier sur le primary remote
 			if (isFirst) {
 				writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.cleanProjectPrimaryRemote() + constrcuctHelper.addCRLF());
 				isFirst = false;
 			}
 			
-			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.mkdirGitRoot() + constrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.mkdirGitRoot() + constrcuctHelper.addCRLF());
 			
-			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.beginDirGitRoot() + constrcuctHelper.addCRLF());
-			writer.write(constrcuctHelper.addTab(5) + constrcuctHelper.checkoutRevisionOnRepo() + constrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.beginDirGitRoot() + constrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(7) + constrcuctHelper.checkoutRevisionOnRepo() + constrcuctHelper.addCRLF());
 			
-			writer.write(constrcuctHelper.addTab(5) + constrcuctHelper.beginDirProjectRoot() + constrcuctHelper.addCRLF());
-			writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.mvnCleanInstall() + constrcuctHelper.addCRLF());
-			writer.write(constrcuctHelper.addTab(5) + constrcuctHelper.endDirProjectRoot() + constrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(7) + constrcuctHelper.beginDirProjectRoot() + constrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(8) + constrcuctHelper.mvnCleanInstall() + constrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(7) + constrcuctHelper.endDirProjectRoot() + constrcuctHelper.addCRLF());
+
+			// deploiement App et Conf
+			addDeployPart(writer, false, true, nbAppDeploy, nbConfDeploy);
 			
-			writer.write(constrcuctHelper.addTab(5) + constrcuctHelper.deploy() + constrcuctHelper.addCRLF());
-			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.endDirGitRoot() + constrcuctHelper.addCRLF());
+			writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.endDirGitRoot() + constrcuctHelper.addCRLF());
 			
 			// if
 			if (isBack)
@@ -303,7 +324,7 @@ public class Pipeline {
 	}
 	
 	
-	private void addParamEnvTools(Writer writer, Script script) throws IOException, URISyntaxException {
+	private void addParamEnvTools(Writer writer, Script script) throws IOException {
 		
 		// parameters
 		if ( script.hadParameters() ) {
@@ -331,7 +352,7 @@ public class Pipeline {
 	}
 	
 	
-	private void addInitializeStage(Writer writer, Script script) throws IOException, URISyntaxException {
+	private void addInitializeStage(Writer writer, Script script) throws IOException {
 		
 		// stage - steps
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("Initialize") + constrcuctHelper.addCRLF());
@@ -359,7 +380,7 @@ public class Pipeline {
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 	
-	private void addCreateDataFolderStage(Writer writer) throws IOException, URISyntaxException {
+	private void addCreateDataFolderStage(Writer writer) throws IOException {
 		
 		// stage - stpes
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("Create data folder") + constrcuctHelper.addCRLF());
@@ -372,7 +393,7 @@ public class Pipeline {
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 	
-	private void addDeployToSecondaryRemoteStage(Writer writer, BuildAll buildAll) throws IOException, URISyntaxException {
+	private void addDeployToSecondaryRemoteStage(Writer writer, BuildAll buildAll) throws IOException {
 		
 		// au moins un remote secondaire
 		if ( buildAll.hadSecondaryRemotes() ) {
@@ -402,40 +423,63 @@ public class Pipeline {
 	}
 	
 	
-	private void addStageForProject(Writer writer, String project, boolean insideParallelBloc, Script script) throws IOException, URISyntaxException {
+	private void addStageForProject(Writer writer, String project, boolean insideParallelBloc, Script script) throws IOException {
 		
 		int identToAdd = insideParallelBloc ? 2 : 0;
 		
 		// stage
 		writer.write(constrcuctHelper.addTab(2 + identToAdd) + constrcuctHelper.beginStage("build " + project) + constrcuctHelper.addCRLF());
 		
+		// nombre d'App et de Conf à déployer (car c'esst un tableau)
+		int nbAppDeploy = 1;
+		int nbConfDeploy = 1;
+		
 		// local env
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
-		for ( Environment env : script.getProjectsEnvironements().get(project) )
-			writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.contentEnv(env) + constrcuctHelper.addCRLF());
+		for ( Environment env : script.getProjectsEnvironements().get(project) ) {
+			
+			if ( env.isList() ) {
+				Map<String, String> map = env.getValuesSplitted();
+				for ( String key : map.keySet().stream().sorted(String.CASE_INSENSITIVE_ORDER).collect(Collectors.toList()) )
+					writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.contentEnv(key, map.get(key)) + constrcuctHelper.addCRLF());
+				
+				if ( env.getName().equals( ProjectKeyEnum.SOURCE_APP_DIRECTORY.getName() ) )
+					nbAppDeploy = map.size();
+				if ( env.getName().equals( ProjectKeyEnum.SOURCE_CONF_DIRECTORY.getName() ) )
+					nbConfDeploy = map.size();
+			}
+			else
+				writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.contentEnv(env) + constrcuctHelper.addCRLF());
+		}
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 		
 		// steps
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.beginSteps() + constrcuctHelper.addCRLF());
 		
-		// clean dossier sur le primary remote
+		// clean du dossier sur le primary remote
 		if (script instanceof BuildOne)
 			writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.cleanProjectPrimaryRemote() + constrcuctHelper.addCRLF());
 		
-		// créer sous-dossier dans le workspace git (permet ainsi de séparer les sources dans le cas des stage parallel)
+		// créer sous-dossier dans le workspace git (permet ainsi de séparer les sources dans le cas des parallel)
 		writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.mkdirGitRoot() + constrcuctHelper.addCRLF());
 		
-		// se déplacer dans le dossier crééer, récupérer les sources du GitLab
+		// se déplacer dans le dossier créé et récupérer les sources du GitLab
 		writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.beginDirGitRoot() + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(5 + identToAdd) + constrcuctHelper.checkoutRevisionOnRepo() + constrcuctHelper.addCRLF());
 		
-		// se déplacer dans le project (car le projet n'est pas la racine du git) mvn clean instal
+		// se déplacer dans le project (car le projet n'est pas la racine du git) mvn clean install -P <mavenProfile>
 		writer.write(constrcuctHelper.addTab(5 + identToAdd) + constrcuctHelper.beginDirProjectRoot() + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(6 + identToAdd) + constrcuctHelper.mvnCleanInstall() + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(5 + identToAdd) + constrcuctHelper.endDirProjectRoot() + constrcuctHelper.addCRLF());
 		
-		// deploiement sur le primary remote
-		writer.write(constrcuctHelper.addTab(5 + identToAdd) + constrcuctHelper.deploy() + constrcuctHelper.addCRLF());
+		// deploiement App puis Conf sur le primary remote
+		// script
+		writer.write(constrcuctHelper.addTab(5 + identToAdd) + constrcuctHelper.beginScript() + constrcuctHelper.addCRLF());
+		
+		addDeployPart(writer, insideParallelBloc, false, nbAppDeploy, nbConfDeploy);
+		
+		// script - dir gitRoot
+		writer.write(constrcuctHelper.addTab(5 + identToAdd) + constrcuctHelper.endScript() + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.endDirGitRoot() + constrcuctHelper.addCRLF());
 		
 		// steps - stage
@@ -443,7 +487,7 @@ public class Pipeline {
 		writer.write(constrcuctHelper.addTab(2 + identToAdd) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 	
-	private void addParallelStageForProject(Writer writer, int currentGroup, List<String> groupe, Script script) throws IOException, URISyntaxException {
+	private void addParallelStageForProject(Writer writer, int currentGroup, List<String> groupe, Script script) throws IOException {
 		
 		// stage - parallel
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("build groupe " + currentGroup) + constrcuctHelper.addCRLF());
@@ -455,6 +499,33 @@ public class Pipeline {
 		// parallel - stage
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endParallel() + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
+	}
+
+	private void addDeployPart(Writer writer, boolean insideParallelBloc, boolean isDashboard, int nbAppDeploy, int nbConfDeploy) throws IOException {
+		
+		int identToAdd = insideParallelBloc ? 2 : 0;
+		identToAdd += isDashboard ? 1 : 0;
+		
+		// if targetDirectory
+		writer.write(constrcuctHelper.addTab(6 + identToAdd) + constrcuctHelper.beginIfTargetDirectory() + constrcuctHelper.addCRLF());
+		
+		// deploy app
+		writer.write(constrcuctHelper.addTab(7 + identToAdd) + constrcuctHelper.beginIfSourceAppDirectory() + constrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(8 + identToAdd) + constrcuctHelper.mkdirRemoteAppTargetDirectory() + constrcuctHelper.addCRLF());
+		for (int i = 0; i < nbAppDeploy; i++)
+			writer.write(constrcuctHelper.addTab(8 + identToAdd) + constrcuctHelper.deployApp(i) + constrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(7 + identToAdd) + constrcuctHelper.endIfSourceAppDirectory() + constrcuctHelper.addCRLF());
+		
+		// deploy conf
+		writer.write(constrcuctHelper.addTab(7 + identToAdd) + constrcuctHelper.beginIfSourceConfDirectory() + constrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(8 + identToAdd) + constrcuctHelper.mkdirRemoteConfTargetDirectory() + constrcuctHelper.addCRLF());
+		for (int i = 0; i < nbConfDeploy; i++)
+			writer.write(constrcuctHelper.addTab(8 + identToAdd) + constrcuctHelper.deployConf(i) + constrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(7 + identToAdd) + constrcuctHelper.endIfSourceConfDirectory() + constrcuctHelper.addCRLF());
+		
+		
+		// if targetDirectory
+		writer.write(constrcuctHelper.addTab(6 + identToAdd) + constrcuctHelper.endIfTargetDirectory() + constrcuctHelper.addCRLF());
 	}
 	
 }

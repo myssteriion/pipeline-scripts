@@ -31,6 +31,7 @@ pipeline {
 				sourceAppDirectory = "esecurity-gxt-app/target"
 				sourceExtension = ".war"
 				sourceConfDirectory = "esecurity-conf/target/esecurity-conf"
+				sourceConfDirectory1 = "esecurity-gxt-conf/target/esecurity-gxt-conf"
 			}
 			steps {
 				cleanProjectPrimaryRemote(env.targetDirectory)
@@ -40,7 +41,19 @@ pipeline {
 					dir ("${env.projectRoot}") {
 						mvnCleanInstall(env.projectRoot, env.jdkCompilation, env.mvnVersion)
 					}
-					deploy(env.gitRoot, env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
+					script {
+						if (env.targetDirectory && env.targetDirectory != "") {
+							if (env.sourceAppDirectory && env.sourceAppDirectory != "") {
+								sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
+								deployApp(env.projectRoot, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension)
+							}
+							if (env.sourceConfDirectory && env.sourceConfDirectory != "") {
+								sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}"
+								deployConf(env.projectRoot, env.targetDirectory, env.sourceConfDirectory)
+								deployConf(env.projectRoot, env.targetDirectory, env.sourceConfDirectory1)
+							}
+						}
+					}
 				}
 			}
 		}
@@ -73,21 +86,14 @@ void cleanProjectPrimaryRemote(String targetDirectory) {
 	}
 }
 
-void deploy(String gitRoot, String projectRoot, String targetDirectory, String sourceAppDirectory, String sourceExtension, String sourceConfDirectory) {
-	script {
-		if (targetDirectory && targetDirectory != "") {
-			if (sourceAppDirectory && sourceAppDirectory != "") {
-				sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
-				sh "scp ${projectRoot}/${sourceAppDirectory}/*${sourceExtension} ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
-				sh returnStatus: true, script: "ssh ${env.primaryRemote} unzip -qq -o ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*${sourceExtension} -d ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/"
-				sh "ssh ${env.primaryRemote} rm -f ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*${sourceExtension}"
-			}
-			if (sourceConfDirectory && sourceConfDirectory != "") {
-				sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}"
-				sh "scp -r ${projectRoot}/${sourceConfDirectory}/* ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}"
-			}
-		}
-	}
+void deployApp(String projectRoot, String targetDirectory, String sourceAppDirectory, String sourceExtension) {
+	sh "scp ${projectRoot}/${sourceAppDirectory}/*${sourceExtension} ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
+	sh returnStatus: true, script: "ssh ${env.primaryRemote} unzip -qq -o ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*${sourceExtension} -d ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/"
+	sh "ssh ${env.primaryRemote} rm -f ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*${sourceExtension}"
+}
+
+void deployConf(String projectRoot, String targetDirectory, String sourceConfDirectory) {
+	sh "scp -r ${projectRoot}/${sourceConfDirectory}/* ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}"
 }
 
 void deployToSecondaryRemote(String secondaryRemote) {

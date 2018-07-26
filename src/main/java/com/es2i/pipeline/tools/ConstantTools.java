@@ -9,6 +9,7 @@ public class ConstantTools {
 	public static final String CRLF										= "\n";
 	public static final String COMA										= ",";
 	public static final String DOLLAR									= "$";
+	public static final String BACKSLASH								= "\\";
 	public static final String SLASH									= "/";
 	public static final String DOT										= ".";
 	
@@ -81,6 +82,7 @@ public class ConstantTools {
 	/*
 	 * dashboard
 	 */
+	public static final String PROJECTS_DASHBOARD_KEY 					= "projects";
 	public static final String BACK 									= "back";
 	public static final String FRONT 									= "front";
 

@@ -17,7 +17,6 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import javax.json.JsonValue;
 
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.ProjectKeyEnum;
@@ -89,7 +88,7 @@ public class ConfReader {
 		
 		Properties props = Tools.findPropertyFile(ConstantTools.RUNNER_FOLDER + ConstantTools.ENV_PROP_FILE);
 		for ( Map.Entry<Object, Object> entry : props.entrySet() ) 
-			runnerEnvironements.add( new Environment( entry.getKey().toString(), entry.getValue().toString() ) );
+			runnerEnvironements.add( new Environment(entry.getKey().toString(), entry.getValue().toString(), false) );
 		
 		return runnerEnvironements;
 	}
@@ -251,8 +250,9 @@ public class ConfReader {
 		
 		if (dashboard == null) {
 			dashboard = new Dashboard();
-			dashboard.setFrontEnvironments( getDashboardFrontEnvironments() );
-			dashboard.setBackEnvironments( getDashboardBackEnvironments() );
+			dashboard.setProjects( getDashboardProjects() );
+			dashboard.setFrontEnvironments( getDashboardFrontEnvironments( dashboard.getProjects() ) );
+			dashboard.setBackEnvironments( getDashboardBackEnvironments( dashboard.getProjects() ) );
 			dashboard.setParameters( getDashboardParameters() );
 			dashboard.setEnvironements( getDashboardEnvironment() );
 		}
@@ -260,6 +260,18 @@ public class ConfReader {
 		return dashboard;
 	}
 	
+	private List<String> getDashboardProjects() throws IOException {
+		
+		List<String> projects = new ArrayList<String>();
+			
+		Properties prop = Tools.findPropertyFile(ConstantTools.DASHBOARD_FOLDER + ConstantTools.APPLICATION_PROP_FILE);
+		String values = prop.getProperty(ConstantTools.PROJECTS_DASHBOARD_KEY);
+		for ( String value : values.split(ConstantTools.COMA) )
+			projects.add( value.trim() );
+			
+		return projects;
+	}
+
 	private List<Parameter> getDashboardParameters() throws IOException {
 		
 		List<Parameter> params = new ArrayList<Parameter>();
@@ -272,43 +284,36 @@ public class ConfReader {
 		return getGlobalEnvironment();
 	}
 	
-	private Map<String, List<Environment>> getDashboardFrontEnvironments() throws IOException {
-		return getDashboardEnvironments(ConstantTools.FRONT);
+	private Map<String, List<Environment>> getDashboardFrontEnvironments(List<String> projectList) throws IOException {
+		return getDashboardEnvironments(ConstantTools.FRONT, projectList);
 	}
 	
-	private Map<String, List<Environment>> getDashboardBackEnvironments() throws IOException {
-		return getDashboardEnvironments(ConstantTools.BACK);
+	private Map<String, List<Environment>> getDashboardBackEnvironments(List<String> projectList) throws IOException {
+		return getDashboardEnvironments(ConstantTools.BACK, projectList);
 	}
 	
-	// TODO : modifier le env.json -> env.prop
-	private Map<String, List<Environment>> getDashboardEnvironments(String frontOrBack) throws IOException {
+	private Map<String, List<Environment>> getDashboardEnvironments(String frontOrBack, List<String> projectList) throws IOException {
 		
-		Map<String, List<Environment>> backEnvironments = new HashMap<String, List<Environment>>();
+		Map<String, List<Environment>> environmentsMap = new HashMap<String, List<Environment>>();
 		
-		try ( InputStream is = ConfReader.class.getClassLoader().getResourceAsStream(ConstantTools.DASHBOARD_FOLDER + "environment.json") ) {
-			try ( Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8) ) {	
-				try ( JsonReader jsonReader = Json.createReader(is) ) {
-					
-					JsonObject racineArray = jsonReader.readObject();
-					JsonArray jsonArray = racineArray.getJsonArray(frontOrBack);
-					
-					for (int i = 0; i < jsonArray.size(); i++) {
-						JsonObject object = jsonArray.get(i).asJsonObject();
-						for (Map.Entry<String, JsonValue> entry : object.entrySet() ) {
-							
-							String secondKey = entry.getKey();
-							List<Environment> envs = new ArrayList<Environment>();
-							for (ProjectKeyEnum keyEnum : ProjectKeyEnum.getKeys())
-								envs.add( new Environment(keyEnum.getName(), entry.getValue().asJsonObject().getString(keyEnum.getName(), null)) );
-							
-							backEnvironments.put(secondKey, envs);
-						}
-					}
-				}
+		Properties props = Tools.findPropertyFile(ConstantTools.DASHBOARD_FOLDER + ConstantTools.ENV_PROP_FILE);
+		for (String project : projectList) {
+			
+			String frontOrBackConcatProject = frontOrBack + ConstantTools.DOT + project;
+			List<String> allKeys = props.stringPropertyNames().stream().collect(Collectors.toList());
+			boolean find = false;
+			int length = allKeys.size();
+			int index = 0;
+			while ( !find && index < length) {
+				find = allKeys.get(index).startsWith(frontOrBackConcatProject);
+				index++;
 			}
+			
+			if (find)
+				environmentsMap.put(project, createEnvListForProject(props, frontOrBackConcatProject));
 		}
 		
-		return backEnvironments;
+		return environmentsMap;
 	}
 	
 	
@@ -412,7 +417,7 @@ public class ConfReader {
 		
 		Properties props = Tools.findPropertyFile(ConstantTools.ENV_PROP_FILE);
 		for ( Map.Entry<Object, Object> entry : props.entrySet() )
-			globalEnvironements.add( new Environment(entry.getKey().toString(), entry.getValue().toString()) );
+			globalEnvironements.add( new Environment(entry.getKey().toString(), entry.getValue().toString(), false) );
 		
 		return globalEnvironements;
 	}
@@ -422,16 +427,28 @@ public class ConfReader {
 		Map<String, List<Environment>> projectsEnvironments = new HashMap<String, List<Environment>>();
 		
 		Properties props = Tools.findPropertyFile(ConstantTools.PROJECT_ENV_PROP_FILE);
-		for (String project : projects) {
-			
-			List<Environment> envs = new ArrayList<Environment>();
-			for (ProjectKeyEnum keyEnum : ProjectKeyEnum.getKeys())
-				envs.add( new Environment(keyEnum.getName(), props.getProperty(project + ConstantTools.DOT + keyEnum.getName())) );
-			
-			projectsEnvironments.put(project, envs);
-		}
+		for (String project : projects)
+			projectsEnvironments.put(project, createEnvListForProject(props, project));
 		
 		return projectsEnvironments;
+	}
+	
+	private List<Environment> createEnvListForProject(Properties props, String project) {
+		
+		List<Environment> envs = new ArrayList<Environment>();
+		for (ProjectKeyEnum keyEnum : ProjectKeyEnum.getKeys()) {
+			String value = props.getProperty(project + ConstantTools.DOT + keyEnum.getName(), null);
+			
+			if (value == null)
+				throw new IllegalArgumentException("Pour la conf du projet '" + project + "', la clé '" + keyEnum.getName() + "' est obligatoire (la valeur peut être cependant vide).");
+			
+			if ( keyEnum.isMandatory() && Tools.isNullOrEmpty(value) )
+				throw new IllegalArgumentException("Pour la conf du projet '" + project + "', la valeur de '" + keyEnum.getName() + "' est obligatoire.");
+			
+			envs.add( new Environment(keyEnum.getName(), value, keyEnum.isList()) );
+		}
+		
+		return envs;
 	}
 
 }
