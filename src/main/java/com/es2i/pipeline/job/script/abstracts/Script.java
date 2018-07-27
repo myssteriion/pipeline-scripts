@@ -2,7 +2,6 @@ package com.es2i.pipeline.job.script.abstracts;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Tool;

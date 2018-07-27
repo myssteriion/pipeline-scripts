@@ -6,12 +6,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.es2i.pipeline.job.entities.Environment;
 import com.es2i.pipeline.job.entities.Tool;
@@ -44,7 +42,7 @@ public class Pipeline {
 
 	
 	
-	public void run() throws IOException, URISyntaxException {
+	public void run() throws IOException {
 
 		clean();
 		generateBuildAll();
@@ -106,7 +104,7 @@ public class Pipeline {
 		}
 	}
 
-	private void generateBuildAll() throws IOException, URISyntaxException {
+	private void generateBuildAll() throws IOException {
 		
 		// création du fichier physique
 		File buildAllDirectory = Tools.createDirectoryIfNeedIt( Paths.get(ConstantTools.BUILD_ALL_DIRECTORY) ).toFile();
@@ -158,7 +156,7 @@ public class Pipeline {
 		}
 	}
 	
-	private void generateAllBuildOne() throws IOException, URISyntaxException {
+	private void generateAllBuildOne() throws IOException {
 		
 		File buildOneDirecrory = Tools.createDirectoryIfNeedIt( Paths.get(ConstantTools.BUILD_ONE_DIRECTORY) ).toFile();
 		
@@ -203,7 +201,7 @@ public class Pipeline {
 		
 	}
 	
-	private void generateDashboard() throws IOException, URISyntaxException {
+	private void generateDashboard() throws IOException {
 		
 		// création du fichier physique
 		File dashboardDirectory = Tools.createDirectoryIfNeedIt( Paths.get(ConstantTools.DASHBOARD_DIRECTORY) ).toFile();
@@ -265,14 +263,15 @@ public class Pipeline {
 			for (Environment environment : entry.getValue()) {
 				
 				if ( environment.isList() ) {
-					Map<String, String> map = environment.getValuesSplitted();
-					for ( String key : map.keySet().stream().sorted(String.CASE_INSENSITIVE_ORDER).collect(Collectors.toList()) )
-						writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.contentEnv(key, map.get(key)) + constrcuctHelper.addCRLF());
+					
+					List<Environment> envSplittedList = environment.getValuesSplitted();
+					for (Environment envSplit : envSplittedList)
+						writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.contentEnv(envSplit) + constrcuctHelper.addCRLF());
 					
 					if ( environment.getName().equals( ProjectKeyEnum.SOURCE_APP_DIRECTORY.getName() ) )
-						nbAppDeploy = map.size();
+						nbAppDeploy = envSplittedList.size();
 					if ( environment.getName().equals( ProjectKeyEnum.SOURCE_CONF_DIRECTORY.getName() ) )
-						nbConfDeploy = map.size();
+						nbConfDeploy = envSplittedList.size();
 				}
 				else
 					writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.contentEnv(environment) + constrcuctHelper.addCRLF());
@@ -437,20 +436,21 @@ public class Pipeline {
 		
 		// local env
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
-		for ( Environment env : script.getProjectsEnvironements().get(project) ) {
+		for ( Environment environment : script.getProjectsEnvironements().get(project) ) {
 			
-			if ( env.isList() ) {
-				Map<String, String> map = env.getValuesSplitted();
-				for ( String key : map.keySet().stream().sorted(String.CASE_INSENSITIVE_ORDER).collect(Collectors.toList()) )
-					writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.contentEnv(key, map.get(key)) + constrcuctHelper.addCRLF());
+			if ( environment.isList() ) {
 				
-				if ( env.getName().equals( ProjectKeyEnum.SOURCE_APP_DIRECTORY.getName() ) )
-					nbAppDeploy = map.size();
-				if ( env.getName().equals( ProjectKeyEnum.SOURCE_CONF_DIRECTORY.getName() ) )
-					nbConfDeploy = map.size();
+				List<Environment> envSplittedList = environment.getValuesSplitted();
+				for (Environment envSplit : envSplittedList)
+					writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.contentEnv(envSplit) + constrcuctHelper.addCRLF());
+				
+				if ( environment.getName().equals( ProjectKeyEnum.SOURCE_APP_DIRECTORY.getName() ) )
+					nbAppDeploy = envSplittedList.size();
+				if ( environment.getName().equals( ProjectKeyEnum.SOURCE_CONF_DIRECTORY.getName() ) )
+					nbConfDeploy = envSplittedList.size();
 			}
 			else
-				writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.contentEnv(env) + constrcuctHelper.addCRLF());
+				writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.contentEnv(environment) + constrcuctHelper.addCRLF());
 		}
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.endEnv() + constrcuctHelper.addCRLF());
 		

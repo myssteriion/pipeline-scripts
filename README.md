@@ -1,6 +1,12 @@
 # Description
 
-Permet de générer automatiquement tous les scripts pipelines d'eSirius.
+Permet de générer automatiquement tous les scripts pipelines d'eSirius.  
+
+# Scripts
+Le script **BuildAll** qui permet de builder et déployer l'application eSirius (lancement manuel).
+Le script **Runner** est est schédulé par un CRON dans Jenkins est déclenche l'IC (lance **BuildAll** sur certaines branches et certains profiles maven).
+Les script **BuildOne** qui permet de builder et déployer un seul modules (lancement manuel).
+Le script **Dashboard** qui permet de builder et déployer le project du même nom (lancement manuel).
 
 # Info techiques
 
@@ -27,13 +33,15 @@ Les fichiers générés sont à commiter sur le repo Git.
 
 # Paramètre $
 
-Dans _functions.json_, il y des variable de la forme __${xxx}__ ou __$xxx__. De même dans les sources (centralisé dans _ConstructHelper__).  
-La syntaxe __${xxx}__ sera écrit tel quel dans le pipeline généré car c'est une variable d'environement (d'un point de vue pipeline).  
-La syntaxe __$xxx__ est remplacé directent par le code java lors de l'exécution du jar => ce sont donc des valeurs en dur dans le pipeline.  
-
-> NOTE : les blocs vides (d'un point de vue pipeline) sont des erreurs de syntaxe (attention au bloc _parameter_, _tools_ et _env_ vide => commenter les blocs si nécessaire) 
+Dans _functions.json_, il y des variable de la forme _${xxx}_ ou _$xxx_. De même dans les sources (centralisé dans _ConstructHelper_).  
+La syntaxe _${xxx}_ sera écrit tel quel dans le pipeline généré car c'est une variable d'environement (d'un point de vue pipeline).  
+La syntaxe _$xxx_ est remplacé directent par le code java lors de l'exécution du jar => ce sont donc des valeurs en dur dans le pipeline.  
 
 # Dossier conf 
+## application.properties
+
+Contient des propriétés communes ou propres à chacun des scripts.  
+
 ## parameters.json
 
 Le fichier décrit les paramètres des scripts. Pour chaque paramètre, il faut :
@@ -65,5 +73,6 @@ Le fichier qui décris tous les projets. Les infos permettent de récupérer les
 
 ## functions.txt
 
-Les fonctions groovy qui sont systématiquement concaténées au buildAll et aux buildOne.  
-Les fonctions sont systématiquement concaténées au buildAll et aux buildOne.
+Les fonctions groovy qui sont systématiquement concaténées à la suite du bloc pipeline.
+
+> NOTE : dans ce fichier il y a directement des noms de variable _${xxx}_ et _$xxx_

@@ -33,7 +33,7 @@ import com.es2i.pipeline.tools.ConstantTools;
 import com.es2i.pipeline.tools.Tools;
 
 /**
- * Singleton. Accède à la conf et vérifie l'intégrité des éléments et aliment les objets de type Script.
+ * Singleton. Accède à la conf et vérifie l'intégrité des éléments et alimente les objets de type Script.
  * Possède un cache.
  */
 public class ConfReader {

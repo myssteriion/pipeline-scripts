@@ -2,7 +2,6 @@ package com.es2i.pipeline.job.helper;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 
 import org.apache.commons.io.IOUtils;
 
@@ -40,7 +39,7 @@ public class ConstructHelper {
 	
 	
 	/*
-	 * Begin and end
+	 * Begin / end
 	 */
 	
 	public String beginPipeline() {
@@ -91,10 +90,6 @@ public class ConstructHelper {
 	
 	public String contentEnv(Environment env) {
 		return env.getName() + " = \"" + env.getValue() + "\"";
-	}
-	
-	public String contentEnv(String key, String value) {
-		return key + " = \"" + value + "\"";
 	}
 	
 	public String endEnv() {
@@ -174,7 +169,7 @@ public class ConstructHelper {
 	 * functions.txt
 	 */
 	
-	public String getFunctions() throws IOException, URISyntaxException {
+	public String getFunctions() throws IOException {
 		
 		InputStream is = ConstructHelper.class.getClassLoader().getResourceAsStream(ConstantTools.FUNCTIONS_TXT_FILE);
 		byte[] bytes = IOUtils.toByteArray(is);

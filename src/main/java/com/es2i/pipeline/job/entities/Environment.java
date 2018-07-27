@@ -1,7 +1,7 @@
 package com.es2i.pipeline.job.entities;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.es2i.pipeline.tools.ConstantTools;
 
@@ -51,15 +51,15 @@ public class Environment {
 	 * Split la value avec le caractère ','.
 	 * Le 1er élément a pour clé "<name>", les autres éléments ont pour clé "<name>1", "<name>2", "<name>3", etc
 	 */
-	public Map<String, String> getValuesSplitted() {
+	public List<Environment> getValuesSplitted() {
 
+		List<Environment> envList = new ArrayList<Environment>();
+		
 		String[] values = value.split(ConstantTools.COMA);
-		
-		Map<String, String> valuesMap = new HashMap<String, String>();
 		for (int i = 0; i < values.length; i++)
-			valuesMap.put(name + (i == 0 ? "" : i), values[i].trim() );
+			envList.add( new Environment(name + (i == 0 ? "" : i), values[i].trim(), false) );
 		
-		return valuesMap;
+		return envList;
 	}
 	
 	@Override
