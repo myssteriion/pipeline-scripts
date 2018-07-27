@@ -86,4 +86,12 @@ public class Dashboard extends WithProjectsStages {
 		return projectsFront.contains(project);
 	}
 	
+	public boolean isFirstProjectFront(String project) {
+		return projectsFront.get(0).equals(project);
+	}
+	
+	public boolean isFirstProjectBack(String project) {
+		return projectsBack.get(0).equals(project);
+	}
+	
 }

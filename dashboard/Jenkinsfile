@@ -68,7 +68,6 @@ pipeline {
 					if (params.frontDeploy) {
 						sh "mkdir -p ${env.gitRoot}"
 						dir ("${env.gitRoot}") {
-							cleanProjectPrimaryRemote(env.targetDirectory)
 							runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)
 							
 							sh "ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${env.targetDirectory}"

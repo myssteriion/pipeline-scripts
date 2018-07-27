@@ -394,7 +394,9 @@ public class Pipeline {
 		writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.beginDirGitRoot() + constrcuctHelper.addCRLF());
 		
 		// clean du dossier sur le primary remote
-		writer.write(constrcuctHelper.addTab(5 + identToAdd) + constrcuctHelper.cleanProjectPrimaryRemote() + constrcuctHelper.addCRLF());
+		// pour le Dashboard, les projet back et les projets front partagent le même target => ne faire le clean qu'au 1er passage
+		if ( !(script instanceof Dashboard && !(((Dashboard) script).isFirstProjectFront(project)) && !(((Dashboard) script).isFirstProjectBack(project))) )
+			writer.write(constrcuctHelper.addTab(5 + identToAdd) + constrcuctHelper.cleanProjectPrimaryRemote() + constrcuctHelper.addCRLF());
 		
 		// runBuild
 		writer.write(constrcuctHelper.addTab(5 + identToAdd) + constrcuctHelper.runBuild() + constrcuctHelper.addCRLF());
