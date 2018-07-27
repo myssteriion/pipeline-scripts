@@ -81,8 +81,7 @@ public class ConstantTools {
 	/*
 	 * dashboard
 	 */
-	public static final String PROJECTS_DASHBOARD_KEY 					= "projects";
-	public static final String BACK 									= "back";
-	public static final String FRONT 									= "front";
+	public static final String PROJECTS_BACK_DASHBOARD_KEY 				= "projects.back";
+	public static final String PROJECTS_FRONT_DASHBOARD_KEY 			= "projects.front";
 
 }

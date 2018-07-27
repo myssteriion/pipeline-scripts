@@ -6,14 +6,19 @@ import java.util.List;
 import java.util.Map;
 
 import com.es2i.pipeline.job.entities.Environment;
-import com.es2i.pipeline.job.script.abstracts.Script;
+import com.es2i.pipeline.job.script.abstracts.WithProjectsStages;
 
-public class Dashboard extends Script {
+public class Dashboard extends WithProjectsStages {
 
 	/**
-	 * La liste des projets front et back.
+	 * La liste des projets front.
 	 */
-	private List<String> projects;
+	private List<String> projectsFront;
+	
+	/**
+	 * La liste des projets back.
+	 */
+	private List<String> projectsBack;
 	
 	/**
 	 * La liste des projets FRONT et de ses variables d'environements.
@@ -33,19 +38,28 @@ public class Dashboard extends Script {
 	
 	public Dashboard() {
 		super();
-		projects = new ArrayList<String>();
+		projectsFront = new ArrayList<String>();
+		projectsBack = new ArrayList<String>();
 		frontEnvironments = new HashMap<String, List<Environment>>();
 		backEnvironments = new HashMap<String, List<Environment>>();
 	}
 
 
 	
-	public List<String> getProjects() {
-		return projects;
+	public List<String> getProjectsFront() {
+		return projectsFront;
 	}
 
-	public void setProjects(List<String> projects) {
-		this.projects = projects;
+	public void setProjectsFront(List<String> projectsFront) {
+		this.projectsFront = projectsFront;
+	}
+	
+	public List<String> getProjectsBack() {
+		return projectsBack;
+	}
+
+	public void setProjectsBack(List<String> projectsBack) {
+		this.projectsBack = projectsBack;
 	}
 
 	public Map<String, List<Environment>> getBackEnvironments() {
@@ -64,4 +78,12 @@ public class Dashboard extends Script {
 		this.frontEnvironments = frontEnvironments;
 	}
 
+	public boolean isProjectIsBack(String project) {
+		return projectsBack.contains(project);
+	}
+	
+	public boolean isProjectIsFront(String project) {
+		return projectsFront.contains(project);
+	}
+	
 }

@@ -211,31 +211,7 @@ public class ConstructHelper {
 		return "}";
 	}
 	
-	public String beginIfTargetDirectory() {
-		return "if (env.targetDirectory && env.targetDirectory != \"\") {";
-	}
-	
-	public String endIfTargetDirectory() {
-		return "}";
-	}
-	
-	public String beginIfSourceAppDirectory() {
-		return "if (env.sourceAppDirectory && env.sourceAppDirectory != \"\") {";
-	}
-	
-	public String endIfSourceAppDirectory() {
-		return "}";
-	}
-	
-	public String beginIfSourceConfDirectory() {
-		return "if (env.sourceConfDirectory && env.sourceConfDirectory != \"\") {";
-	}
-	
-	public String endIfSourceConfDirectory() {
-		return "}";
-	}
-	
-	
+
 	/*
 	 * shell
 	 */
@@ -278,12 +254,8 @@ public class ConstructHelper {
 	 * Appel des fonctions groovy (voir functions.txt)
 	 */
 	
-	public String checkoutRevisionOnRepo() {
-		return "checkoutRevisionOnRepo(env.gitRoot)";
-	}
-	
-	public String mvnCleanInstall() {
-		return "mvnCleanInstall(env.projectRoot, env.jdkCompilation, env.mvnVersion)";
+	public String runBuild() {
+		return "runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)";
 	}
 	
 	public String cleanPrimaryRemote() {
@@ -329,11 +301,11 @@ public class ConstructHelper {
 	}
 	
 	public String mkdirRemoteAppTargetDirectory() {
-		return sh("ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}");
+		return sh("ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${env.targetDirectory}");
 	}
 	
 	public String mkdirRemoteConfTargetDirectory() {
-		return sh("ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}");
+		return sh("ssh ${env.primaryRemote} mkdir -p ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${env.targetDirectory}");
 	}
 	
 	/*
@@ -347,15 +319,6 @@ public class ConstructHelper {
 	public String endDirGitRoot() {
 		return "}";
 	}
-	
-	public String beginDirProjectRoot() {
-		return "dir (\"${env.projectRoot}\") {";
-	}
-	
-	public String endDirProjectRoot() {
-		return "}";
-	}
-	
 	
 	/*
 	 * indentation et fonctions (sh, echo...)

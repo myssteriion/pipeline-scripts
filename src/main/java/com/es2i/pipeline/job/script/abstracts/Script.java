@@ -18,7 +18,7 @@ import com.es2i.pipeline.job.entities.parameter.Parameter;
  * 
  * Script <A>	<-	WithProjectsStages <A>	<-	BuildAll
  * 											<-	BuildOne
- * 				<-	Dashboard
+ * 											<-	Dashboard
  * 				<-	Runner
  */
 public abstract class Script {

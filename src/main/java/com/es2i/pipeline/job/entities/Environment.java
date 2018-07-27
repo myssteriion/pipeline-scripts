@@ -64,7 +64,7 @@ public class Environment {
 	
 	@Override
 	public String toString() {
-		return "name=" + name + ", value=" + value + ", isList =" + isList + "]";
+		return "name=" + name + ", value=" + value + ", isList=" + isList;
 	}
 
 }

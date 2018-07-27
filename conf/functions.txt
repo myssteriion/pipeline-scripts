@@ -1,3 +1,11 @@
+void runBuild(String gitRoot, String projectRoot, String jdkCompilation, String mvnVersion, String targetDirectory, String sourceAppDirectory, String sourceExtension, String sourceConfDirectory) {
+	sh "mkdir -p ${gitRoot}"
+	checkoutRevisionOnRepo(gitRoot)
+	dir ("${projectRoot}") {
+		mvnCleanInstall(projectRoot, jdkCompilation, mvnVersion)
+	}
+}
+
 void checkoutRevisionOnRepo(String gitRoot) {
 	checkout scm: [ $class: "GitSCM", 
 					userRemoteConfigs: [ [url: env.gitLabUrl+gitRoot, credentialsId: "root"] ],
@@ -18,27 +26,39 @@ void cleanPrimaryRemote() {
 void cleanProjectPrimaryRemote(String targetDirectory) {
 	script {
 		if (targetDirectory && targetDirectory != "") { 
-			sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${params.mavenProfile}/$esiiFolder/$appFolder/${targetDirectory}" 
-			sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${params.mavenProfile}/$esiiFolder/$confFolder/${targetDirectory}" 
+			sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}" 
+			sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}" 
+		}
+	}
+}
+				
+void deployApp(String projectRoot, String targetDirectory, String sourceAppDirectory, String sourceExtension) {
+	script {
+		if (targetDirectory && targetDirectory != "") {
+			if (sourceAppDirectory && sourceAppDirectory != "") {
+				sh "scp ${projectRoot}/${sourceAppDirectory}/*${sourceExtension} ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
+				sh returnStatus: true, script: "ssh ${env.primaryRemote} unzip -qq -o ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*${sourceExtension} -d ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/"
+				sh "ssh ${env.primaryRemote} rm -f ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*${sourceExtension}"
+			}
 		}
 	}
 }
 
-void deployApp(String projectRoot, String targetDirectory, String sourceAppDirectory, String sourceExtension) {
-	sh "scp ${projectRoot}/${sourceAppDirectory}/*${sourceExtension} ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}"
-	sh returnStatus: true, script: "ssh ${env.primaryRemote} unzip -qq -o ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*${sourceExtension} -d ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/"
-	sh "ssh ${env.primaryRemote} rm -f ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*${sourceExtension}"
-}
-
 void deployConf(String projectRoot, String targetDirectory, String sourceConfDirectory) {
-	sh "scp -r ${projectRoot}/${sourceConfDirectory}/* ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}"
+	script {
+		if (targetDirectory && targetDirectory != "") {
+			if (sourceConfDirectory && sourceConfDirectory != "") {
+				sh "scp -r ${projectRoot}/${sourceConfDirectory}/* ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}"
+			}
+		}
+	}
 }
 
 void deployToSecondaryRemote(String secondaryRemote) {
-	sh "ssh ${secondaryRemote} \"rm -rf $esiiFolder && mkdir -p $esiiFolder\""
+	sh "ssh ${secondaryRemote} \"rm -rf ESII-Applications && mkdir -p ESII-Applications\""
 	
-	sh "scp -r ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/$esiiFolder.gz ${secondaryRemote}:"
-	sh "ssh ${secondaryRemote} tar -xf $esiiFolder.gz"
+	sh "scp -r ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications.gz ${secondaryRemote}:"
+	sh "ssh ${secondaryRemote} tar -xf ESII-Applications.gz"
 	
-	sh "ssh ${secondaryRemote} rm -rf $esiiFolder.gz"
+	sh "ssh ${secondaryRemote} rm -rf ESII-Applications.gz"
 }

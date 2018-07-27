@@ -250,9 +250,10 @@ public class ConfReader {
 		
 		if (dashboard == null) {
 			dashboard = new Dashboard();
-			dashboard.setProjects( getDashboardProjects() );
-			dashboard.setFrontEnvironments( getDashboardFrontEnvironments( dashboard.getProjects() ) );
-			dashboard.setBackEnvironments( getDashboardBackEnvironments( dashboard.getProjects() ) );
+			dashboard.setProjectsFront( getDashboardProjects(ConstantTools.PROJECTS_FRONT_DASHBOARD_KEY) );
+			dashboard.setProjectsBack( getDashboardProjects(ConstantTools.PROJECTS_BACK_DASHBOARD_KEY) );
+			dashboard.setFrontEnvironments( getDashboardFrontEnvironments( dashboard.getProjectsFront() ) );
+			dashboard.setBackEnvironments( getDashboardBackEnvironments( dashboard.getProjectsBack() ) );
 			dashboard.setParameters( getDashboardParameters() );
 			dashboard.setEnvironements( getDashboardEnvironment() );
 		}
@@ -260,12 +261,12 @@ public class ConfReader {
 		return dashboard;
 	}
 	
-	private List<String> getDashboardProjects() throws IOException {
+	private List<String> getDashboardProjects(String frontOrBack) throws IOException {
 		
 		List<String> projects = new ArrayList<String>();
 			
 		Properties prop = Tools.findPropertyFile(ConstantTools.DASHBOARD_FOLDER + ConstantTools.APPLICATION_PROP_FILE);
-		String values = prop.getProperty(ConstantTools.PROJECTS_DASHBOARD_KEY);
+		String values = prop.getProperty(frontOrBack);
 		for ( String value : values.split(ConstantTools.COMA) )
 			projects.add( value.trim() );
 			
@@ -285,32 +286,31 @@ public class ConfReader {
 	}
 	
 	private Map<String, List<Environment>> getDashboardFrontEnvironments(List<String> projectList) throws IOException {
-		return getDashboardEnvironments(ConstantTools.FRONT, projectList);
+		return getDashboardEnvironments(projectList);
 	}
 	
 	private Map<String, List<Environment>> getDashboardBackEnvironments(List<String> projectList) throws IOException {
-		return getDashboardEnvironments(ConstantTools.BACK, projectList);
+		return getDashboardEnvironments( projectList);
 	}
 	
-	private Map<String, List<Environment>> getDashboardEnvironments(String frontOrBack, List<String> projectList) throws IOException {
+	private Map<String, List<Environment>> getDashboardEnvironments(List<String> projectList) throws IOException {
 		
 		Map<String, List<Environment>> environmentsMap = new HashMap<String, List<Environment>>();
 		
 		Properties props = Tools.findPropertyFile(ConstantTools.DASHBOARD_FOLDER + ConstantTools.ENV_PROP_FILE);
 		for (String project : projectList) {
 			
-			String frontOrBackConcatProject = frontOrBack + ConstantTools.DOT + project;
 			List<String> allKeys = props.stringPropertyNames().stream().collect(Collectors.toList());
 			boolean find = false;
 			int length = allKeys.size();
 			int index = 0;
 			while ( !find && index < length) {
-				find = allKeys.get(index).startsWith(frontOrBackConcatProject);
+				find = allKeys.get(index).startsWith(project);
 				index++;
 			}
 			
 			if (find)
-				environmentsMap.put(project, createEnvListForProject(props, frontOrBackConcatProject));
+				environmentsMap.put(project, createEnvListForProject(props, project));
 		}
 		
 		return environmentsMap;
