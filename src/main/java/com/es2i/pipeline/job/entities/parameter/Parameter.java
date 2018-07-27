@@ -23,7 +23,7 @@ public abstract class Parameter {
 	}; 
 	
 	/**
-	 * Les propriété obligatoires et facultatives permettant de définir une variable paramètre.
+	 * Les propriété permettant de définir une variable paramètre.
 	 */
 	public enum ParameterKey { NAME("name"), TYPE("type"), DEFAULT_VALUE("defaultValue"), CHOICES ("choices"), DESCRIPTION("description");
 	
@@ -51,15 +51,24 @@ public abstract class Parameter {
 				return tab;
 			}
 			else
-				throw new IllegalArgumentException("il manque un DEV : définir les champs obligatoires pour le type '" + type + "'.");
+				throw new IllegalArgumentException("TECH : définir les champs obligatoires pour le type '" + type + "'.");
 		}
 	};
 
 	
+	/**
+	 * Le nom du paramètre.
+	 */
 	private String name;
 	
+	/**
+	 * Le type du paramètre.
+	 */
 	private TypeParameter type;
 	
+	/**
+	 * La description du paramètre.
+	 */
 	private String desc;
 	
 	

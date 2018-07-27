@@ -19,12 +19,12 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 import com.es2i.pipeline.job.entities.Environment;
-import com.es2i.pipeline.job.entities.ProjectKeyEnum;
+import com.es2i.pipeline.job.entities.enums.ProjectKeyEnum;
 import com.es2i.pipeline.job.entities.parameter.Parameter;
 import com.es2i.pipeline.job.entities.parameter.impl.BooleanParameter;
 import com.es2i.pipeline.job.entities.parameter.impl.ChoiceParameter;
 import com.es2i.pipeline.job.entities.parameter.impl.StringParameter;
-import com.es2i.pipeline.job.script.Script;
+import com.es2i.pipeline.job.script.abstracts.Script;
 import com.es2i.pipeline.job.script.impl.BuildAll;
 import com.es2i.pipeline.job.script.impl.BuildOne;
 import com.es2i.pipeline.job.script.impl.Dashboard;
@@ -182,7 +182,7 @@ public class ConfReader {
 		
 		List<String> secondaryRemotes = new ArrayList<String>();
 		
-		Properties prop = Tools.findPropertyFile(ConstantTools.BUILD_ALL_FOLDER + ConstantTools.SECONDARY_REMOTE_FILE);
+		Properties prop = Tools.findPropertyFile(ConstantTools.BUILD_ALL_FOLDER + ConstantTools.SECONDARY_REMOTE_PROP_FILE);
 		String key = ConstantTools.SECONDARY_REMOTE1_KEY;
 		
 		int index = 1;

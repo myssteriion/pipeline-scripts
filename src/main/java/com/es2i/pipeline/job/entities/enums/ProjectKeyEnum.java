@@ -1,10 +1,12 @@
-package com.es2i.pipeline.job.entities;
+package com.es2i.pipeline.job.entities.enums;
 
-import java.util.Arrays;
 
+/**
+ * Enum représentant les clés obligatoires et facultatives (tableau ou non) pour un stage project (voir 'project_environment.properties').
+ */
 public enum ProjectKeyEnum {
 
-	GIT_ROOT("gitRoot", true, false), PROJECT_ROOT("projectRoot", true, true), 
+	GIT_ROOT("gitRoot", true, false), PROJECT_ROOT("projectRoot", true, false), 
 	JDK_COMPILATION("jdkCompilation", true, false), MVN_VERSION("mvnVersion", true, false), 
 	
 	TARGET_DIRECTORY("targetDirectory", false, false),
@@ -40,18 +42,12 @@ public enum ProjectKeyEnum {
 	}
 	
 	
+	/**
+	 * Retourne un tableau (l'ordre du tableau impose l'ordre dans le script pipeline).
+	 */
 	public static ProjectKeyEnum[] getKeys() {
 		ProjectKeyEnum[] tab = { GIT_ROOT, PROJECT_ROOT, JDK_COMPILATION, MVN_VERSION, TARGET_DIRECTORY, SOURCE_APP_DIRECTORY, SOURCE_EXTENSION, SOURCE_CONF_DIRECTORY };
 		return tab;
 	}
-	
-	public static ProjectKeyEnum findKeyByName(String name) {
-		ProjectKeyEnum projectKey = Arrays.asList( getKeys() ).stream()
-												.filter(projectKeyTmp -> projectKeyTmp.getName().equalsIgnoreCase(name))
-												.findFirst().orElse(null);
-		if (projectKey == null)
-			throw new IllegalArgumentException("La clé '" + name + "' n'est reconnu.");
-		
-		return projectKey;
-	}
+
 }

@@ -5,12 +5,24 @@ import com.es2i.pipeline.tools.ConstantTools;
 
 public class ChoiceParameter extends Parameter {
 
+	/**
+	 * La liste de valeurs.
+	 */
 	private String choices;
 	
 	
 	
 	public ChoiceParameter(String name, String choices, String desc) {
+		
 		super(name, TypeParameter.CHOICE, desc);
+		this.choices = formatChoices(choices);
+		
+	}
+	
+	/**
+	 * Formatte la liste de valeur (ajoute le caractère '\n' entre chaque élément).
+	 */
+	private String formatChoices(String choices) {
 		
 		String[] elements = choices.split(ConstantTools.COMA);
 		
@@ -21,7 +33,7 @@ public class ChoiceParameter extends Parameter {
 			}
 		}
 		
-		this.choices = choices;
+		return choices;
 	}
 
 	
@@ -32,7 +44,7 @@ public class ChoiceParameter extends Parameter {
 	
 	@Override
 	public String toString() {
-		return "ChoiceParameter [" + super.toString() + ", choices=" + choices + "]";
+		return super.toString() + ", choices=" + choices;
 	}
 	
 }

@@ -1,4 +1,4 @@
-package com.es2i.pipeline.job.script;
+package com.es2i.pipeline.job.script.abstracts;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,9 +9,18 @@ import com.es2i.pipeline.job.entities.Tool;
 import com.es2i.pipeline.job.entities.parameter.Parameter;
 
 /**
- * Correspond au Job dans Jenkins.
- * Un job doit posséde (même si la liste est vide), des paramètres, des variables d'environements, des variables tools.
- * Cette architecture permet de mutualiser le code dans la classe Pipeline.
+ * Correspond aux Jobs dans l'applciation Jenkins.
+ * Un job possède (même si la liste est vide), des paramètres, des variables d'environements, des variables tools.
+ */
+/* 
+ * Une touche d'abstraction pour mutualiser le code.
+ * Le sympbole <- traduit l'héritage.
+ * Le symbole <A> traduit l'abstraction
+ * 
+ * Script <A>	<-	WithProjectsStages <A>	<-	BuildAll
+ * 											<-	BuildOne
+ * 				<-	Dashboard
+ * 				<-	Runner
  */
 public abstract class Script {
 	
@@ -29,13 +38,6 @@ public abstract class Script {
 	 * La liste des variables tools.
 	 */
 	protected List<Tool> tools;
-	
-	/**
-	 * La liste des projets et de ses variables d'environements.
-	 * 	key : 		le nom du projet (identique à l'attribut projects ci dessus)
-	 *  value : 	la liste des variables d'environements.	
-	 */
-	protected Map<String, List<Environment>> projectsEnvironements;
 	
 	
 	
@@ -94,19 +96,4 @@ public abstract class Script {
 		return tools != null && !tools.isEmpty();
 	}
 	
-	/*
-	 * La liste de chacun des stages (nom projet) avec la liste des variables d'env.
-	 */
-	public Map<String, List<Environment>> getProjectsEnvironements() {
-		return projectsEnvironements;
-	}
-	
-	public void setProjectsEnvironements(Map<String, List<Environment>> projectsEnvironements) {
-		this.projectsEnvironements = projectsEnvironements;
-	}
-
-	public boolean hadProjectsEnvironements() {
-		return projectsEnvironements != null && !projectsEnvironements.isEmpty();
-	}
-
 }

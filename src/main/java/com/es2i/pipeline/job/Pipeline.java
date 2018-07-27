@@ -14,12 +14,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.es2i.pipeline.job.entities.Environment;
-import com.es2i.pipeline.job.entities.ProjectKeyEnum;
 import com.es2i.pipeline.job.entities.Tool;
+import com.es2i.pipeline.job.entities.enums.ProjectKeyEnum;
 import com.es2i.pipeline.job.entities.parameter.Parameter;
 import com.es2i.pipeline.job.helper.ConfReader;
 import com.es2i.pipeline.job.helper.ConstructHelper;
-import com.es2i.pipeline.job.script.Script;
+import com.es2i.pipeline.job.script.abstracts.Script;
+import com.es2i.pipeline.job.script.abstracts.WithProjectsStages;
 import com.es2i.pipeline.job.script.impl.BuildAll;
 import com.es2i.pipeline.job.script.impl.BuildOne;
 import com.es2i.pipeline.job.script.impl.Dashboard;
@@ -423,7 +424,7 @@ public class Pipeline {
 	}
 	
 	
-	private void addStageForProject(Writer writer, String project, boolean insideParallelBloc, Script script) throws IOException {
+	private void addStageForProject(Writer writer, String project, boolean insideParallelBloc, WithProjectsStages script) throws IOException {
 		
 		int identToAdd = insideParallelBloc ? 2 : 0;
 		
@@ -487,7 +488,7 @@ public class Pipeline {
 		writer.write(constrcuctHelper.addTab(2 + identToAdd) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 	
-	private void addParallelStageForProject(Writer writer, int currentGroup, List<String> groupe, Script script) throws IOException {
+	private void addParallelStageForProject(Writer writer, int currentGroup, List<String> groupe, WithProjectsStages script) throws IOException {
 		
 		// stage - parallel
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("build groupe " + currentGroup) + constrcuctHelper.addCRLF());

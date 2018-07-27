@@ -10,8 +10,14 @@ import com.es2i.pipeline.tools.ConstantTools;
  */
 public class Environment {
 	
+	/**
+	 * Le nom de la varaible d'env.
+	 */
 	private String name;
 	
+	/**
+	 * Peut contenir plusieur valeur est sera splité sur le caractère ','.
+	 */
 	private String value;
 	
 	/**
@@ -41,6 +47,10 @@ public class Environment {
 		return isList;
 	}
 
+	/**
+	 * Split la value avec le caractère ','.
+	 * Le 1er élément a pour clé "<name>", les autres éléments ont pour clé "<name>1", "<name>2", "<name>3", etc
+	 */
 	public Map<String, String> getValuesSplitted() {
 
 		String[] values = value.split(ConstantTools.COMA);
@@ -54,7 +64,7 @@ public class Environment {
 	
 	@Override
 	public String toString() {
-		return "Environment [name=" + name + ", value=" + value + "]";
+		return "name=" + name + ", value=" + value + ", isList =" + isList + "]";
 	}
 
 }

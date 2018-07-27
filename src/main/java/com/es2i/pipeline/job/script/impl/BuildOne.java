@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.es2i.pipeline.job.script.Script;
+import com.es2i.pipeline.job.script.abstracts.WithProjectsStages;
 
-public class BuildOne extends Script {
+public class BuildOne extends WithProjectsStages {
 
 	/**
 	 * La liste des projets (l'odre compte).

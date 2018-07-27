@@ -2,12 +2,17 @@ package com.es2i.pipeline.job.entities;
 
 /**
  * Représente une variable tools d'un point de vue Pipeline.
- * @see conf/tools.json
  */
 public class Tool {
 
+	/**
+	 * Le nom de la variable tools.
+	 */
 	private String name;
 	
+	/**
+	 * La valeur de la variable tools.
+	 */
 	private String value;
 	
 	
@@ -29,7 +34,7 @@ public class Tool {
 
 	@Override
 	public String toString() {
-		return "Tool [name=" + name + ", value=" + value + "]";
+		return "name=" + name + ", value=" + value;
 	}
 	
 }

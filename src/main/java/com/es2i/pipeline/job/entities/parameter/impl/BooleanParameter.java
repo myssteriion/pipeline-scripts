@@ -4,6 +4,9 @@ import com.es2i.pipeline.job.entities.parameter.Parameter;
 
 public class BooleanParameter extends Parameter {
 
+	/**
+	 * La valeur par défaut.
+	 */
 	private String defaultValue;
 	
 	
@@ -21,7 +24,7 @@ public class BooleanParameter extends Parameter {
 	
 	@Override
 	public String toString() {
-		return "BooleanParameter [" + super.toString() + ", defaultValue=" + defaultValue + "]";
+		return super.toString() + ", defaultValue=" + defaultValue;
 	}
 	
 }

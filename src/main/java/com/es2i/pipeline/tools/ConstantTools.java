@@ -9,7 +9,6 @@ public class ConstantTools {
 	public static final String CRLF										= "\n";
 	public static final String COMA										= ",";
 	public static final String DOLLAR									= "$";
-	public static final String BACKSLASH								= "\\";
 	public static final String SLASH									= "/";
 	public static final String DOT										= ".";
 	
@@ -33,7 +32,7 @@ public class ConstantTools {
 	
 	/*
 	 * Le code java va directement remplacer des valeurs qui seront dans le Jenkinsfile.
-	 * Ce sont les éléments statiques qui ne sont pas des variables d'environement (d'un point de vue pipeline).
+	 * Ce sont les éléments statiques qui ne sont pas des variables d'environements (d'un point de vue pipeline).
 	 * Ces valeurs sont présentes dans le fichier "functions.txt" et dans "ConstructHelper.java".
 	 */
 	public static final String ESII_APPLICATION_PARAM 					= DOLLAR + "esiiFolder";
@@ -56,9 +55,9 @@ public class ConstantTools {
 	public static final String TOOLS_JSON_FILE 							= "tools.json";
 	public static final String ENV_PROP_FILE 							= "environment.properties";
 	public static final String PROJECT_ENV_PROP_FILE 					= "project_environment.properties";
-	public static final String FUNCTIONS_FILE 							= "functions.txt";
+	public static final String FUNCTIONS_TXT_FILE 						= "functions.txt";
 	
-	public static final String SECONDARY_REMOTE_FILE					= "secondaryRemote.properties";
+	public static final String SECONDARY_REMOTE_PROP_FILE				= "secondaryRemote.properties";
 	
 	/*
 	 * runner

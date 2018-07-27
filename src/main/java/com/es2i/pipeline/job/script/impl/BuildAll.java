@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.es2i.pipeline.job.script.Script;
+import com.es2i.pipeline.job.script.abstracts.WithProjectsStages;
 
-public class BuildAll extends Script {
+public class BuildAll extends WithProjectsStages {
 
 	/**
 	 * La liste des projets trier par groupe afin d'exécuter en parallèle (l'ordre des groupes comptes ; l'ordre dans un groupe est arbitraire).

@@ -3,7 +3,7 @@ package com.es2i.pipeline.job.script.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.es2i.pipeline.job.script.Script;
+import com.es2i.pipeline.job.script.abstracts.Script;
 
 public class Runner extends Script {
 

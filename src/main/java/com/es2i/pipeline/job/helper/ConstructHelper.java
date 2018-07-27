@@ -176,7 +176,7 @@ public class ConstructHelper {
 	
 	public String getFunctions() throws IOException, URISyntaxException {
 		
-		InputStream is = ConstructHelper.class.getClassLoader().getResourceAsStream(ConstantTools.FUNCTIONS_FILE);
+		InputStream is = ConstructHelper.class.getClassLoader().getResourceAsStream(ConstantTools.FUNCTIONS_TXT_FILE);
 		byte[] bytes = IOUtils.toByteArray(is);
 		String str = new String(bytes);
 		

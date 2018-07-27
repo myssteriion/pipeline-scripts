@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.es2i.pipeline.job.entities.Environment;
-import com.es2i.pipeline.job.script.Script;
+import com.es2i.pipeline.job.script.abstracts.Script;
 
 public class Dashboard extends Script {
 
