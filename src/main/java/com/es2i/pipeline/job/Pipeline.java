@@ -136,9 +136,9 @@ public class Pipeline {
 					//	- sinon, créer parallel bloc
 					List<String> groupe = projectsBuildAll.get(currentGroup);
 					if (groupe.size() == 1)
-						addStageForProject(writer, groupe.get(0), false, buildAll);
+						addStageForProject(writer, buildAll, groupe.get(0), false);
 					else
-						addParallelStageForProject(writer, currentGroup, groupe, buildAll);
+						addParallelStageForProject(writer, buildAll, currentGroup, groupe);
 				}
 				
 				addDeployToSecondaryRemoteStage(writer, buildAll);
@@ -184,7 +184,7 @@ public class Pipeline {
 					
 					addInitializeStage(writer, buildOne);
 					
-					addStageForProject(writer, project, false, buildOne);
+					addStageForProject(writer, buildOne, project, false);
 					
 					// stages - pipeline
 					writer.write(constrcuctHelper.addTab(1) + constrcuctHelper.endStages() + constrcuctHelper.addCRLF());
@@ -304,7 +304,7 @@ public class Pipeline {
 			writer.write(constrcuctHelper.addTab(7) + constrcuctHelper.endDirProjectRoot() + constrcuctHelper.addCRLF());
 
 			// deploiement App et Conf
-			addDeployPart(writer, false, true, nbAppDeploy, nbConfDeploy);
+			addDeployPart(writer, dashboard, false, nbAppDeploy, nbConfDeploy);
 			
 			writer.write(constrcuctHelper.addTab(6) + constrcuctHelper.endDirGitRoot() + constrcuctHelper.addCRLF());
 			
@@ -423,30 +423,30 @@ public class Pipeline {
 	}
 	
 	
-	private void addStageForProject(Writer writer, String project, boolean insideParallelBloc, WithProjectsStages script) throws IOException {
+	private void addStageForProject(Writer writer, WithProjectsStages script, String project, boolean insideParallelBloc) throws IOException {
 		
 		int identToAdd = insideParallelBloc ? 2 : 0;
 		
 		// stage
 		writer.write(constrcuctHelper.addTab(2 + identToAdd) + constrcuctHelper.beginStage("build " + project) + constrcuctHelper.addCRLF());
 		
-		// nombre d'App et de Conf à déployer (car c'esst un tableau)
+		// nombre d'App et de Conf à déployer (car la value peut être un tableau)
 		int nbAppDeploy = 1;
 		int nbConfDeploy = 1;
 		
 		// local env
 		writer.write(constrcuctHelper.addTab(3 + identToAdd) + constrcuctHelper.beginEnv() + constrcuctHelper.addCRLF());
 		for ( Environment environment : script.getProjectsEnvironements().get(project) ) {
-			
+
 			if ( environment.isList() ) {
 				
 				List<Environment> envSplittedList = environment.getValuesSplitted();
 				for (Environment envSplit : envSplittedList)
 					writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.contentEnv(envSplit) + constrcuctHelper.addCRLF());
 				
-				if ( environment.getName().equals( ProjectKeyEnum.SOURCE_APP_DIRECTORY.getName() ) )
+				if ( environment.getName().equalsIgnoreCase( ProjectKeyEnum.SOURCE_APP_DIRECTORY.getName() ) )
 					nbAppDeploy = envSplittedList.size();
-				if ( environment.getName().equals( ProjectKeyEnum.SOURCE_CONF_DIRECTORY.getName() ) )
+				if ( environment.getName().equalsIgnoreCase( ProjectKeyEnum.SOURCE_CONF_DIRECTORY.getName() ) )
 					nbConfDeploy = envSplittedList.size();
 			}
 			else
@@ -477,7 +477,7 @@ public class Pipeline {
 		// script
 		writer.write(constrcuctHelper.addTab(5 + identToAdd) + constrcuctHelper.beginScript() + constrcuctHelper.addCRLF());
 		
-		addDeployPart(writer, insideParallelBloc, false, nbAppDeploy, nbConfDeploy);
+		addDeployPart(writer, script, insideParallelBloc, nbAppDeploy, nbConfDeploy);
 		
 		// script - dir gitRoot
 		writer.write(constrcuctHelper.addTab(5 + identToAdd) + constrcuctHelper.endScript() + constrcuctHelper.addCRLF());
@@ -488,24 +488,24 @@ public class Pipeline {
 		writer.write(constrcuctHelper.addTab(2 + identToAdd) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 	
-	private void addParallelStageForProject(Writer writer, int currentGroup, List<String> groupe, WithProjectsStages script) throws IOException {
+	private void addParallelStageForProject(Writer writer, WithProjectsStages script, int currentGroup, List<String> groupe) throws IOException {
 		
 		// stage - parallel
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.beginStage("build groupe " + currentGroup) + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.beginParallel() + constrcuctHelper.addCRLF());
 		
 		for (String project : groupe)
-			addStageForProject(writer, project, true, script);
+			addStageForProject(writer, script, project, true);
 		
 		// parallel - stage
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endParallel() + constrcuctHelper.addCRLF());
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
 	}
 
-	private void addDeployPart(Writer writer, boolean insideParallelBloc, boolean isDashboard, int nbAppDeploy, int nbConfDeploy) throws IOException {
+	private void addDeployPart(Writer writer, Script script, boolean insideParallelBloc, int nbAppDeploy, int nbConfDeploy) throws IOException {
 		
 		int identToAdd = insideParallelBloc ? 2 : 0;
-		identToAdd += isDashboard ? 1 : 0;
+		identToAdd += script instanceof Dashboard ? 1 : 0;
 		
 		// if targetDirectory
 		writer.write(constrcuctHelper.addTab(6 + identToAdd) + constrcuctHelper.beginIfTargetDirectory() + constrcuctHelper.addCRLF());
