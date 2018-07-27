@@ -258,10 +258,6 @@ public class ConstructHelper {
 		return "runBuild(env.gitRoot, env.projectRoot, env.jdkCompilation, env.mvnVersion, env.targetDirectory, env.sourceAppDirectory, env.sourceExtension, env.sourceConfDirectory)";
 	}
 	
-	public String cleanPrimaryRemote() {
-		return "cleanPrimaryRemote()";
-	}
-	
 	public String cleanProjectPrimaryRemote() { 
 		return "cleanProjectPrimaryRemote(env.targetDirectory)"; 
 	}

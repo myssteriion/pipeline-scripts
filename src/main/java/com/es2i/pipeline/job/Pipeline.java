@@ -290,10 +290,6 @@ public class Pipeline {
 		// clean jenkins workspace
 		writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.cleanWs() + constrcuctHelper.addCRLF());
 		
-		// clean primary remote
-		if (script instanceof BuildAll)
-			writer.write(constrcuctHelper.addTab(4) + constrcuctHelper.cleanPrimaryRemote() + constrcuctHelper.addCRLF());
-		
 		// steps - stage
 		writer.write(constrcuctHelper.addTab(3) + constrcuctHelper.endSteps() + constrcuctHelper.addCRLF());	
 		writer.write(constrcuctHelper.addTab(2) + constrcuctHelper.endStage() + constrcuctHelper.addCRLF());
@@ -398,8 +394,7 @@ public class Pipeline {
 		writer.write(constrcuctHelper.addTab(4 + identToAdd) + constrcuctHelper.beginDirGitRoot() + constrcuctHelper.addCRLF());
 		
 		// clean du dossier sur le primary remote
-		if (script instanceof BuildOne)
-			writer.write(constrcuctHelper.addTab(5 + identToAdd) + constrcuctHelper.cleanProjectPrimaryRemote() + constrcuctHelper.addCRLF());
+		writer.write(constrcuctHelper.addTab(5 + identToAdd) + constrcuctHelper.cleanProjectPrimaryRemote() + constrcuctHelper.addCRLF());
 		
 		// runBuild
 		writer.write(constrcuctHelper.addTab(5 + identToAdd) + constrcuctHelper.runBuild() + constrcuctHelper.addCRLF());
