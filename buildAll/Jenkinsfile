@@ -417,6 +417,9 @@ void deployApp(String projectRoot, String targetDirectory, String sourceAppDirec
 				sh returnStatus: true, script: "ssh ${env.primaryRemote} unzip -qq -o ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*${sourceExtension} -d ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/"
 				sh "ssh ${env.primaryRemote} rm -f ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${targetDirectory}/*${sourceExtension}"
 			}
+			else {
+				sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/app/${env.targetDirectory}"
+			}
 		}
 	}
 }
@@ -426,6 +429,9 @@ void deployConf(String projectRoot, String targetDirectory, String sourceConfDir
 		if (targetDirectory && targetDirectory != "") {
 			if (sourceConfDirectory && sourceConfDirectory != "") {
 				sh "scp -r ${projectRoot}/${sourceConfDirectory}/* ${env.primaryRemote}:${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${targetDirectory}"
+			}
+			else {
+				sh "ssh ${env.primaryRemote} rm -rf ${env.depotFolder}/${params.revision}/${params.mavenProfile}/ESII-Applications/conf/${env.targetDirectory}"
 			}
 		}
 	}
